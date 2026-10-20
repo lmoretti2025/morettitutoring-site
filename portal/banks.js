@@ -25,50 +25,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "cce2f8dc",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "In 2023 literary scholar Jeremy Douglass cautioned technology investors and enthusiasts who predict conventional books' ultimate displacement by newer forms of media. Douglass observed that <u>the concept of an \"interactive\" text is much older than technologists assume</u>, extending back to the first time readers scratched notes into a text's margins. In addition, newer media, such as video games, haven't replaced older forms of entertainment, such as comic books, but rather exist alongside them. Douglass believes that rather than supplanting books, technology is simply making new forms of expression possible.<br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
-    "choices": [
-     "It challenges the stance of the investors and enthusiasts who are mentioned earlier in the text.",
-     "It explains the basis for the claim made by the technologists mentioned in the text.",
-     "It suggests that academics are better suited than investors to see the potential uses of contemporary interactive texts.",
-     "It provides a historical anecdote about the technological challenges involved in reading the earliest interactive texts."
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. It most accurately describes how the underlined portion functions in the text as a whole. The first sentence of the text introduces literary scholar Jeremy Douglass's warning to technology investors and enthusiasts against predicting the displacement of conventional books by newer media forms. The next sentence, which is underlined in part, presents Douglass's observation that interactive texts are hardly new; they have been available for longer than technologists assume, beginning with the first time readers wrote notes in texts' margins. Thus, the function of the underlined portion is to challenge the stance of the technology investors and enthusiasts mentioned earlier in the text. As the remainder of the text points out, newer media doesn't necessarily replace older media, but rather, as Douglass believes, leads to new forms of expression.",
-     "Incorrect. The underlined portion challenges the position taken by investors and enthusiasts; it doesn't provide context for their claims.",
-     "Incorrect. The underlined portion doesn't mention academics or compare them to investors regarding their ability to see potential in using contemporary interactive texts; instead, the underlined portion challenges the position of investors and enthusiasts who predict that conventional books will be replaced by newer forms of media.",
-     "Incorrect. The underlined portion doesn't address technological challenges; instead, it disputes the stance taken by investors and enthusiasts, suggesting that conventional books haven't been displaced by traditional interactions with texts, such as writing in the margins, and won't be supplanted by newer forms of media either."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "662ebff2",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "In response to concerns that some recent financial crises were exacerbated by consumers misunderstanding risks associated with credit cards, loans, and other financial products, policymakers in many countries have instituted risk-disclosure requirements on sellers of those products. Enrique Seira et al. investigated a variety of risk-disclosure messages sent to thousands of credit card customers and found that the messages had only small and short-lived effects on behavior. <u>Seira et al. asserted that such effects may nevertheless be worth pursuing, given the negligible cost of messaging.</u><br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
-    "choices": [
-     "It notes a factor that led Seira et al. to not dismiss risk-disclosure messaging altogether despite their evidence of its limited utility.",
-     "It acknowledges a type of risk-disclosure messaging that Seira et al. may not have fully accounted for in their study.",
-     "It describes a consideration that explains why Seira et al. recommended risk-disclosure messaging even though its effects may be small relative to its costs.",
-     "It points out a circumstance that Seira et al. conceded may make risk-disclosure messaging more effective than their study suggests."
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. It most accurately describes the function of the underlined portion in the text as a whole. The text establishes that many countries have adopted risk-disclosure requirements for financial products due to concerns that consumers don't understand the risks associated with the products. According to the text, Seira et al. found that the effects of such messaging on consumer behavior were small and temporary. The text then adds that the researchers assert that because the cost of the messaging is negligible, the approach may be worth doing even if the effects are limited. Thus, the underlined portion notes a factor—very low cost—that led the researchers to not completely dismiss risk-disclosure messaging despite their evidence of its limited utility.",
-     "Incorrect. The underlined portion doesn't refer to a particular type of risk-disclosure messaging, whether Seira et al. considered it or not; the underlined portion simply indicates that the cost of the messaging (broadly) is very low, which makes the approach worth pursuing even if its effects are limited.",
-     "Incorrect. Although the underlined portion does describe a consideration that led the researchers to recommend risk-disclosure messaging despite the messaging's small effects on consumer behavior, it directly states that the cost of such messaging is negligible, or very low—meaning that both the effects and the costs are small, not that the effects are small only relative to the costs.",
-     "Incorrect. There's no indication that Seira et al. suggest that risk-disclosure messaging could be more effective if it had lower costs; rather, the underlined portion indicates that Seira et al. believe the already negligible cost of messaging makes the approach worth pursuing even if its effects are limited."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "d168e7c5",
     "domain": "Craft and Structure",
     "skill": "Text Structure and Purpose",
@@ -157,6 +113,50 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "cce2f8dc",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "In 2023 literary scholar Jeremy Douglass cautioned technology investors and enthusiasts who predict conventional books' ultimate displacement by newer forms of media. Douglass observed that <u>the concept of an \"interactive\" text is much older than technologists assume</u>, extending back to the first time readers scratched notes into a text's margins. In addition, newer media, such as video games, haven't replaced older forms of entertainment, such as comic books, but rather exist alongside them. Douglass believes that rather than supplanting books, technology is simply making new forms of expression possible.<br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
+    "choices": [
+     "It challenges the stance of the investors and enthusiasts who are mentioned earlier in the text.",
+     "It explains the basis for the claim made by the technologists mentioned in the text.",
+     "It suggests that academics are better suited than investors to see the potential uses of contemporary interactive texts.",
+     "It provides a historical anecdote about the technological challenges involved in reading the earliest interactive texts."
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. It most accurately describes how the underlined portion functions in the text as a whole. The first sentence of the text introduces literary scholar Jeremy Douglass's warning to technology investors and enthusiasts against predicting the displacement of conventional books by newer media forms. The next sentence, which is underlined in part, presents Douglass's observation that interactive texts are hardly new; they have been available for longer than technologists assume, beginning with the first time readers wrote notes in texts' margins. Thus, the function of the underlined portion is to challenge the stance of the technology investors and enthusiasts mentioned earlier in the text. As the remainder of the text points out, newer media doesn't necessarily replace older media, but rather, as Douglass believes, leads to new forms of expression.",
+     "Incorrect. The underlined portion challenges the position taken by investors and enthusiasts; it doesn't provide context for their claims.",
+     "Incorrect. The underlined portion doesn't mention academics or compare them to investors regarding their ability to see potential in using contemporary interactive texts; instead, the underlined portion challenges the position of investors and enthusiasts who predict that conventional books will be replaced by newer forms of media.",
+     "Incorrect. The underlined portion doesn't address technological challenges; instead, it disputes the stance taken by investors and enthusiasts, suggesting that conventional books haven't been displaced by traditional interactions with texts, such as writing in the margins, and won't be supplanted by newer forms of media either."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "662ebff2",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "In response to concerns that some recent financial crises were exacerbated by consumers misunderstanding risks associated with credit cards, loans, and other financial products, policymakers in many countries have instituted risk-disclosure requirements on sellers of those products. Enrique Seira et al. investigated a variety of risk-disclosure messages sent to thousands of credit card customers and found that the messages had only small and short-lived effects on behavior. <u>Seira et al. asserted that such effects may nevertheless be worth pursuing, given the negligible cost of messaging.</u><br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
+    "choices": [
+     "It notes a factor that led Seira et al. to not dismiss risk-disclosure messaging altogether despite their evidence of its limited utility.",
+     "It acknowledges a type of risk-disclosure messaging that Seira et al. may not have fully accounted for in their study.",
+     "It describes a consideration that explains why Seira et al. recommended risk-disclosure messaging even though its effects may be small relative to its costs.",
+     "It points out a circumstance that Seira et al. conceded may make risk-disclosure messaging more effective than their study suggests."
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. It most accurately describes the function of the underlined portion in the text as a whole. The text establishes that many countries have adopted risk-disclosure requirements for financial products due to concerns that consumers don't understand the risks associated with the products. According to the text, Seira et al. found that the effects of such messaging on consumer behavior were small and temporary. The text then adds that the researchers assert that because the cost of the messaging is negligible, the approach may be worth doing even if the effects are limited. Thus, the underlined portion notes a factor—very low cost—that led the researchers to not completely dismiss risk-disclosure messaging despite their evidence of its limited utility.",
+     "Incorrect. The underlined portion doesn't refer to a particular type of risk-disclosure messaging, whether Seira et al. considered it or not; the underlined portion simply indicates that the cost of the messaging (broadly) is very low, which makes the approach worth pursuing even if its effects are limited.",
+     "Incorrect. Although the underlined portion does describe a consideration that led the researchers to recommend risk-disclosure messaging despite the messaging's small effects on consumer behavior, it directly states that the cost of such messaging is negligible, or very low—meaning that both the effects and the costs are small, not that the effects are small only relative to the costs.",
+     "Incorrect. There's no indication that Seira et al. suggest that risk-disclosure messaging could be more effective if it had lower costs; rather, the underlined portion indicates that Seira et al. believe the already negligible cost of messaging makes the approach worth pursuing even if its effects are limited."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
     "qid": "b8199d5a",
     "domain": "Information and Ideas",
     "skill": "Command of Evidence (Quantitative)",
@@ -197,50 +197,6 @@ window.SECTION_BANKS = {
      "Correct. By looking at the top-ranked option, we can see that people provided with ranked lists spent more time reading about the British Museum than reading about other museums (36% of the time versus 21% for the second-ranked option).",
      "Incorrect. The claim is about people with ranked lists looking at the top-ranked option, and these data are about the third-ranked option.",
      "Incorrect. The claim is about people with ranked lists, and these data are about those with unranked lists."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "ec93e52c",
-    "domain": "Information and Ideas",
-    "skill": "Command of Evidence (Textual)",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "Archaeologist Petra Vaiglova, anthropologist Xinyi Liu, and their colleagues investigated the domestication of farm animals in China during the Bronze Age (approximately 2000 to 1000 BCE). By analyzing the chemical composition of the bones of sheep, goats, and cattle from this era, the team determined that wild plants made up the bulk of sheep's and goats' diets, while the cattle's diet consisted largely of millet, a crop cultivated by humans. The team concluded that cattle were likely raised closer to human settlements, whereas sheep and goats were allowed to roam farther away.<br><br>Which finding, if true, would most strongly support the team's conclusion?",
-    "choices": [
-     "Analysis of the animal bones showed that the cattle's diet also consisted of wheat, which humans widely cultivated in China during the Bronze Age.",
-     "Further investigation of sheep and goat bones revealed that their diets consisted of small portions of millet as well.",
-     "Cattle's diets generally require larger amounts of food and a greater variety of nutrients than do sheep's and goats' diets.",
-     "The diets of sheep, goats, and cattle were found to vary based on what the farmers in each Bronze Age settlement could grow."
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. It presents a finding that, if true, would most strongly support the team's conclusion that cattle were likely raised closer to human settlements than sheep and goats were. The text explains that Vaiglova, Liu, and their colleagues analyzed the chemical composition of sheep, goat, and cattle bones from the Bronze Age in China in order to investigate the animals' domestication, or their adaptation from a wild state to a state in which they existed in close connection with humans. According to the text, the team's analysis showed that sheep and goats of the era fed largely on wild plants, whereas cattle fed on millet—importantly, a crop cultivated by humans. If analysis of the animal bones shows that the cattle's diet also consisted of wheat, another crop cultivated by humans in China during the Bronze Age, the finding would support the team's conclusion by offering additional evidence that cattle during this era fed on human-grown crops—and, by extension, that humans raised cattle relatively close to the settlements where they grew these crops, leaving goats and sheep to roam farther away in areas with wild vegetation, uncultivated by humans.",
-     "Incorrect. If it were true that sheep's and goats' diets consisted of small portions of millet, which the text states was a crop cultivated by humans, the finding would suggest that sheep and goats were raised relatively close to human settlements, weakening the team's conclusion that cattle were likely raised closer to those settlements than sheep and goats were.",
-     "Incorrect. The finding that cattle generally require more food and nutrients than do sheep and goats wouldn't support the team's conclusion that cattle were likely raised closer to human settlements than sheep and goats were. Nothing in the text suggests that cattle were incapable of obtaining sufficient food and nutrients without access to human-grown crops. Hence, even if cattle's diets are found to have different requirements than the diets of sheep and goats, the cattle could have met those requirements from food located far from human settlements.",
-     "Incorrect. If it were true that the diets of sheep, goats, and cattle varied based on what the farmers in each Bronze Age settlement could grow, the finding would weaken the team's conclusion that cattle were likely raised closer to human settlements than sheep and goats were, suggesting instead that all three types of animals were raised close enough to human settlements to feed on those settlements' crops."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "eaf22802",
-    "domain": "Information and Ideas",
-    "skill": "Command of Evidence (Textual)",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "A student in a political science course is writing a paper on Aristotle's The Politics, in which Aristotle offers his opinion on political instability and gives advice on how constitutions can be preserved. Aristotle observes that different forms of government can fall in different ways—for example, oligarchies might grant power to military leaders during wartime who refuse to relinquish that power during peacetime—but some methods of preserving order apply across all forms of government. The student claims that in particular Aristotle asserts that in a healthy state obedience to law must be as close to absolute as possible and that even minor infractions should not be ignored.<br><br>Which quotation from a philosopher's analysis of The Politics would best support the student's claim?",
-    "choices": [
-     "\"When constructing his argument regarding the characteristics of a well-functioning government, Aristotle asserts that 'Transgression creeps in unperceived and at last ruins the state,' illustrating this idea with a comparison to frequent small expenditures slowly and almost imperceptibly chipping away at a fortune until it is ultimately depleted.\"",
-     "\"When Aristotle writes on the necessity of avoiding corruption in government, he proposes that 'every state should be so administered and so regulated by law that its magistrates cannot possibly make money.' In particular, he thinks oligarchies are particularly susceptible to corruption through bribery.\"",
-     "\"When Aristotle considers the health of constitutions, he states that 'Constitutions are preserved when their destroyers are at a distance, and sometimes also because they are near, for the fear of them makes the government keep in hand the constitution.' He holds that rulers who wish to see constitutions preserved must continually remind the populace of the dangers that would result from a constitutional collapse.\"",
-     "\"When contrasting different forms of government, Aristotle holds that 'oligarchies may last, not from any inherent stability in such forms of government, but because the rulers are on good terms both with the unenfranchised and with the governing classes.' That is, oligarchic leaders who wish to hold on to power will introduce members of disenfranchised classes into government in a participatory role.\""
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. It presents the quotation that best supports the student's claim that in The Politics, Aristotle gives advice on preserving constitutions—preventing governments from falling and maintaining order—and specifically asserts that in a healthy state, laws must be followed as strictly as possible and infractions should not be overlooked even if they are minor. The philosopher states that when Aristotle builds his argument about the characteristics of a well-functioning government, Aristotle asserts that transgression, or violation of law, will ruin the state if it \"creeps in unperceived,\" or goes unnoticed. The philosopher then adds that Aristotle illustrates this point by comparing the situation to one in which small but frequent expenses diminish a fortune almost unnoticeably until, eventually, the fortune is entirely gone. In other words, the philosopher indicates that Aristotle makes the point that total obedience to law preserves a healthy state while even small violations, if ignored, will undermine the health of the state.",
-     "Incorrect. The philosopher addresses Aristotle's observation about corruption within the government (in particular, preventing the possibility that members of the government can take bribes), and although corruption can involve infractions, the observation is about a subset of people within the state and isn't directly connected to the importance of upholding total obedience to the law throughout the state.",
-     "Incorrect. The philosopher discusses Aristotle's point about those who would intentionally destroy a constitution altogether and the need for rulers to remind the populace that it would be dangerous for a constitution to collapse, but neither idea is directly connected to the importance of upholding total obedience to the law.",
-     "Incorrect. The philosopher explains that Aristotle makes the point that oligarchic leaders may retain power by having members of disenfranchised classes participate in government alongside governing classes, and this point doesn't address the importance of ensuring obedience to the law and addressing even minor violations."
     ],
     "source": "Non-Bluebook"
    },
@@ -311,6 +267,50 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "ec93e52c",
+    "domain": "Information and Ideas",
+    "skill": "Command of Evidence (Textual)",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "Archaeologist Petra Vaiglova, anthropologist Xinyi Liu, and their colleagues investigated the domestication of farm animals in China during the Bronze Age (approximately 2000 to 1000 BCE). By analyzing the chemical composition of the bones of sheep, goats, and cattle from this era, the team determined that wild plants made up the bulk of sheep's and goats' diets, while the cattle's diet consisted largely of millet, a crop cultivated by humans. The team concluded that cattle were likely raised closer to human settlements, whereas sheep and goats were allowed to roam farther away.<br><br>Which finding, if true, would most strongly support the team's conclusion?",
+    "choices": [
+     "Analysis of the animal bones showed that the cattle's diet also consisted of wheat, which humans widely cultivated in China during the Bronze Age.",
+     "Further investigation of sheep and goat bones revealed that their diets consisted of small portions of millet as well.",
+     "Cattle's diets generally require larger amounts of food and a greater variety of nutrients than do sheep's and goats' diets.",
+     "The diets of sheep, goats, and cattle were found to vary based on what the farmers in each Bronze Age settlement could grow."
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. It presents a finding that, if true, would most strongly support the team's conclusion that cattle were likely raised closer to human settlements than sheep and goats were. The text explains that Vaiglova, Liu, and their colleagues analyzed the chemical composition of sheep, goat, and cattle bones from the Bronze Age in China in order to investigate the animals' domestication, or their adaptation from a wild state to a state in which they existed in close connection with humans. According to the text, the team's analysis showed that sheep and goats of the era fed largely on wild plants, whereas cattle fed on millet—importantly, a crop cultivated by humans. If analysis of the animal bones shows that the cattle's diet also consisted of wheat, another crop cultivated by humans in China during the Bronze Age, the finding would support the team's conclusion by offering additional evidence that cattle during this era fed on human-grown crops—and, by extension, that humans raised cattle relatively close to the settlements where they grew these crops, leaving goats and sheep to roam farther away in areas with wild vegetation, uncultivated by humans.",
+     "Incorrect. If it were true that sheep's and goats' diets consisted of small portions of millet, which the text states was a crop cultivated by humans, the finding would suggest that sheep and goats were raised relatively close to human settlements, weakening the team's conclusion that cattle were likely raised closer to those settlements than sheep and goats were.",
+     "Incorrect. The finding that cattle generally require more food and nutrients than do sheep and goats wouldn't support the team's conclusion that cattle were likely raised closer to human settlements than sheep and goats were. Nothing in the text suggests that cattle were incapable of obtaining sufficient food and nutrients without access to human-grown crops. Hence, even if cattle's diets are found to have different requirements than the diets of sheep and goats, the cattle could have met those requirements from food located far from human settlements.",
+     "Incorrect. If it were true that the diets of sheep, goats, and cattle varied based on what the farmers in each Bronze Age settlement could grow, the finding would weaken the team's conclusion that cattle were likely raised closer to human settlements than sheep and goats were, suggesting instead that all three types of animals were raised close enough to human settlements to feed on those settlements' crops."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "eaf22802",
+    "domain": "Information and Ideas",
+    "skill": "Command of Evidence (Textual)",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "A student in a political science course is writing a paper on Aristotle's The Politics, in which Aristotle offers his opinion on political instability and gives advice on how constitutions can be preserved. Aristotle observes that different forms of government can fall in different ways—for example, oligarchies might grant power to military leaders during wartime who refuse to relinquish that power during peacetime—but some methods of preserving order apply across all forms of government. The student claims that in particular Aristotle asserts that in a healthy state obedience to law must be as close to absolute as possible and that even minor infractions should not be ignored.<br><br>Which quotation from a philosopher's analysis of The Politics would best support the student's claim?",
+    "choices": [
+     "\"When constructing his argument regarding the characteristics of a well-functioning government, Aristotle asserts that 'Transgression creeps in unperceived and at last ruins the state,' illustrating this idea with a comparison to frequent small expenditures slowly and almost imperceptibly chipping away at a fortune until it is ultimately depleted.\"",
+     "\"When Aristotle writes on the necessity of avoiding corruption in government, he proposes that 'every state should be so administered and so regulated by law that its magistrates cannot possibly make money.' In particular, he thinks oligarchies are particularly susceptible to corruption through bribery.\"",
+     "\"When Aristotle considers the health of constitutions, he states that 'Constitutions are preserved when their destroyers are at a distance, and sometimes also because they are near, for the fear of them makes the government keep in hand the constitution.' He holds that rulers who wish to see constitutions preserved must continually remind the populace of the dangers that would result from a constitutional collapse.\"",
+     "\"When contrasting different forms of government, Aristotle holds that 'oligarchies may last, not from any inherent stability in such forms of government, but because the rulers are on good terms both with the unenfranchised and with the governing classes.' That is, oligarchic leaders who wish to hold on to power will introduce members of disenfranchised classes into government in a participatory role.\""
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. It presents the quotation that best supports the student's claim that in The Politics, Aristotle gives advice on preserving constitutions—preventing governments from falling and maintaining order—and specifically asserts that in a healthy state, laws must be followed as strictly as possible and infractions should not be overlooked even if they are minor. The philosopher states that when Aristotle builds his argument about the characteristics of a well-functioning government, Aristotle asserts that transgression, or violation of law, will ruin the state if it \"creeps in unperceived,\" or goes unnoticed. The philosopher then adds that Aristotle illustrates this point by comparing the situation to one in which small but frequent expenses diminish a fortune almost unnoticeably until, eventually, the fortune is entirely gone. In other words, the philosopher indicates that Aristotle makes the point that total obedience to law preserves a healthy state while even small violations, if ignored, will undermine the health of the state.",
+     "Incorrect. The philosopher addresses Aristotle's observation about corruption within the government (in particular, preventing the possibility that members of the government can take bribes), and although corruption can involve infractions, the observation is about a subset of people within the state and isn't directly connected to the importance of upholding total obedience to the law throughout the state.",
+     "Incorrect. The philosopher discusses Aristotle's point about those who would intentionally destroy a constitution altogether and the need for rulers to remind the populace that it would be dangerous for a constitution to collapse, but neither idea is directly connected to the importance of upholding total obedience to the law.",
+     "Incorrect. The philosopher explains that Aristotle makes the point that oligarchic leaders may retain power by having members of disenfranchised classes participate in government alongside governing classes, and this point doesn't address the importance of ensuring obedience to the law and addressing even minor violations."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
     "qid": "89fe7f93",
     "domain": "Standard English Conventions",
     "skill": "Boundaries",
@@ -351,50 +351,6 @@ window.SECTION_BANKS = {
      "Incorrect. A colon can't be used to separate items in a series.",
      "Incorrect. A comma is needed to separate the first and second items in a series of three.",
      "Incorrect. A semicolon is used to separate items in a series only when the items themselves contain commas, which these don't."
-    ],
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
-    "qid": "2784cbaf",
-    "domain": "Standard English Conventions",
-    "skill": "Form, Structure, and Sense",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "To fully describe the motion of an object requires knowing each of five ______ movement: displacement, time, initial velocity, final velocity, and acceleration. These are called kinematic variables.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
-    "choices": [
-     "variable's that characterize objects'",
-     "variables that characterize objects'",
-     "variables that characterize object's",
-     "variables that characterize objects"
-    ],
-    "correct": 1,
-    "choiceNotes": [
-     "Incorrect. The context requires the plural noun \"variables,\" not the singular possessive noun \"variable's.\"",
-     "Correct. The conventions being tested are the use of plural and possessive nouns. The plural noun \"variables\" correctly indicates that there are multiple variables, and the plural possessive noun \"objects'\" correctly indicates that the movement of objects in general is being discussed.",
-     "Incorrect. The context requires the plural possessive noun \"objects',\" not the singular possessive noun \"object's.\"",
-     "Incorrect. The context requires the plural possessive noun \"objects',\" not the plural noun \"objects.\""
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "81a636a3",
-    "domain": "Standard English Conventions",
-    "skill": "Form, Structure, and Sense",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "The orbital period of a satellite, the time a satellite takes to circle the Earth once, grows longer the farther out it orbits. Compared with that of a spacecraft in low Earth orbit, ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
-    "choices": [
-     "the orbital period of a satellite in geostationary orbit is far longer.",
-     "a satellite in geostationary orbit has a far longer orbital period.",
-     "satellites in geostationary orbit take far longer to complete one circuit.",
-     "a satellite in geostationary orbit must travel far longer before it returns to the same point."
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. The convention being tested is subject-modifier placement. A modifying phrase at the start of a sentence must be followed directly by the noun it describes. \"That of\" stands in for the orbital period, so the main clause must begin with the period being compared with it.",
-     "Incorrect. It compares an orbital period with a satellite rather than with another orbital period.",
-     "Incorrect. It compares an orbital period with satellites rather than with another orbital period.",
-     "Incorrect. It compares an orbital period with a satellite rather than with another orbital period. Only choice A results in a grammatical sentence."
     ],
     "source": "Moretti Test Prep & Tutoring"
    },
@@ -465,26 +421,48 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "2c61e0b9",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
+    "qid": "2784cbaf",
+    "domain": "Standard English Conventions",
+    "skill": "Form, Structure, and Sense",
     "difficulty": "hard",
     "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>British musicians John Lennon and Paul McCartney shared writing credit for numerous Beatles songs.</li><li>Many Lennon-McCartney songs were actually written by either Lennon or McCartney, not by both.</li><li>The exact authorship of specific parts of many Beatles songs, such as the verse for \"In My Life,\" is disputed.</li><li>Mark Glickman, Jason Brown, and Ryan Song used statistical methods to analyze the musical content of Beatles songs.</li><li>They concluded that there is 18.9% probability that McCartney wrote the verse for \"In My Life,\" stating that the verse is \"consistent with Lennon's songwriting style.\"</li></ul><br><br>The student wants to make a generalization about the kind of study conducted by Glickman, Brown, and Song. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "text": "To fully describe the motion of an object requires knowing each of five ______ movement: displacement, time, initial velocity, final velocity, and acceleration. These are called kinematic variables.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
     "choices": [
-     "Based on statistical analysis, Glickman, Brown, and Song claim that John Lennon wrote the verse of \"In My Life.\"",
-     "There is only an 18.9% probability that Paul McCartney wrote the verse for \"In My Life\"; John Lennon is the more likely author.",
-     "It is likely that John Lennon, not Paul McCartney, wrote the verse for \"In My Life.\"",
-     "Researchers have used statistical methods to address questions of authorship within the field of music."
+     "variable's that characterize objects'",
+     "variables that characterize objects'",
+     "variables that characterize object's",
+     "variables that characterize objects"
     ],
-    "correct": 3,
+    "correct": 1,
     "choiceNotes": [
-     "Incorrect. The sentence summarizes the methodology and findings of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
-     "Incorrect. The sentence mentions the data and conclusion of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
-     "Incorrect. The sentence focuses on a specific conclusion from a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
-     "Correct. The sentence uses information from the notes to make a generalization about the kind of study Glickman, Brown, and Song conducted. Specifically, the sentence indicates that the study was of a kind that used statistical methods to address questions of authorship within the field of music."
+     "Incorrect. The context requires the plural noun \"variables,\" not the singular possessive noun \"variable's.\"",
+     "Correct. The conventions being tested are the use of plural and possessive nouns. The plural noun \"variables\" correctly indicates that there are multiple variables, and the plural possessive noun \"objects'\" correctly indicates that the movement of objects in general is being discussed.",
+     "Incorrect. The context requires the plural possessive noun \"objects',\" not the singular possessive noun \"object's.\"",
+     "Incorrect. The context requires the plural possessive noun \"objects',\" not the plural noun \"objects.\""
     ],
     "source": "Non-Bluebook"
+   },
+   {
+    "qid": "81a636a3",
+    "domain": "Standard English Conventions",
+    "skill": "Form, Structure, and Sense",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "The orbital period of a satellite, the time a satellite takes to circle the Earth once, grows longer the farther out it orbits. Compared with that of a spacecraft in low Earth orbit, ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "choices": [
+     "the orbital period of a satellite in geostationary orbit is far longer.",
+     "a satellite in geostationary orbit has a far longer orbital period.",
+     "satellites in geostationary orbit take far longer to complete one circuit.",
+     "a satellite in geostationary orbit must travel far longer before it returns to the same point."
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. The convention being tested is subject-modifier placement. A modifying phrase at the start of a sentence must be followed directly by the noun it describes. \"That of\" stands in for the orbital period, so the main clause must begin with the period being compared with it.",
+     "Incorrect. It compares an orbital period with a satellite rather than with another orbital period.",
+     "Incorrect. It compares an orbital period with satellites rather than with another orbital period.",
+     "Incorrect. It compares an orbital period with a satellite rather than with another orbital period. Only choice A results in a grammatical sentence."
+    ],
+    "source": "Moretti Test Prep & Tutoring"
    },
    {
     "qid": "0d3ebdce",
@@ -595,6 +573,28 @@ window.SECTION_BANKS = {
      "Incorrect. It counts the species involved and describes the elaiosome without saying what an ant does with a seed."
     ],
     "source": "Moretti Test Prep & Tutoring"
+   },
+   {
+    "qid": "2c61e0b9",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>British musicians John Lennon and Paul McCartney shared writing credit for numerous Beatles songs.</li><li>Many Lennon-McCartney songs were actually written by either Lennon or McCartney, not by both.</li><li>The exact authorship of specific parts of many Beatles songs, such as the verse for \"In My Life,\" is disputed.</li><li>Mark Glickman, Jason Brown, and Ryan Song used statistical methods to analyze the musical content of Beatles songs.</li><li>They concluded that there is 18.9% probability that McCartney wrote the verse for \"In My Life,\" stating that the verse is \"consistent with Lennon's songwriting style.\"</li></ul><br><br>The student wants to make a generalization about the kind of study conducted by Glickman, Brown, and Song. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "choices": [
+     "Based on statistical analysis, Glickman, Brown, and Song claim that John Lennon wrote the verse of \"In My Life.\"",
+     "There is only an 18.9% probability that Paul McCartney wrote the verse for \"In My Life\"; John Lennon is the more likely author.",
+     "It is likely that John Lennon, not Paul McCartney, wrote the verse for \"In My Life.\"",
+     "Researchers have used statistical methods to address questions of authorship within the field of music."
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. The sentence summarizes the methodology and findings of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
+     "Incorrect. The sentence mentions the data and conclusion of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
+     "Incorrect. The sentence focuses on a specific conclusion from a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
+     "Correct. The sentence uses information from the notes to make a generalization about the kind of study Glickman, Brown, and Song conducted. Specifically, the sentence indicates that the study was of a kind that used statistical methods to address questions of authorship within the field of music."
+    ],
+    "source": "Non-Bluebook"
    }
   ],
   "module2Easier": [
@@ -753,28 +753,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "f7bd14de",
-    "domain": "Information and Ideas",
-    "skill": "Central Ideas and Details",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "Several scholars have argued that conditions in England in the late ninth through early eleventh centuries—namely, burgeoning literacy amid running conflicts between England's Anglo-Saxon kingdoms and Danish invaders—were especially conducive to the production of the Old English epic poem Beowulf, and they have dated the poem's composition accordingly. It is not inconceivable that Beowulf emerged from such a context, but privileging contextual fit over the linguistic evidence of an eighth- or even seventh-century composition requires a level of justification that thus far has not been presented.<br><br>Which choice best states the main idea of the text?",
-    "choices": [
-     "Although there are some grounds for believing that Beowulf was composed between the late ninth and early eleventh centuries, advocates for that view tend to rely on evidence that has been called into question by advocates for an earlier date.",
-     "Although several scholars have dated Beowulf to the late ninth through early eleventh centuries, others have argued that doing so privileges a controversial interpretation of the social conditions of the period.",
-     "Although Beowulf fits well with the historical context of England in the late ninth through early eleventh centuries, it fits equally well with the historical context of England in the seventh and eighth centuries.",
-     "Although the claim of a late ninth- through early eleventh-century composition date for Beowulf has some plausibility, advocates for the claim have not compellingly addressed evidence suggesting an earlier date."
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. The text says that scholars who date the poem to the late ninth through early eleventh centuries have failed to account for the linguistic evidence that the poem may have been composed earlier, not that the evidence those scholars cite in favor of their view is unreliable or that anyone has cast doubt on that evidence. In other words, the text does not suggest that there are problems with the evidence cited by advocates of the later composition date, only that there is other evidence of an earlier composition date that those advocates need to consider.",
-     "Incorrect. Nothing in the text suggests that those scholars who date the poem to the late ninth through early eleventh centuries are giving priority to a controversial view of the social conditions at that time. The text makes no reference to any controversy about how scholars interpret that historical period. Instead, the text suggests that scholars who date the poem on the basis of its fit with the historical context of England in the late ninth through early eleventh centuries have failed to account for linguistic evidence that the poem may have been composed earlier.",
-     "Incorrect. The text says nothing about how well the poem fits the historical context of England in the seventh and eighth centuries, let alone that it fits that historical context as well as it fits the historical context of the late ninth through early eleventh centuries. Rather, the text says that there is linguistic evidence that the poem may have been composed in the seventh or eighth century.",
-     "Correct. It most accurately states the main idea of the text. The text states that some scholars have dated the composition of Beowulf to the late ninth through early eleventh centuries due to the poem's fit with that period's historical context. The text goes on to say that while it is \"not inconceivable that Beowulf emerged from such a context\"—that is, it is possible that Beowulf was composed during the late ninth through eleventh centuries—there is linguistic evidence that the poem was composed earlier, in the seventh or eighth century. According to the text, favoring the historical context over the linguistic evidence requires justification that scholars have not yet supplied. In other words, the text suggests that scholars who favor the later composition date need to explain why the poem's fit with historical context should take precedence over the linguistic evidence, but they have not yet done so. Thus, the main idea of the text is that while there is some plausibility to the later composition date, advocates for the later date have not compellingly addressed evidence suggestive of an earlier date."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "dc043599",
     "domain": "Information and Ideas",
     "skill": "Cross-Text Connections",
@@ -907,26 +885,26 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "e46a3758",
-    "domain": "Standard English Conventions",
-    "skill": "Boundaries",
+    "qid": "f7bd14de",
+    "domain": "Information and Ideas",
+    "skill": "Central Ideas and Details",
     "difficulty": "hard",
     "type": "mc",
-    "text": "The Japanese art of kintsugi repairs broken pottery with seams that are meant to be noticed rather than hidden. A typical repair layers materials chosen as much for visibility as for ______ lacquer, a tree sap that hardens as it cures; a filler made from clay or wheat flour; and powdered gold, which makes the mended seams impossible to miss.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "text": "Several scholars have argued that conditions in England in the late ninth through early eleventh centuries—namely, burgeoning literacy amid running conflicts between England's Anglo-Saxon kingdoms and Danish invaders—were especially conducive to the production of the Old English epic poem Beowulf, and they have dated the poem's composition accordingly. It is not inconceivable that Beowulf emerged from such a context, but privileging contextual fit over the linguistic evidence of an eighth- or even seventh-century composition requires a level of justification that thus far has not been presented.<br><br>Which choice best states the main idea of the text?",
     "choices": [
-     "strength; urushi",
-     "strength, urushi",
-     "strength: urushi",
-     "strength urushi"
+     "Although there are some grounds for believing that Beowulf was composed between the late ninth and early eleventh centuries, advocates for that view tend to rely on evidence that has been called into question by advocates for an earlier date.",
+     "Although several scholars have dated Beowulf to the late ninth through early eleventh centuries, others have argued that doing so privileges a controversial interpretation of the social conditions of the period.",
+     "Although Beowulf fits well with the historical context of England in the late ninth through early eleventh centuries, it fits equally well with the historical context of England in the seventh and eighth centuries.",
+     "Although the claim of a late ninth- through early eleventh-century composition date for Beowulf has some plausibility, advocates for the claim have not compellingly addressed evidence suggesting an earlier date."
     ],
-    "correct": 2,
+    "correct": 3,
     "choiceNotes": [
-     "Incorrect. A semicolon can't introduce the list; semicolons here separate the items of the list from one another.",
-     "Incorrect. A comma can't introduce a list whose items are themselves separated by semicolons.",
-     "Correct. The convention being tested is the use of a colon within a sentence. A colon is conventionally used after a main clause to introduce a list. Here the list itself contains commas, so its items are separated by semicolons, but the boundary between the main clause (\"A typical repair...strength\") and the list still requires a colon.",
-     "Incorrect. Punctuation is needed to mark the boundary between the main clause and the list that follows it."
+     "Incorrect. The text says that scholars who date the poem to the late ninth through early eleventh centuries have failed to account for the linguistic evidence that the poem may have been composed earlier, not that the evidence those scholars cite in favor of their view is unreliable or that anyone has cast doubt on that evidence. In other words, the text does not suggest that there are problems with the evidence cited by advocates of the later composition date, only that there is other evidence of an earlier composition date that those advocates need to consider.",
+     "Incorrect. Nothing in the text suggests that those scholars who date the poem to the late ninth through early eleventh centuries are giving priority to a controversial view of the social conditions at that time. The text makes no reference to any controversy about how scholars interpret that historical period. Instead, the text suggests that scholars who date the poem on the basis of its fit with the historical context of England in the late ninth through early eleventh centuries have failed to account for linguistic evidence that the poem may have been composed earlier.",
+     "Incorrect. The text says nothing about how well the poem fits the historical context of England in the seventh and eighth centuries, let alone that it fits that historical context as well as it fits the historical context of the late ninth through early eleventh centuries. Rather, the text says that there is linguistic evidence that the poem may have been composed in the seventh or eighth century.",
+     "Correct. It most accurately states the main idea of the text. The text states that some scholars have dated the composition of Beowulf to the late ninth through early eleventh centuries due to the poem's fit with that period's historical context. The text goes on to say that while it is \"not inconceivable that Beowulf emerged from such a context\"—that is, it is possible that Beowulf was composed during the late ninth through eleventh centuries—there is linguistic evidence that the poem was composed earlier, in the seventh or eighth century. According to the text, favoring the historical context over the linguistic evidence requires justification that scholars have not yet supplied. In other words, the text suggests that scholars who favor the later composition date need to explain why the poem's fit with historical context should take precedence over the linguistic evidence, but they have not yet done so. Thus, the main idea of the text is that while there is some plausibility to the later composition date, advocates for the later date have not compellingly addressed evidence suggestive of an earlier date."
     ],
-    "source": "Moretti Test Prep & Tutoring"
+    "source": "Non-Bluebook"
    },
    {
     "qid": "c102f9b0",
@@ -1059,6 +1037,28 @@ window.SECTION_BANKS = {
      "Incorrect. It results in a comma splice. Without a conjunction following it, a comma can't be used in this way to join the two main clauses of the sentence."
     ],
     "source": "Non-Bluebook"
+   },
+   {
+    "qid": "e46a3758",
+    "domain": "Standard English Conventions",
+    "skill": "Boundaries",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "The Japanese art of kintsugi repairs broken pottery with seams that are meant to be noticed rather than hidden. A typical repair layers materials chosen as much for visibility as for ______ lacquer, a tree sap that hardens as it cures; a filler made from clay or wheat flour; and powdered gold, which makes the mended seams impossible to miss.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "choices": [
+     "strength; urushi",
+     "strength, urushi",
+     "strength: urushi",
+     "strength urushi"
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. A semicolon can't introduce the list; semicolons here separate the items of the list from one another.",
+     "Incorrect. A comma can't introduce a list whose items are themselves separated by semicolons.",
+     "Correct. The convention being tested is the use of a colon within a sentence. A colon is conventionally used after a main clause to introduce a list. Here the list itself contains commas, so its items are separated by semicolons, but the boundary between the main clause (\"A typical repair...strength\") and the list still requires a colon.",
+     "Incorrect. Punctuation is needed to mark the boundary between the main clause and the list that follows it."
+    ],
+    "source": "Moretti Test Prep & Tutoring"
    },
    {
     "qid": "20733eac",
@@ -1811,23 +1811,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "244ff6c4",
-    "domain": "Geometry and Trigonometry",
-    "skill": "Circles",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "What is the value of tan <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">92π</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>?",
-    "choices": [
-     "−√3",
-     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">√3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>",
-     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">√3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>",
-     "√3"
-    ],
-    "correct": 0,
-    "explanation": "Choice A is correct. A trigonometric ratio can be found using the unit circle, that is, a circle with radius 1 unit. If a central angle of a unit circle in the <i>xy</i>-plane centered at the origin has its starting side on the positive <i>x</i>-axis and its terminal side intersects the circle at a point (<i>x</i>, <i>y</i>), then the value of the tangent of the central angle is equal to the <i>y</i>-coordinate divided by the <i>x</i>-coordinate. There are 2π radians in a circle. Dividing 92π/3 by 2π yields 92/6, which is equivalent to 15 + 2/3. It follows that on the unit circle centered at the origin in the <i>xy</i>-plane, the angle 92π/3 is the result of 15 revolutions from its starting side on the positive <i>x</i>-axis followed by a rotation through 2π/3 radians. Therefore, the angles 92π/3 and 2π/3 are coterminal angles and tan(92π/3) is equal to tan(2π/3). Since 2π/3 is greater than π/2 and less than π, it follows that the terminal side of the angle is in quadrant II and forms an angle of π/3, or 60°, with the negative <i>x</i>-axis. Therefore, the terminal side of the angle intersects the unit circle at the point (−1/2, √3/2). It follows that the value of tan(2π/3) is (√3/2)/(−1/2), which is equivalent to −√3. Therefore, the value of tan(92π/3) is −√3.<br><br>Choice B is incorrect. This is the value of 1/tan(92π/3), not tan(92π/3).<br><br>Choice C is incorrect. This is the value of 1/tan(π/3), not tan(92π/3).<br><br>Choice D is incorrect. This is the value of tan(π/3), not tan(92π/3).",
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "3f236a64",
     "domain": "Problem-Solving and Data Analysis",
     "skill": "Ratios, Rates, Proportional Relationships, and Units",
@@ -1842,6 +1825,40 @@ window.SECTION_BANKS = {
     ],
     "correct": 3,
     "explanation": "Choice D is correct. Since the ratio of <i>y</i> to <i>x</i> is constant for each ordered pair in the table, the first row can be used to determine that the ratio of <i>y</i> to <i>x</i> is 4 to 1. The proportion <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>k</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">40</span></span> can be used to solve for <i>k</i>. Multiplying each side of the equation by 40 yields 160 = <i>k</i>.<br><br>Choice A is incorrect. This is the value of <i>y</i> when the value of <i>x</i> is 7, not 40. Choice B is incorrect and may result from subtracting 4 from 40 instead of multiplying 40 by 4. Choice C is incorrect and may result from incorrectly setting up the proportion.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "5b8a8475",
+    "domain": "Algebra",
+    "skill": "Linear Equations in Two Variables",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "Line <i>k</i> is defined by <i>y</i> = 3<i>x</i> + 15. Line <i>j</i> is perpendicular to line <i>k</i> in the <i>xy</i>-plane. What is the slope of line <i>j</i>?",
+    "choices": [
+     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>",
+     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span></span>",
+     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">18</span></span>",
+     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">45</span></span>"
+    ],
+    "correct": 0,
+    "explanation": "It's given that line <i>j</i> is perpendicular to line <i>k</i> in the <i>xy</i>-plane. It follows that the slope of line <i>j</i> is the opposite reciprocal of the slope of line <i>k</i>. The equation for line <i>k</i> is written in slope-intercept form <i>y</i> = <i>m</i><i>x</i> + <i>b</i>, where <i>m</i> is the slope of the line and <i>b</i> is the <i>y</i>-coordinate of the <i>y</i>-intercept of the line. It follows that the slope of line <i>k</i> is 3. The opposite reciprocal of a number is −1 divided by the number. Thus, the opposite reciprocal of 3 is −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>. Therefore, the slope of line <i>j</i> is −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>.<br><br>Choice B is incorrect and may result from conceptual or calculation errors. Choice C is incorrect and may result from conceptual or calculation errors. Choice D is incorrect and may result from conceptual or calculation errors.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "3c95093c",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">6<i>x</i> − 9<i>y</i> &gt; 12</div>Which of the following inequalities is equivalent to the inequality above?",
+    "choices": [
+     "<i>x</i> − <i>y</i> &gt; 2",
+     "2<i>x</i> − 3<i>y</i> &gt; 4",
+     "3<i>x</i> − 2<i>y</i> &gt; 4",
+     "3<i>y</i> − 2<i>x</i> &gt; 2"
+    ],
+    "correct": 1,
+    "explanation": "Choice B is correct. Both sides of the given inequality can be divided by 3 to yield 2<i>x</i> − 3<i>y</i> &gt; 4.<br><br>Choices A, C, and D are incorrect because they are not equivalent to (do not have the same solution set as) the given inequality. For example, the ordered pair (0, −1.5) is a solution to the given inequality, but it is not a solution to any of the inequalities in choices A, C, or D.",
     "source": "Non-Bluebook"
    },
    {
@@ -1862,23 +1879,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "4626102e",
-    "domain": "Problem-Solving and Data Analysis",
-    "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><img src=\"question-bank-assets/4626102e.png\" alt=\"Dot plot of Data Set A showing 15 values from 22 to 26\" style=\"max-width:400px;width:100%;height:auto;\"/></div>The dot plot represents the 15 values in data set A. Data set B is created by adding 56 to each of the values in data set A. Which of the following correctly compares the medians and the ranges of data sets A and B?",
-    "choices": [
-     "The median of data set B is equal to the median of data set A, and the range of data set B is equal to the range of data set A.",
-     "The median of data set B is equal to the median of data set A, and the range of data set B is greater than the range of data set A.",
-     "The median of data set B is greater than the median of data set A, and the range of data set B is equal to the range of data set A.",
-     "The median of data set B is greater than the median of data set A, and the range of data set B is greater than the range of data set A."
-    ],
-    "correct": 2,
-    "explanation": "Choice C is correct. The median of a data set with an odd number of values, in ascending or descending order, is the middle value of the data set, and the range of a data set is the positive difference between the maximum and minimum values in the data set. Since the dot plot shown gives the values in data set A in ascending order and there are 15 values in the data set, the eighth value in data set A, 23, is the median. The maximum value in data set A is 26 and the minimum value is 22, so the range of data set A is 26 − 22, or 4. It's given that data set B is created by adding 56 to each of the values in data set A. Increasing each of the 15 values in data set A by 56 will also increase its median value by 56, making the median of data set B 79. Increasing each value of data set A by 56 does not change the range, since the maximum value of data set B is 26 + 56, or 82, and the minimum value is 22 + 56, or 78, making the range of data set B 82 − 78, or 4. Therefore, the median of data set B is greater than the median of data set A, and the range of data set B is equal to the range of data set A.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "83fb222d",
     "domain": "Algebra",
     "skill": "Linear Equations in One Variable",
@@ -1890,14 +1890,14 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "d1b66ae6",
-    "domain": "Algebra",
-    "skill": "Systems of Two Linear Equations in Two Variables",
-    "difficulty": "hard",
+    "qid": "cc2601cb",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Functions",
+    "difficulty": "easy",
     "type": "fr",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">−<i>x</i> + <i>y</i> = −3.5<br><i>x</i> + 3<i>y</i> = 9.5</div><div>If (<i>x</i>, <i>y</i>) satisfies the system of equations above, what is the value of <i>y</i>?</div>",
-    "answer": "3/2",
-    "explanation": "The correct answer is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span></span>. One method for solving the system of equations for <i>y</i> is to add corresponding sides of the two equations. Adding the left-hand sides gives (−<i>x</i> + <i>y</i>) + (<i>x</i> + 3<i>y</i>), or 4<i>y</i>. Adding the right-hand sides yields −3.5 + 9.5 = 6. It follows that 4<i>y</i> = 6. Finally, dividing both sides of 4<i>y</i> = 6 by 4 yields <i>y</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span> or <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span></span>. Note that 3/2 and 1.5 are examples of ways to enter a correct answer.",
+    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><svg viewBox=\"0 0 280 190\" class=\"dx-fig\" style=\"color:var(--text);max-width:280px;\" role=\"img\" aria-label=\"Graph of a parabola in the xy-plane opening upward, with the horizontal axis labeled 4 to 10 and the vertical axis labeled -2 to 10. Its lowest point touches the x-axis at (7, 0), and it passes through (6, 3) and (8, 3).\"><title>Graph of a parabola in the xy-plane opening upward, with the horizontal axis labeled 4 to 10 and the vertical axis labeled -2 to 10. Its lowest point touches the x-axis at (7, 0), and it passes through (6, 3) and (8, 3).</title><rect x=\"30.0\" y=\"14.0\" width=\"234.0\" height=\"152.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.35\"/><line x1=\"30.0\" y1=\"166.0\" x2=\"30.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"69.0\" y1=\"166.0\" x2=\"69.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"108.0\" y1=\"166.0\" x2=\"108.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"147.0\" y1=\"166.0\" x2=\"147.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"186.0\" y1=\"166.0\" x2=\"186.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"225.0\" y1=\"166.0\" x2=\"225.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"264.0\" y1=\"166.0\" x2=\"264.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"166.0\" x2=\"264.0\" y2=\"166.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"142.6\" x2=\"264.0\" y2=\"142.6\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"119.2\" x2=\"264.0\" y2=\"119.2\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"95.8\" x2=\"264.0\" y2=\"95.8\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"72.5\" x2=\"264.0\" y2=\"72.5\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"49.1\" x2=\"264.0\" y2=\"49.1\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"25.7\" x2=\"264.0\" y2=\"25.7\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"142.6\" x2=\"264.0\" y2=\"142.6\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"-126.0\" y1=\"166.0\" x2=\"-126.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"1\"/><polygon points=\"264.0,142.6 259.0,140.1 259.0,145.1\" fill=\"currentColor\"/><polygon points=\"-126.0,14.0 -128.5,19.0 -123.5,19.0\" fill=\"currentColor\"/><text x=\"30.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">4</text><text x=\"69.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">5</text><text x=\"108.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">6</text><text x=\"147.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">7</text><text x=\"186.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">8</text><text x=\"225.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">9</text><text x=\"264.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">10</text><text x=\"26.0\" y=\"168.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-2</text><text x=\"26.0\" y=\"121.9\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">2</text><text x=\"26.0\" y=\"98.5\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">4</text><text x=\"26.0\" y=\"75.2\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">6</text><text x=\"26.0\" y=\"51.8\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">8</text><text x=\"26.0\" y=\"28.4\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">10</text><text x=\"26.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">0</text><path d=\"M 80.7 41.2 L 82.4 46.2 L 84.0 51.1 L 85.7 55.9 L 87.3 60.5 L 89.0 65.0 L 90.6 69.4 L 92.3 73.6 L 94.0 77.7 L 95.6 81.7 L 97.3 85.6 L 98.9 89.3 L 100.6 92.9 L 102.2 96.4 L 103.9 99.8 L 105.6 103.0 L 107.2 106.1 L 108.9 109.1 L 110.5 112.0 L 112.2 114.7 L 113.8 117.3 L 115.5 119.7 L 117.2 122.1 L 118.8 124.3 L 120.5 126.4 L 122.1 128.4 L 123.8 130.2 L 125.5 131.9 L 127.1 133.5 L 128.8 134.9 L 130.4 136.3 L 132.1 137.5 L 133.7 138.6 L 135.4 139.5 L 137.1 140.3 L 138.7 141.0 L 140.4 141.6 L 142.0 142.0 L 143.7 142.4 L 145.3 142.6 L 147.0 142.6 L 148.7 142.6 L 150.3 142.4 L 152.0 142.0 L 153.6 141.6 L 155.3 141.0 L 156.9 140.3 L 158.6 139.5 L 160.3 138.6 L 161.9 137.5 L 163.6 136.3 L 165.2 134.9 L 166.9 133.5 L 168.5 131.9 L 170.2 130.2 L 171.9 128.4 L 173.5 126.4 L 175.2 124.3 L 176.8 122.1 L 178.5 119.7 L 180.1 117.3 L 181.8 114.7 L 183.5 112.0 L 185.1 109.1 L 186.8 106.1 L 188.4 103.0 L 190.1 99.8 L 191.8 96.4 L 193.4 92.9 L 195.1 89.3 L 196.7 85.6 L 198.4 81.7 L 200.0 77.7 L 201.7 73.6 L 203.4 69.4 L 205.0 65.0 L 206.7 60.5 L 208.3 55.9 L 210.0 51.1 L 211.6 46.2 L 213.3 41.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg></div>The <i>x</i>-intercept of the graph shown is (<i>x</i>, 0). What is the value of <i>x</i>?",
+    "answer": "7",
+    "explanation": "It's given that the <i>x</i>-intercept of the graph shown is (<i>x</i>, 0). The graph passes through the point (7, 0). Therefore, the value of <i>x</i> is 7.",
     "source": "Non-Bluebook"
    },
    {
@@ -1932,96 +1932,6 @@ window.SECTION_BANKS = {
     ],
     "correct": 1,
     "explanation": "Choice B is correct. The Pythagorean theorem states that for a right triangle, <i>c</i><sup>2</sup> = a<sup>2</sup> + <i>b</i><sup>2</sup>, where <i>c</i> represents the length of the hypotenuse and a and <i>b</i> represent the lengths of the legs. It's given that a right triangle has legs with lengths of 11 centimeters and 9 centimeters. Substituting 11 for a and 9 for <i>b</i> in the formula <i>c</i><sup>2</sup> = a<sup>2</sup> + <i>b</i><sup>2</sup> yields <i>c</i><sup>2</sup> = 11<sup>2</sup> + 9<sup>2</sup>, which is equivalent to <i>c</i><sup>2</sup> = 121 + 81, or <i>c</i><sup>2</sup> = 202. Taking the square root of each side of this equation yields <i>c</i> = ±√202. Since <i>c</i> represents a length, <i>c</i> must be positive. Therefore, the length of the triangle's hypotenuse, in centimeters, is √202.<br><br>Choice A is incorrect. This is the result of solving the equation <i>c</i><sup>2</sup> = 11(2) + 9(2), not <i>c</i><sup>2</sup> = 11<sup>2</sup> + 9<sup>2</sup>.<br><br>Choice C is incorrect. This is the result of solving the equation <i>c</i>(2) = 11(2) + 9(2), not <i>c</i><sup>2</sup> = 11<sup>2</sup> + 9<sup>2</sup>.<br><br>Choice D is incorrect. This is the result of solving the equation <i>c</i> = 11<sup>2</sup> + 9<sup>2</sup>, not <i>c</i><sup>2</sup> = 11<sup>2</sup> + 9<sup>2</sup>.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "5b8a8475",
-    "domain": "Algebra",
-    "skill": "Linear Equations in Two Variables",
-    "difficulty": "easy",
-    "type": "mc",
-    "text": "Line <i>k</i> is defined by <i>y</i> = 3<i>x</i> + 15. Line <i>j</i> is perpendicular to line <i>k</i> in the <i>xy</i>-plane. What is the slope of line <i>j</i>?",
-    "choices": [
-     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>",
-     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span></span>",
-     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">18</span></span>",
-     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">45</span></span>"
-    ],
-    "correct": 0,
-    "explanation": "It's given that line <i>j</i> is perpendicular to line <i>k</i> in the <i>xy</i>-plane. It follows that the slope of line <i>j</i> is the opposite reciprocal of the slope of line <i>k</i>. The equation for line <i>k</i> is written in slope-intercept form <i>y</i> = <i>m</i><i>x</i> + <i>b</i>, where <i>m</i> is the slope of the line and <i>b</i> is the <i>y</i>-coordinate of the <i>y</i>-intercept of the line. It follows that the slope of line <i>k</i> is 3. The opposite reciprocal of a number is −1 divided by the number. Thus, the opposite reciprocal of 3 is −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>. Therefore, the slope of line <i>j</i> is −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>.<br><br>Choice B is incorrect and may result from conceptual or calculation errors. Choice C is incorrect and may result from conceptual or calculation errors. Choice D is incorrect and may result from conceptual or calculation errors.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "023c0a8d",
-    "domain": "Algebra",
-    "skill": "Linear Functions",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
-    "choices": [
-     "−6",
-     "−4",
-     "0",
-     "2"
-    ],
-    "correct": 1,
-    "explanation": "It's given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) will equal <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2. Therefore, substituting 2 for <i>x</i> in the given equation yields <i>f</i>(3 × 2) = 2 − 6, which can be rewritten as <i>f</i>(6) = −4.<br><br>Choice A is incorrect. This is the value of the constant in the given equation for <i>f</i>. Choice C is incorrect and may result from substituting <i>x</i> = 6, rather than <i>x</i> = 2, into the given equation. Choice D is incorrect. This is the value of <i>x</i> that yields <i>f</i>(6) for the left-hand side of the given equation; it's not the value of <i>f</i>(6).",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "3c95093c",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
-    "difficulty": "easy",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">6<i>x</i> − 9<i>y</i> &gt; 12</div>Which of the following inequalities is equivalent to the inequality above?",
-    "choices": [
-     "<i>x</i> − <i>y</i> &gt; 2",
-     "2<i>x</i> − 3<i>y</i> &gt; 4",
-     "3<i>x</i> − 2<i>y</i> &gt; 4",
-     "3<i>y</i> − 2<i>x</i> &gt; 2"
-    ],
-    "correct": 1,
-    "explanation": "Choice B is correct. Both sides of the given inequality can be divided by 3 to yield 2<i>x</i> − 3<i>y</i> &gt; 4.<br><br>Choices A, C, and D are incorrect because they are not equivalent to (do not have the same solution set as) the given inequality. For example, the ordered pair (0, −1.5) is a solution to the given inequality, but it is not a solution to any of the inequalities in choices A, C, or D.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "cc2601cb",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Functions",
-    "difficulty": "easy",
-    "type": "fr",
-    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><svg viewBox=\"0 0 280 190\" class=\"dx-fig\" style=\"color:var(--text);max-width:280px;\" role=\"img\" aria-label=\"Graph of a parabola in the xy-plane opening upward, with the horizontal axis labeled 4 to 10 and the vertical axis labeled -2 to 10. Its lowest point touches the x-axis at (7, 0), and it passes through (6, 3) and (8, 3).\"><title>Graph of a parabola in the xy-plane opening upward, with the horizontal axis labeled 4 to 10 and the vertical axis labeled -2 to 10. Its lowest point touches the x-axis at (7, 0), and it passes through (6, 3) and (8, 3).</title><rect x=\"30.0\" y=\"14.0\" width=\"234.0\" height=\"152.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.35\"/><line x1=\"30.0\" y1=\"166.0\" x2=\"30.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"69.0\" y1=\"166.0\" x2=\"69.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"108.0\" y1=\"166.0\" x2=\"108.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"147.0\" y1=\"166.0\" x2=\"147.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"186.0\" y1=\"166.0\" x2=\"186.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"225.0\" y1=\"166.0\" x2=\"225.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"264.0\" y1=\"166.0\" x2=\"264.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"166.0\" x2=\"264.0\" y2=\"166.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"142.6\" x2=\"264.0\" y2=\"142.6\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"119.2\" x2=\"264.0\" y2=\"119.2\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"95.8\" x2=\"264.0\" y2=\"95.8\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"72.5\" x2=\"264.0\" y2=\"72.5\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"49.1\" x2=\"264.0\" y2=\"49.1\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"25.7\" x2=\"264.0\" y2=\"25.7\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"142.6\" x2=\"264.0\" y2=\"142.6\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"-126.0\" y1=\"166.0\" x2=\"-126.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"1\"/><polygon points=\"264.0,142.6 259.0,140.1 259.0,145.1\" fill=\"currentColor\"/><polygon points=\"-126.0,14.0 -128.5,19.0 -123.5,19.0\" fill=\"currentColor\"/><text x=\"30.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">4</text><text x=\"69.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">5</text><text x=\"108.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">6</text><text x=\"147.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">7</text><text x=\"186.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">8</text><text x=\"225.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">9</text><text x=\"264.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">10</text><text x=\"26.0\" y=\"168.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-2</text><text x=\"26.0\" y=\"121.9\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">2</text><text x=\"26.0\" y=\"98.5\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">4</text><text x=\"26.0\" y=\"75.2\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">6</text><text x=\"26.0\" y=\"51.8\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">8</text><text x=\"26.0\" y=\"28.4\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">10</text><text x=\"26.0\" y=\"152.6\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">0</text><path d=\"M 80.7 41.2 L 82.4 46.2 L 84.0 51.1 L 85.7 55.9 L 87.3 60.5 L 89.0 65.0 L 90.6 69.4 L 92.3 73.6 L 94.0 77.7 L 95.6 81.7 L 97.3 85.6 L 98.9 89.3 L 100.6 92.9 L 102.2 96.4 L 103.9 99.8 L 105.6 103.0 L 107.2 106.1 L 108.9 109.1 L 110.5 112.0 L 112.2 114.7 L 113.8 117.3 L 115.5 119.7 L 117.2 122.1 L 118.8 124.3 L 120.5 126.4 L 122.1 128.4 L 123.8 130.2 L 125.5 131.9 L 127.1 133.5 L 128.8 134.9 L 130.4 136.3 L 132.1 137.5 L 133.7 138.6 L 135.4 139.5 L 137.1 140.3 L 138.7 141.0 L 140.4 141.6 L 142.0 142.0 L 143.7 142.4 L 145.3 142.6 L 147.0 142.6 L 148.7 142.6 L 150.3 142.4 L 152.0 142.0 L 153.6 141.6 L 155.3 141.0 L 156.9 140.3 L 158.6 139.5 L 160.3 138.6 L 161.9 137.5 L 163.6 136.3 L 165.2 134.9 L 166.9 133.5 L 168.5 131.9 L 170.2 130.2 L 171.9 128.4 L 173.5 126.4 L 175.2 124.3 L 176.8 122.1 L 178.5 119.7 L 180.1 117.3 L 181.8 114.7 L 183.5 112.0 L 185.1 109.1 L 186.8 106.1 L 188.4 103.0 L 190.1 99.8 L 191.8 96.4 L 193.4 92.9 L 195.1 89.3 L 196.7 85.6 L 198.4 81.7 L 200.0 77.7 L 201.7 73.6 L 203.4 69.4 L 205.0 65.0 L 206.7 60.5 L 208.3 55.9 L 210.0 51.1 L 211.6 46.2 L 213.3 41.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg></div>The <i>x</i>-intercept of the graph shown is (<i>x</i>, 0). What is the value of <i>x</i>?",
-    "answer": "7",
-    "explanation": "It's given that the <i>x</i>-intercept of the graph shown is (<i>x</i>, 0). The graph passes through the point (7, 0). Therefore, the value of <i>x</i> is 7.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "09d21d79",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Functions",
-    "difficulty": "hard",
-    "type": "fr",
-    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><svg viewBox=\"0 0 280 220\" class=\"dx-fig\" style=\"color:var(--text);max-width:280px;\" role=\"img\" aria-label=\"Graph of a parabola in the xy-plane opening upward, with the x-axis labeled from -3.5 to 1.5 and the y-axis labeled from -9 to 3. It crosses the x-axis at -3 and at 1, crosses the y-axis at (0, -6), and has its lowest point at (-1, -8).\"><title>Graph of a parabola in the xy-plane opening upward, with the x-axis labeled from -3.5 to 1.5 and the y-axis labeled from -9 to 3. It crosses the x-axis at -3 and at 1, crosses the y-axis at (0, -6), and has its lowest point at (-1, -8).</title><rect x=\"30.0\" y=\"14.0\" width=\"234.0\" height=\"182.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.35\"/><line x1=\"30.0\" y1=\"196.0\" x2=\"30.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"76.8\" y1=\"196.0\" x2=\"76.8\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"123.6\" y1=\"196.0\" x2=\"123.6\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"170.4\" y1=\"196.0\" x2=\"170.4\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"217.2\" y1=\"196.0\" x2=\"217.2\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"264.0\" y1=\"196.0\" x2=\"264.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"196.0\" x2=\"264.0\" y2=\"196.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"150.5\" x2=\"264.0\" y2=\"150.5\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"105.0\" x2=\"264.0\" y2=\"105.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"59.5\" x2=\"264.0\" y2=\"59.5\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"14.0\" x2=\"264.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"59.5\" x2=\"264.0\" y2=\"59.5\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"193.8\" y1=\"196.0\" x2=\"193.8\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"1\"/><polygon points=\"264.0,59.5 259.0,57.0 259.0,62.0\" fill=\"currentColor\"/><polygon points=\"193.8,14.0 191.3,19.0 196.3,19.0\" fill=\"currentColor\"/><text x=\"30.0\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-3.5</text><text x=\"76.8\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-2.5</text><text x=\"123.6\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-1.5</text><text x=\"170.4\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-0.5</text><text x=\"217.2\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">0.5</text><text x=\"264.0\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">1.5</text><text x=\"189.8\" y=\"198.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-9</text><text x=\"189.8\" y=\"153.2\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-6</text><text x=\"189.8\" y=\"107.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-3</text><text x=\"189.8\" y=\"16.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">3</text><text x=\"189.8\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">0</text><path d=\"M 44.0 34.0 L 46.6 41.3 L 49.2 48.3 L 51.8 55.2 L 54.3 61.9 L 56.9 68.4 L 59.5 74.8 L 62.1 80.9 L 64.6 86.9 L 67.2 92.7 L 69.8 98.3 L 72.4 103.7 L 74.9 108.9 L 77.5 113.9 L 80.1 118.8 L 82.7 123.5 L 85.2 128.0 L 87.8 132.3 L 90.4 136.4 L 92.9 140.4 L 95.5 144.1 L 98.1 147.7 L 100.7 151.1 L 103.2 154.3 L 105.8 157.3 L 108.4 160.2 L 111.0 162.8 L 113.5 165.3 L 116.1 167.6 L 118.7 169.7 L 121.3 171.7 L 123.8 173.4 L 126.4 175.0 L 129.0 176.3 L 131.6 177.5 L 134.1 178.5 L 136.7 179.4 L 139.3 180.0 L 141.9 180.5 L 144.4 180.7 L 147.0 180.8 L 149.6 180.7 L 152.1 180.5 L 154.7 180.0 L 157.3 179.4 L 159.9 178.5 L 162.4 177.5 L 165.0 176.3 L 167.6 175.0 L 170.2 173.4 L 172.7 171.7 L 175.3 169.7 L 177.9 167.6 L 180.5 165.3 L 183.0 162.8 L 185.6 160.2 L 188.2 157.3 L 190.8 154.3 L 193.3 151.1 L 195.9 147.7 L 198.5 144.1 L 201.1 140.4 L 203.6 136.4 L 206.2 132.3 L 208.8 128.0 L 211.3 123.5 L 213.9 118.8 L 216.5 113.9 L 219.1 108.9 L 221.6 103.7 L 224.2 98.3 L 226.8 92.7 L 229.4 86.9 L 231.9 80.9 L 234.5 74.8 L 237.1 68.4 L 239.7 61.9 L 242.2 55.2 L 244.8 48.3 L 247.4 41.3 L 250.0 34.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg></div>The graph of <i>y</i> = 2<i>x</i><sup>2</sup> + <i>b</i><i>x</i> + c is shown, where <i>b</i> and c are constants. What is the value of <i>b</i>c?",
-    "answer": "-24",
-    "explanation": "Since the graph passes through the point (0, −6), it follows that when the value of <i>x</i> is 0, the value of <i>y</i> is −6. Substituting 0 for <i>x</i> and −6 for <i>y</i> in the given equation yields −6 = 2(0)<sup>2</sup> + <i>b</i>(0) + c, or −6 = c. Therefore, the value of c is −6. Substituting −6 for c in the equation yields <i>y</i> = 2<i>x</i><sup>2</sup> + <i>b</i><i>x</i> − 6. Since the graph passes through the point (−1, −8), it follows that when the value of <i>x</i> is −1, the value of <i>y</i> is −8. Substituting −1 for <i>x</i> and −8 for <i>y</i> in the equation <i>y</i> = 2<i>x</i><sup>2</sup> + <i>b</i><i>x</i> − 6 yields −8 = 2(−1)<sup>2</sup> + <i>b</i>(−1) − 6, or −8 = −4 − <i>b</i>. Adding 4 to each side of this equation yields −4 = −<i>b</i>. Dividing each side of this equation by −1 yields 4 = <i>b</i>. Since the value of <i>b</i> is 4 and the value of c is −6, it follows that the value of <i>b</i>c is (4)(−6), or −24.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "7e6ea718",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Functions",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><i>y</i> = 2(<i>x</i> − <i>d</i>)(<i>x</i> + <i>d</i>)(<i>x</i> + <i>g</i>)(<i>x</i> − <i>d</i>)</div>In the given equation, <i>d</i> and <i>g</i> are unique positive constants. When the equation is graphed in the <i>xy</i>-plane, how many distinct <i>x</i>-intercepts does the graph have?",
-    "choices": [
-     "4",
-     "3",
-     "2",
-     "1"
-    ],
-    "correct": 1,
-    "explanation": "An <i>x</i>-intercept of a graph in the <i>xy</i>-plane is a point on the graph where the value of <i>y</i> is 0. Substituting 0 for <i>y</i> in the given equation yields 0 = 2(<i>x</i> − <i>d</i>)(<i>x</i> + <i>d</i>)(<i>x</i> + <i>g</i>)(<i>x</i> − <i>d</i>). By the zero product property, the solutions to this equation are <i>x</i> = <i>d</i>, <i>x</i> = −<i>d</i>, <i>x</i> = −<i>g</i>, and <i>x</i> = <i>d</i>. However, <i>x</i> = <i>d</i> and <i>x</i> = <i>d</i> are identical. It's given that <i>d</i> and <i>g</i> are unique positive constants. It follows that the equation 0 = 2(<i>x</i> − <i>d</i>)(<i>x</i> + <i>d</i>)(<i>x</i> + <i>g</i>)(<i>x</i> − <i>d</i>) has 3 unique solutions: <i>x</i> = <i>d</i>, <i>x</i> = −<i>d</i>, and <i>x</i> = −<i>g</i>. Thus, the graph of the given equation has 3 distinct <i>x</i>-intercepts.<br><br>Choice A is incorrect and may result from conceptual errors. Choice C is incorrect and may result from conceptual errors. Choice D is incorrect and may result from conceptual errors.",
     "source": "Non-Bluebook"
    },
    {
@@ -2076,23 +1986,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "c39dbbdf",
-    "domain": "Algebra",
-    "skill": "Linear Equations in Two Variables",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "Line <i>r</i> is defined by the equation 4<i>x</i> − 9<i>y</i> = 3. Line <i>s</i> is parallel to line <i>r</i> in the <i>xy</i>-plane. What is the slope of line <i>s</i>?",
-    "choices": [
-     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span>",
-     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>",
-     "−4",
-     "−9"
-    ],
-    "correct": 1,
-    "explanation": "It's given that line <i>s</i> is parallel to line <i>r</i> in the <i>xy</i>-plane. This means that the slope of line <i>r</i> is equal to the slope of line <i>s</i>. Line <i>r</i> is defined by the equation 4<i>x</i> − 9<i>y</i> = 3. This equation can be written in slope-intercept form <i>y</i> = <i>m</i><i>x</i> + <i>b</i>, where <i>m</i> represents the slope of the line and <i>b</i> represents the <i>y</i>-coordinate of the <i>y</i>-intercept of the line. Subtracting 4<i>x</i> from both sides of the equation 4<i>x</i> − 9<i>y</i> = 3 yields −9<i>y</i> = −4<i>x</i> + 3. Dividing both sides of this equation by −9 yields <i>y</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span><i>x</i> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>. Therefore, the slope of line <i>r</i> is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>. Since parallel lines have equal slopes, the slope of line <i>s</i> is also <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>.<br><br>Choice A is incorrect. This is the reciprocal of the slope of line <i>s</i>, not the slope of line <i>s</i>. Choice C is incorrect and may result from conceptual or calculation errors. Choice D is incorrect and may result from conceptual or calculation errors.",
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "547f3ae9",
     "domain": "Advanced Math",
     "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
@@ -2115,6 +2008,23 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "c39dbbdf",
+    "domain": "Algebra",
+    "skill": "Linear Equations in Two Variables",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "Line <i>r</i> is defined by the equation 4<i>x</i> − 9<i>y</i> = 3. Line <i>s</i> is parallel to line <i>r</i> in the <i>xy</i>-plane. What is the slope of line <i>s</i>?",
+    "choices": [
+     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span>",
+     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>",
+     "−4",
+     "−9"
+    ],
+    "correct": 1,
+    "explanation": "It's given that line <i>s</i> is parallel to line <i>r</i> in the <i>xy</i>-plane. This means that the slope of line <i>r</i> is equal to the slope of line <i>s</i>. Line <i>r</i> is defined by the equation 4<i>x</i> − 9<i>y</i> = 3. This equation can be written in slope-intercept form <i>y</i> = <i>m</i><i>x</i> + <i>b</i>, where <i>m</i> represents the slope of the line and <i>b</i> represents the <i>y</i>-coordinate of the <i>y</i>-intercept of the line. Subtracting 4<i>x</i> from both sides of the equation 4<i>x</i> − 9<i>y</i> = 3 yields −9<i>y</i> = −4<i>x</i> + 3. Dividing both sides of this equation by −9 yields <i>y</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span><i>x</i> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>. Therefore, the slope of line <i>r</i> is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>. Since parallel lines have equal slopes, the slope of line <i>s</i> is also <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>.<br><br>Choice A is incorrect. This is the reciprocal of the slope of line <i>s</i>, not the slope of line <i>s</i>. Choice C is incorrect and may result from conceptual or calculation errors. Choice D is incorrect and may result from conceptual or calculation errors.",
+    "source": "Non-Bluebook"
+   },
+   {
     "qid": "a5834ea4",
     "domain": "Algebra",
     "skill": "Linear Functions",
@@ -2129,6 +2039,96 @@ window.SECTION_BANKS = {
     ],
     "correct": 1,
     "explanation": "For the given linear function <i>f</i>, <i>f</i>(<i>x</i>) must equal 39 for all values of <i>x</i>. Of the given choices, only choice B gives three values of <i>x</i> and their corresponding values of <i>f</i>(<i>x</i>) for the given linear function <i>f</i>.<br><br>Choice A is incorrect and may result from conceptual errors. Choice C is incorrect and may result from conceptual errors. Choice D is incorrect and may result from conceptual errors.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "244ff6c4",
+    "domain": "Geometry and Trigonometry",
+    "skill": "Circles",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "What is the value of tan <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">92π</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>?",
+    "choices": [
+     "−√3",
+     "−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">√3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>",
+     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">√3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>",
+     "√3"
+    ],
+    "correct": 0,
+    "explanation": "Choice A is correct. A trigonometric ratio can be found using the unit circle, that is, a circle with radius 1 unit. If a central angle of a unit circle in the <i>xy</i>-plane centered at the origin has its starting side on the positive <i>x</i>-axis and its terminal side intersects the circle at a point (<i>x</i>, <i>y</i>), then the value of the tangent of the central angle is equal to the <i>y</i>-coordinate divided by the <i>x</i>-coordinate. There are 2π radians in a circle. Dividing 92π/3 by 2π yields 92/6, which is equivalent to 15 + 2/3. It follows that on the unit circle centered at the origin in the <i>xy</i>-plane, the angle 92π/3 is the result of 15 revolutions from its starting side on the positive <i>x</i>-axis followed by a rotation through 2π/3 radians. Therefore, the angles 92π/3 and 2π/3 are coterminal angles and tan(92π/3) is equal to tan(2π/3). Since 2π/3 is greater than π/2 and less than π, it follows that the terminal side of the angle is in quadrant II and forms an angle of π/3, or 60°, with the negative <i>x</i>-axis. Therefore, the terminal side of the angle intersects the unit circle at the point (−1/2, √3/2). It follows that the value of tan(2π/3) is (√3/2)/(−1/2), which is equivalent to −√3. Therefore, the value of tan(92π/3) is −√3.<br><br>Choice B is incorrect. This is the value of 1/tan(92π/3), not tan(92π/3).<br><br>Choice C is incorrect. This is the value of 1/tan(π/3), not tan(92π/3).<br><br>Choice D is incorrect. This is the value of tan(π/3), not tan(92π/3).",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "4626102e",
+    "domain": "Problem-Solving and Data Analysis",
+    "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><img src=\"question-bank-assets/4626102e.png\" alt=\"Dot plot of Data Set A showing 15 values from 22 to 26\" style=\"max-width:400px;width:100%;height:auto;\"/></div>The dot plot represents the 15 values in data set A. Data set B is created by adding 56 to each of the values in data set A. Which of the following correctly compares the medians and the ranges of data sets A and B?",
+    "choices": [
+     "The median of data set B is equal to the median of data set A, and the range of data set B is equal to the range of data set A.",
+     "The median of data set B is equal to the median of data set A, and the range of data set B is greater than the range of data set A.",
+     "The median of data set B is greater than the median of data set A, and the range of data set B is equal to the range of data set A.",
+     "The median of data set B is greater than the median of data set A, and the range of data set B is greater than the range of data set A."
+    ],
+    "correct": 2,
+    "explanation": "Choice C is correct. The median of a data set with an odd number of values, in ascending or descending order, is the middle value of the data set, and the range of a data set is the positive difference between the maximum and minimum values in the data set. Since the dot plot shown gives the values in data set A in ascending order and there are 15 values in the data set, the eighth value in data set A, 23, is the median. The maximum value in data set A is 26 and the minimum value is 22, so the range of data set A is 26 − 22, or 4. It's given that data set B is created by adding 56 to each of the values in data set A. Increasing each of the 15 values in data set A by 56 will also increase its median value by 56, making the median of data set B 79. Increasing each value of data set A by 56 does not change the range, since the maximum value of data set B is 26 + 56, or 82, and the minimum value is 22 + 56, or 78, making the range of data set B 82 − 78, or 4. Therefore, the median of data set B is greater than the median of data set A, and the range of data set B is equal to the range of data set A.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "023c0a8d",
+    "domain": "Algebra",
+    "skill": "Linear Functions",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
+    "choices": [
+     "−6",
+     "−4",
+     "0",
+     "2"
+    ],
+    "correct": 1,
+    "explanation": "It's given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) will equal <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2. Therefore, substituting 2 for <i>x</i> in the given equation yields <i>f</i>(3 × 2) = 2 − 6, which can be rewritten as <i>f</i>(6) = −4.<br><br>Choice A is incorrect. This is the value of the constant in the given equation for <i>f</i>. Choice C is incorrect and may result from substituting <i>x</i> = 6, rather than <i>x</i> = 2, into the given equation. Choice D is incorrect. This is the value of <i>x</i> that yields <i>f</i>(6) for the left-hand side of the given equation; it's not the value of <i>f</i>(6).",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "d1b66ae6",
+    "domain": "Algebra",
+    "skill": "Systems of Two Linear Equations in Two Variables",
+    "difficulty": "hard",
+    "type": "fr",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">−<i>x</i> + <i>y</i> = −3.5<br><i>x</i> + 3<i>y</i> = 9.5</div><div>If (<i>x</i>, <i>y</i>) satisfies the system of equations above, what is the value of <i>y</i>?</div>",
+    "answer": "3/2",
+    "explanation": "The correct answer is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span></span>. One method for solving the system of equations for <i>y</i> is to add corresponding sides of the two equations. Adding the left-hand sides gives (−<i>x</i> + <i>y</i>) + (<i>x</i> + 3<i>y</i>), or 4<i>y</i>. Adding the right-hand sides yields −3.5 + 9.5 = 6. It follows that 4<i>y</i> = 6. Finally, dividing both sides of 4<i>y</i> = 6 by 4 yields <i>y</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span> or <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span></span>. Note that 3/2 and 1.5 are examples of ways to enter a correct answer.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "09d21d79",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Functions",
+    "difficulty": "hard",
+    "type": "fr",
+    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><svg viewBox=\"0 0 280 220\" class=\"dx-fig\" style=\"color:var(--text);max-width:280px;\" role=\"img\" aria-label=\"Graph of a parabola in the xy-plane opening upward, with the x-axis labeled from -3.5 to 1.5 and the y-axis labeled from -9 to 3. It crosses the x-axis at -3 and at 1, crosses the y-axis at (0, -6), and has its lowest point at (-1, -8).\"><title>Graph of a parabola in the xy-plane opening upward, with the x-axis labeled from -3.5 to 1.5 and the y-axis labeled from -9 to 3. It crosses the x-axis at -3 and at 1, crosses the y-axis at (0, -6), and has its lowest point at (-1, -8).</title><rect x=\"30.0\" y=\"14.0\" width=\"234.0\" height=\"182.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.35\"/><line x1=\"30.0\" y1=\"196.0\" x2=\"30.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"76.8\" y1=\"196.0\" x2=\"76.8\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"123.6\" y1=\"196.0\" x2=\"123.6\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"170.4\" y1=\"196.0\" x2=\"170.4\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"217.2\" y1=\"196.0\" x2=\"217.2\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"264.0\" y1=\"196.0\" x2=\"264.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"196.0\" x2=\"264.0\" y2=\"196.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"150.5\" x2=\"264.0\" y2=\"150.5\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"105.0\" x2=\"264.0\" y2=\"105.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"59.5\" x2=\"264.0\" y2=\"59.5\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"14.0\" x2=\"264.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"0.3\" opacity=\"0.2\"/><line x1=\"30.0\" y1=\"59.5\" x2=\"264.0\" y2=\"59.5\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"193.8\" y1=\"196.0\" x2=\"193.8\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"1\"/><polygon points=\"264.0,59.5 259.0,57.0 259.0,62.0\" fill=\"currentColor\"/><polygon points=\"193.8,14.0 191.3,19.0 196.3,19.0\" fill=\"currentColor\"/><text x=\"30.0\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-3.5</text><text x=\"76.8\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-2.5</text><text x=\"123.6\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-1.5</text><text x=\"170.4\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">-0.5</text><text x=\"217.2\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">0.5</text><text x=\"264.0\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"middle\" fill=\"currentColor\">1.5</text><text x=\"189.8\" y=\"198.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-9</text><text x=\"189.8\" y=\"153.2\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-6</text><text x=\"189.8\" y=\"107.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">-3</text><text x=\"189.8\" y=\"16.7\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">3</text><text x=\"189.8\" y=\"69.5\" font-size=\"7.5\" text-anchor=\"end\" fill=\"currentColor\">0</text><path d=\"M 44.0 34.0 L 46.6 41.3 L 49.2 48.3 L 51.8 55.2 L 54.3 61.9 L 56.9 68.4 L 59.5 74.8 L 62.1 80.9 L 64.6 86.9 L 67.2 92.7 L 69.8 98.3 L 72.4 103.7 L 74.9 108.9 L 77.5 113.9 L 80.1 118.8 L 82.7 123.5 L 85.2 128.0 L 87.8 132.3 L 90.4 136.4 L 92.9 140.4 L 95.5 144.1 L 98.1 147.7 L 100.7 151.1 L 103.2 154.3 L 105.8 157.3 L 108.4 160.2 L 111.0 162.8 L 113.5 165.3 L 116.1 167.6 L 118.7 169.7 L 121.3 171.7 L 123.8 173.4 L 126.4 175.0 L 129.0 176.3 L 131.6 177.5 L 134.1 178.5 L 136.7 179.4 L 139.3 180.0 L 141.9 180.5 L 144.4 180.7 L 147.0 180.8 L 149.6 180.7 L 152.1 180.5 L 154.7 180.0 L 157.3 179.4 L 159.9 178.5 L 162.4 177.5 L 165.0 176.3 L 167.6 175.0 L 170.2 173.4 L 172.7 171.7 L 175.3 169.7 L 177.9 167.6 L 180.5 165.3 L 183.0 162.8 L 185.6 160.2 L 188.2 157.3 L 190.8 154.3 L 193.3 151.1 L 195.9 147.7 L 198.5 144.1 L 201.1 140.4 L 203.6 136.4 L 206.2 132.3 L 208.8 128.0 L 211.3 123.5 L 213.9 118.8 L 216.5 113.9 L 219.1 108.9 L 221.6 103.7 L 224.2 98.3 L 226.8 92.7 L 229.4 86.9 L 231.9 80.9 L 234.5 74.8 L 237.1 68.4 L 239.7 61.9 L 242.2 55.2 L 244.8 48.3 L 247.4 41.3 L 250.0 34.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg></div>The graph of <i>y</i> = 2<i>x</i><sup>2</sup> + <i>b</i><i>x</i> + c is shown, where <i>b</i> and c are constants. What is the value of <i>b</i>c?",
+    "answer": "-24",
+    "explanation": "Since the graph passes through the point (0, −6), it follows that when the value of <i>x</i> is 0, the value of <i>y</i> is −6. Substituting 0 for <i>x</i> and −6 for <i>y</i> in the given equation yields −6 = 2(0)<sup>2</sup> + <i>b</i>(0) + c, or −6 = c. Therefore, the value of c is −6. Substituting −6 for c in the equation yields <i>y</i> = 2<i>x</i><sup>2</sup> + <i>b</i><i>x</i> − 6. Since the graph passes through the point (−1, −8), it follows that when the value of <i>x</i> is −1, the value of <i>y</i> is −8. Substituting −1 for <i>x</i> and −8 for <i>y</i> in the equation <i>y</i> = 2<i>x</i><sup>2</sup> + <i>b</i><i>x</i> − 6 yields −8 = 2(−1)<sup>2</sup> + <i>b</i>(−1) − 6, or −8 = −4 − <i>b</i>. Adding 4 to each side of this equation yields −4 = −<i>b</i>. Dividing each side of this equation by −1 yields 4 = <i>b</i>. Since the value of <i>b</i> is 4 and the value of c is −6, it follows that the value of <i>b</i>c is (4)(−6), or −24.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "7e6ea718",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Functions",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><i>y</i> = 2(<i>x</i> − <i>d</i>)(<i>x</i> + <i>d</i>)(<i>x</i> + <i>g</i>)(<i>x</i> − <i>d</i>)</div>In the given equation, <i>d</i> and <i>g</i> are unique positive constants. When the equation is graphed in the <i>xy</i>-plane, how many distinct <i>x</i>-intercepts does the graph have?",
+    "choices": [
+     "4",
+     "3",
+     "2",
+     "1"
+    ],
+    "correct": 1,
+    "explanation": "An <i>x</i>-intercept of a graph in the <i>xy</i>-plane is a point on the graph where the value of <i>y</i> is 0. Substituting 0 for <i>y</i> in the given equation yields 0 = 2(<i>x</i> − <i>d</i>)(<i>x</i> + <i>d</i>)(<i>x</i> + <i>g</i>)(<i>x</i> − <i>d</i>). By the zero product property, the solutions to this equation are <i>x</i> = <i>d</i>, <i>x</i> = −<i>d</i>, <i>x</i> = −<i>g</i>, and <i>x</i> = <i>d</i>. However, <i>x</i> = <i>d</i> and <i>x</i> = <i>d</i> are identical. It's given that <i>d</i> and <i>g</i> are unique positive constants. It follows that the equation 0 = 2(<i>x</i> − <i>d</i>)(<i>x</i> + <i>d</i>)(<i>x</i> + <i>g</i>)(<i>x</i> − <i>d</i>) has 3 unique solutions: <i>x</i> = <i>d</i>, <i>x</i> = −<i>d</i>, and <i>x</i> = −<i>g</i>. Thus, the graph of the given equation has 3 distinct <i>x</i>-intercepts.<br><br>Choice A is incorrect and may result from conceptual errors. Choice C is incorrect and may result from conceptual errors. Choice D is incorrect and may result from conceptual errors.",
     "source": "Non-Bluebook"
    }
   ],
@@ -2151,40 +2151,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "df2ee56e",
-    "domain": "Geometry and Trigonometry",
-    "skill": "Right Triangles and Trigonometry",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "In right triangle <i>PQR</i>, angle <i>Q</i> is a right angle, <i>PR</i> = 97, and <i>QR</i> = 65. What is the length of <i>PQ</i>?",
-    "choices": [
-     "32",
-     "72",
-     "162",
-     "5,184"
-    ],
-    "correct": 1,
-    "explanation": "Choice B is correct. Since angle <i>Q</i> is a right angle, <i>PR</i> is the hypotenuse of right triangle <i>PQR</i> and <i>PQ</i> and <i>QR</i> are its legs. By the Pythagorean theorem, <i>PQ</i><sup>2</sup> + <i>QR</i><sup>2</sup> = <i>PR</i><sup>2</sup>, so <i>PQ</i><sup>2</sup> = 97<sup>2</sup> &minus; 65<sup>2</sup>, or 9,409 &minus; 4,225 = 5,184. Since a length is positive and 72<sup>2</sup> = 5,184, the length of <i>PQ</i> is 72.<br><br>Choice A is incorrect. This is 97 &minus; 65, the difference of the two given lengths. The Pythagorean theorem relates the squares of the side lengths, not the lengths themselves.<br><br>Choice C is incorrect. This is 97 + 65, the sum of the two given lengths. A leg of a right triangle is shorter than the hypotenuse, so the length of <i>PQ</i> must be less than 97.<br><br>Choice D is incorrect. This is 97<sup>2</sup> &minus; 65<sup>2</sup>, which is the square of the length of <i>PQ</i> rather than the length of <i>PQ</i>.",
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
-    "qid": "c8e9a011",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i></span></span> = −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i></span></span></div>The given equation relates the variables <i>n</i>, <i>t</i>, and <i>w</i>, where <i>n</i> &gt; 0, <i>t</i> &gt; 0, and <i>w</i> &gt; <i>t</i>. Which expression is equivalent to <i>n</i>?",
-    "choices": [
-     "12<i>t</i><i>w</i>",
-     "6(<i>t</i> − <i>w</i>)",
-     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">6<i>t</i><i>w</i></span></span>",
-     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6<i>t</i><i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span></span>"
-    ],
-    "correct": 3,
-    "explanation": "Choice D is correct. Adding <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i></span></span> to each side of the given equation yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i></span></span> + <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i></span></span>. The fractions on the right side of this equation have a common denominator of <i>t</i><i>w</i>; therefore, the equation can be written as <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2<i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2<i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>, or <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2<i>w</i> − 2<i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>, which is equivalent to <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2(<i>w</i> − <i>t</i>)</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>. Dividing each side of this equation by 2 yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>. Since <i>n</i>, <i>t</i>, <i>w</i>, and <i>w</i> − <i>t</i> are all positive quantities, taking the reciprocal of each side of the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span> yields an equivalent equation: <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span></span>. Multiplying each side of this equation by 6 yields <i>n</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6<i>t</i><i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span></span>.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect. This is equivalent to <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> rather than <i>n</i>.",
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "555939d2",
     "domain": "Problem-Solving and Data Analysis",
     "skill": "Ratios, Rates, Proportional Relationships, and Units",
@@ -2199,96 +2165,6 @@ window.SECTION_BANKS = {
     ],
     "correct": 2,
     "explanation": "Choice C is correct. It's given that 8 out of 300 customers in a random sample said they would be interested in the new plan. This means the fraction of sampled customers who said they would be interested is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">8</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">300</span></span>. Multiplying this fraction by the total customer population yields (<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">8</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">300</span></span>)(30,000), or 800. Therefore, the best estimate of the total number of customers who would be interested in the new service plan is 800.<br><br>Choice A is incorrect. This is the number of customers surveyed who said they would be interested in the new plan, not the best estimate of the total number of customers who would be interested in the new plan.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "53b669bc",
-    "domain": "Problem-Solving and Data Analysis",
-    "skill": "Two-Variable Data: Models and Scatterplots",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><svg viewBox=\"0 0 300 290\" class=\"dx-fig\" role=\"img\" style=\"color:var(--text);max-width:300px;\" aria-label=\"A scatterplot of the scores of 10 students on quiz 1 and quiz 2\"><title>A scatterplot of the scores of 10 students on quiz 1 and quiz 2</title><line x1=\"80.8\" y1=\"34\" x2=\"80.8\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"109.5\" y1=\"34\" x2=\"109.5\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"138.2\" y1=\"34\" x2=\"138.2\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"167.0\" y1=\"34\" x2=\"167.0\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"195.8\" y1=\"34\" x2=\"195.8\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"224.5\" y1=\"34\" x2=\"224.5\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"253.2\" y1=\"34\" x2=\"253.2\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"282.0\" y1=\"34\" x2=\"282.0\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"226.5\" x2=\"282\" y2=\"226.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"209.0\" x2=\"282\" y2=\"209.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"191.5\" x2=\"282\" y2=\"191.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"174.0\" x2=\"282\" y2=\"174.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"156.5\" x2=\"282\" y2=\"156.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"139.0\" x2=\"282\" y2=\"139.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"121.5\" x2=\"282\" y2=\"121.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"104.0\" x2=\"282\" y2=\"104.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"86.5\" x2=\"282\" y2=\"86.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"69.0\" x2=\"282\" y2=\"69.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"51.5\" x2=\"282\" y2=\"51.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"34.0\" x2=\"282\" y2=\"34.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><text x=\"52.0\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">60</text><text x=\"109.5\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">70</text><text x=\"167.0\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">80</text><text x=\"224.5\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">90</text><text x=\"282.0\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">100</text><text x=\"45\" y=\"248.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">40</text><text x=\"45\" y=\"213.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">50</text><text x=\"45\" y=\"178.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">60</text><text x=\"45\" y=\"143.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">70</text><text x=\"45\" y=\"108.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">80</text><text x=\"45\" y=\"73.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">90</text><text x=\"45\" y=\"38.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">100</text><line x1=\"52\" y1=\"244\" x2=\"290\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"52\" y1=\"244\" x2=\"52\" y2=\"26\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"167.0\" y=\"276\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">Score on quiz 1</text><text x=\"6\" y=\"18\" font-size=\"11\" fill=\"currentColor\">Score on quiz 2</text><circle cx=\"80.8\" cy=\"121.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"109.5\" cy=\"69.0\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"138.2\" cy=\"104.0\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"167.0\" cy=\"51.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"195.8\" cy=\"69.0\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"224.5\" cy=\"51.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"80.8\" cy=\"191.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"167.0\" cy=\"121.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"224.5\" cy=\"121.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"253.2\" cy=\"104.0\" r=\"3.4\" fill=\"currentColor\"/></svg></div>Each dot in the scatterplot represents one of 10 students, where <i>x</i> is the student’s score on quiz 1 and <i>y</i> is the student’s score on quiz 2. How many of these students had a greater score on quiz 2 than on quiz 1?",
-    "choices": [
-     "2",
-     "4",
-     "6",
-     "8"
-    ],
-    "correct": 2,
-    "explanation": "Choice C is correct. A student had a greater score on quiz 2 than on quiz 1 exactly when the student’s dot (<i>x</i>, <i>y</i>) has <i>y</i> &gt; <i>x</i>, that is, when the dot lies above the line <i>y</i> = <i>x</i>. On this graph that line passes through (60, 60) and (100, 100); it is not the diagonal from corner to corner, since the vertical axis starts at 40. The dots at (65, 75), (70, 90), (75, 80), (80, 95), (85, 90), (90, 95) each have <i>y</i> &gt; <i>x</i>. The other 4 dots, at (65, 55), (80, 75), (90, 75), (95, 80), have <i>y</i> &lt; <i>x</i>. Therefore, 6 of the students had a greater score on quiz 2 than on quiz 1.<br><br>Choice A is incorrect. This is the number of dots below the segment that joins the lower-left corner of the graph, (60, 40), to the upper-right corner, (100, 100). Because the axes start at different values, that segment is not the line <i>y</i> = <i>x</i>.<br><br>Choice B is incorrect. This is the number of students whose score on quiz 2 was less than their score on quiz 1.<br><br>Choice D is incorrect. This counts the dots above the segment that joins the lower-left corner of the graph, (60, 40), to the upper-right corner, (100, 100). Because the axes start at different values, that segment is not the line <i>y</i> = <i>x</i>, and it also counts the dots at (65, 55) and (80, 75), whose quiz 2 scores are lower.",
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
-    "qid": "fb58c0db",
-    "domain": "Geometry and Trigonometry",
-    "skill": "Circles",
-    "difficulty": "hard",
-    "type": "fr",
-    "text": "Points <i>A</i> and <i>B</i> lie on a circle with radius 1, and arc <i>AB</i> has length <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">π</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>. What fraction of the circumference of the circle is the length of arc <i>AB</i>?",
-    "answer": "1/6",
-    "explanation": "The correct answer is 1/6. The circumference, <i>C</i>, of a circle is <i>C</i> = 2π<i>r</i>, where <i>r</i> is the length of the radius of the circle. For the given circle with a radius of 1, the circumference is <i>C</i> = 2(π)(1) or <i>C</i> = 2π. To find what fraction of the circumference the length of arc <i>AB</i> is, divide the length of the arc by the circumference, which gives (π/3) ÷ 2π. This division can be represented by (π/3) · (1/2π) = 1/6. Note that 1/6, .1666, .1667, 0.166, and 0.167 are examples of ways to enter a correct answer.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "cdcc4d61",
-    "domain": "Algebra",
-    "skill": "Linear Equations in Two Variables",
-    "difficulty": "hard",
-    "type": "fr",
-    "text": "In the <i>xy</i>-plane, line <i>l</i> has equation 3<i>x</i> + <i>By</i> = 0, where <i>B</i> is a nonzero constant. Line <i>l</i> is perpendicular to the line that passes through the points (2, 4) and (5, 19). What is the value of <i>B</i><sup>2</sup>?",
-    "answer": "225",
-    "explanation": "The correct answer is 225. The slope of the line through (2, 4) and (5, 19) is the difference of the <i>y</i>-coordinates divided by the difference of the <i>x</i>-coordinates, which is (19 − 4)/(5 − 2), or 5. Solving the equation of line <i>l</i> for <i>y</i> gives <i>By</i> = −3<i>x</i>, or <i>y</i> = −(3/<i>B</i>)<i>x</i>, so the slope of line <i>l</i> is −3/<i>B</i>. Two lines are perpendicular exactly when the product of their slopes is −1, so 5(−3/<i>B</i>) = −1, which gives −15/<i>B</i> = −1, or <i>B</i> = 15. Therefore <i>B</i><sup>2</sup> is 15<sup>2</sup>, or 225. (Check: line <i>l</i> is 3<i>x</i> + 15<i>y</i> = 0, whose slope is −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>, and 5(−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>) = −1.)",
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
-    "qid": "e635aede",
-    "domain": "Problem-Solving and Data Analysis",
-    "skill": "Percentages",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "In 2008, Zinah earned 14% more than in 2007, and in 2009 Zinah earned 4% more than in 2008. If Zinah earned <i>y</i> times as much in 2009 as in 2007, what is the value of <i>y</i>?",
-    "choices": [
-     "0.5600",
-     "1.0056",
-     "1.1800",
-     "1.1856"
-    ],
-    "correct": 3,
-    "explanation": "Choice D is correct. It's given that in 2008 Zinah earned 14% more than in 2007. Let <i>h</i> represent the amount Zinah earned in 2007 and let <i>j</i> represent the amount that Zinah earned in 2008. This situation can be represented by the equation <i>j</i> = (1 + 14/100)<i>h</i>, or <i>j</i> = 1.14<i>h</i>. It's also given that in 2009 Zinah earned 4% more than in 2008. Let <i>k</i> represent the amount Zinah earned in 2009. This situation can be represented by the equation <i>k</i> = (1 + 4/100)<i>j</i>, or <i>k</i> = 1.04<i>j</i>. Substituting 1.14<i>h</i> for <i>j</i> in the equation <i>k</i> = 1.04<i>j</i> yields <i>k</i> = (1.04)(1.14<i>h</i>), or <i>k</i> = 1.1856<i>h</i>. If Zinah earned <i>y</i> times as much in 2009 as in 2007, then the value of <i>y</i> is 1.1856.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect and may result from conceptual or calculation errors.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "2855cb58",
-    "domain": "Geometry and Trigonometry",
-    "skill": "Circles",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "A circle in the <i>xy</i>-plane has its center at (16, 17) and has a radius of 7<i>k</i>. Which equation represents this circle?",
-    "choices": [
-     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i>",
-     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i><sup>2</sup>",
-     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 7<i>k</i>",
-     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 7<i>k</i><sup>2</sup>"
-    ],
-    "correct": 1,
-    "explanation": "Choice B is correct. The equation of a circle in the <i>xy</i>-plane can be written as (<i>x</i> − <i>h</i>)<sup>2</sup> + (<i>y</i> − <i>k</i>)<sup>2</sup> = <i>r</i><sup>2</sup>, where the center of the circle is (<i>h</i>, <i>k</i>) and the radius of the circle is <i>r</i>. It’s given that this circle has a center at (16, 17) and a radius of 7<i>k</i>. Substituting 16 for <i>h</i>, 17 for <i>k</i>, and 7<i>k</i> for <i>r</i> in (<i>x</i> − <i>h</i>)<sup>2</sup> + (<i>y</i> − <i>k</i>)<sup>2</sup> = <i>r</i><sup>2</sup> yields (<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = (7<i>k</i>)<sup>2</sup>, or (<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i><sup>2</sup>. Therefore, the equation that represents this circle is (<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i><sup>2</sup>.<br><br>Choice A is incorrect. This equation represents a circle with radius 7√<i>k</i>, not 7<i>k</i>.<br><br>Choice C is incorrect. This equation represents a circle with radius √7<i>k</i>, not 7<i>k</i>.<br><br>Choice D is incorrect. This equation represents a circle with radius √7<i>k</i>, not 7<i>k</i>.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "a049f400",
-    "domain": "Algebra",
-    "skill": "Linear Inequalities in One or Two Variables",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><i>y</i> &lt; 5<i>x</i> + 6</div>For which of the following tables are all the values of <i>x</i> and their corresponding values of <i>y</i> solutions to the given inequality?",
-    "choices": [
-     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>17</td></tr><tr><td>5</td><td>27</td></tr><tr><td>7</td><td>37</td></tr></table>",
-     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>17</td></tr><tr><td>5</td><td>35</td></tr><tr><td>7</td><td>37</td></tr></table>",
-     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>25</td></tr><tr><td>5</td><td>35</td></tr><tr><td>7</td><td>45</td></tr></table>",
-     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>21</td></tr><tr><td>5</td><td>31</td></tr><tr><td>7</td><td>41</td></tr></table>"
-    ],
-    "correct": 0,
-    "explanation": "Choice A is correct. Substituting 3 for <i>x</i> in the given inequality yields <i>y</i> &lt; 5(3) + 6, or <i>y</i> &lt; 21. Therefore, when <i>x</i> = 3, the corresponding value of <i>y</i> is less than 21. Substituting 5 for <i>x</i> in the given inequality yields <i>y</i> &lt; 5(5) + 6, or <i>y</i> &lt; 31. Therefore, when <i>x</i> = 5, the corresponding value of <i>y</i> is less than 31. Substituting 7 for <i>x</i> in the given inequality yields <i>y</i> &lt; 5(7) + 6, or <i>y</i> &lt; 41. Therefore, when <i>x</i> = 7, the corresponding value of <i>y</i> is less than 41. For the table in choice A, when <i>x</i> = 3, the corresponding value of <i>y</i> is 17, which is less than 21; when <i>x</i> = 5, the corresponding value of <i>y</i> is 27, which is less than 31; and when <i>x</i> = 7, the corresponding value of <i>y</i> is 37, which is less than 41. Therefore, the table in choice A gives values of <i>x</i> and their corresponding values of <i>y</i> that are all solutions to the given inequality.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
     "source": "Non-Bluebook"
    },
    {
@@ -2326,6 +2202,23 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "63c00e2b",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i></div>The given equation relates the quantities <i>r</i>, <i>s</i>, and <i>t</i>. Which equation correctly expresses <i>r</i> in terms of <i>s</i> and <i>t</i>?",
+    "choices": [
+     "<i>r</i> = <i>s</i> + <i>t</i> + 38",
+     "<i>r</i> = <i>s</i> + <i>t</i> − 38",
+     "<i>r</i> = 38(<i>s</i> + <i>t</i>)",
+     "<i>r</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>s</i> + <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span>"
+    ],
+    "correct": 2,
+    "explanation": "Choice C is correct. Multiplying both sides of the given equation by 38 yields <i>r</i> = 38(<i>s</i> + <i>t</i>).<br><br>Choice A is incorrect. This equation is equivalent to <i>r</i> − 38 = <i>s</i> + <i>t</i>, not <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i>.<br><br>Choice B is incorrect. This equation is equivalent to <i>r</i> + 38 = <i>s</i> + <i>t</i>, not <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i>.<br><br>Choice D is incorrect. This equation is equivalent to 38<i>r</i> = <i>s</i> + <i>t</i>, not <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i>.",
+    "source": "Non-Bluebook"
+   },
+   {
     "qid": "aacc834b",
     "domain": "Algebra",
     "skill": "Systems of Two Linear Equations in Two Variables",
@@ -2337,14 +2230,65 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "8dd101d3",
-    "domain": "Algebra",
-    "skill": "Linear Equations in One Variable",
-    "difficulty": "medium",
+    "qid": "13e5a5d5",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
+    "difficulty": "easy",
     "type": "fr",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><i>a</i>(<i>x</i> &minus; 3) + 2<i>x</i> = 7<i>x</i> + <i>b</i></div>In the given equation, <i>a</i> and <i>b</i> are constants. If <i>x</i> = 1 and <i>x</i> = 6 are both solutions to the given equation, what is the value of <i>b</i>?",
-    "answer": "-15",
-    "explanation": "The correct answer is &minus;15. Distributing on the left side of the given equation gives <i>ax</i> &minus; 3<i>a</i> + 2<i>x</i>, or (<i>a</i> + 2)<i>x</i> &minus; 3<i>a</i>. So the given equation is (<i>a</i> + 2)<i>x</i> &minus; 3<i>a</i> = 7<i>x</i> + <i>b</i>, a linear equation in <i>x</i>. A linear equation in one variable has either no solution, exactly one solution, or infinitely many solutions. Since this equation has two different solutions, 1 and 6, it must have infinitely many solutions, so the coefficients of <i>x</i> on each side are equal and the constant terms on each side are equal. The coefficients give <i>a</i> + 2 = 7, or <i>a</i> = 5. The constant terms give <i>b</i> = &minus;3<i>a</i>, so <i>b</i> = &minus;3(5), or &minus;15.<br><br>Alternatively, substituting 1 for <i>x</i> gives &minus;2<i>a</i> + 2 = 7 + <i>b</i>, and substituting 6 for <i>x</i> gives 3<i>a</i> + 12 = 42 + <i>b</i>. Subtracting the first equation from the second gives 5<i>a</i> + 10 = 35, so <i>a</i> = 5, and then &minus;2(5) + 2 = 7 + <i>b</i> gives <i>b</i> = &minus;15.",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">5|<i>x</i>| = 45</div>What is the positive solution to the given equation?",
+    "answer": "9",
+    "explanation": "The correct answer is 9. Dividing both sides of the given equation by 5 yields |<i>x</i>| = 9. By the definition of absolute value, if |<i>x</i>| = 9, then <i>x</i> = 9 or <i>x</i> = −9. Therefore, the two solutions to the equation 5|<i>x</i>| = 45 are 9 and −9. It follows that the positive solution to the given equation is 9.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "88867d37",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">(<i>x</i> + 2)(<i>x</i> − 5)(<i>x</i> + 9) = 0</div>What is a positive solution to the given equation?",
+    "choices": [
+     "3",
+     "4",
+     "5",
+     "18"
+    ],
+    "correct": 2,
+    "explanation": "Choice C is correct. Applying the zero product property to the given equation yields three equations: <i>x</i> + 2 = 0, <i>x</i> − 5 = 0, and <i>x</i> + 9 = 0. Subtracting 2 from both sides of the equation <i>x</i> + 2 = 0 yields <i>x</i> = −2. Adding 5 to both sides of the equation <i>x</i> − 5 = 0 yields <i>x</i> = 5. Subtracting 9 from both sides of the equation <i>x</i> + 9 = 0 yields <i>x</i> = −9. Therefore, the solutions to the given equation are −2, 5, and −9. It follows that a positive solution to the given equation is 5.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "df2ee56e",
+    "domain": "Geometry and Trigonometry",
+    "skill": "Right Triangles and Trigonometry",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "In right triangle <i>PQR</i>, angle <i>Q</i> is a right angle, <i>PR</i> = 97, and <i>QR</i> = 65. What is the length of <i>PQ</i>?",
+    "choices": [
+     "32",
+     "72",
+     "162",
+     "5,184"
+    ],
+    "correct": 1,
+    "explanation": "Choice B is correct. Since angle <i>Q</i> is a right angle, <i>PR</i> is the hypotenuse of right triangle <i>PQR</i> and <i>PQ</i> and <i>QR</i> are its legs. By the Pythagorean theorem, <i>PQ</i><sup>2</sup> + <i>QR</i><sup>2</sup> = <i>PR</i><sup>2</sup>, so <i>PQ</i><sup>2</sup> = 97<sup>2</sup> &minus; 65<sup>2</sup>, or 9,409 &minus; 4,225 = 5,184. Since a length is positive and 72<sup>2</sup> = 5,184, the length of <i>PQ</i> is 72.<br><br>Choice A is incorrect. This is 97 &minus; 65, the difference of the two given lengths. The Pythagorean theorem relates the squares of the side lengths, not the lengths themselves.<br><br>Choice C is incorrect. This is 97 + 65, the sum of the two given lengths. A leg of a right triangle is shorter than the hypotenuse, so the length of <i>PQ</i> must be less than 97.<br><br>Choice D is incorrect. This is 97<sup>2</sup> &minus; 65<sup>2</sup>, which is the square of the length of <i>PQ</i> rather than the length of <i>PQ</i>.",
+    "source": "Moretti Test Prep & Tutoring"
+   },
+   {
+    "qid": "53b669bc",
+    "domain": "Problem-Solving and Data Analysis",
+    "skill": "Two-Variable Data: Models and Scatterplots",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0;\"><svg viewBox=\"0 0 300 290\" class=\"dx-fig\" role=\"img\" style=\"color:var(--text);max-width:300px;\" aria-label=\"A scatterplot of the scores of 10 students on quiz 1 and quiz 2\"><title>A scatterplot of the scores of 10 students on quiz 1 and quiz 2</title><line x1=\"80.8\" y1=\"34\" x2=\"80.8\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"109.5\" y1=\"34\" x2=\"109.5\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"138.2\" y1=\"34\" x2=\"138.2\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"167.0\" y1=\"34\" x2=\"167.0\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"195.8\" y1=\"34\" x2=\"195.8\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"224.5\" y1=\"34\" x2=\"224.5\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"253.2\" y1=\"34\" x2=\"253.2\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"282.0\" y1=\"34\" x2=\"282.0\" y2=\"244\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"226.5\" x2=\"282\" y2=\"226.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"209.0\" x2=\"282\" y2=\"209.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"191.5\" x2=\"282\" y2=\"191.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"174.0\" x2=\"282\" y2=\"174.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"156.5\" x2=\"282\" y2=\"156.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"139.0\" x2=\"282\" y2=\"139.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"121.5\" x2=\"282\" y2=\"121.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"104.0\" x2=\"282\" y2=\"104.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"86.5\" x2=\"282\" y2=\"86.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"69.0\" x2=\"282\" y2=\"69.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"51.5\" x2=\"282\" y2=\"51.5\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><line x1=\"52\" y1=\"34.0\" x2=\"282\" y2=\"34.0\" stroke-dasharray=\"4,3\" stroke=\"currentColor\" stroke-width=\"0.4\"/><text x=\"52.0\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">60</text><text x=\"109.5\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">70</text><text x=\"167.0\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">80</text><text x=\"224.5\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">90</text><text x=\"282.0\" y=\"259\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">100</text><text x=\"45\" y=\"248.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">40</text><text x=\"45\" y=\"213.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">50</text><text x=\"45\" y=\"178.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">60</text><text x=\"45\" y=\"143.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">70</text><text x=\"45\" y=\"108.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">80</text><text x=\"45\" y=\"73.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">90</text><text x=\"45\" y=\"38.0\" font-size=\"11\" text-anchor=\"end\" fill=\"currentColor\">100</text><line x1=\"52\" y1=\"244\" x2=\"290\" y2=\"244\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"52\" y1=\"244\" x2=\"52\" y2=\"26\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"167.0\" y=\"276\" font-size=\"11\" text-anchor=\"middle\" fill=\"currentColor\">Score on quiz 1</text><text x=\"6\" y=\"18\" font-size=\"11\" fill=\"currentColor\">Score on quiz 2</text><circle cx=\"80.8\" cy=\"121.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"109.5\" cy=\"69.0\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"138.2\" cy=\"104.0\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"167.0\" cy=\"51.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"195.8\" cy=\"69.0\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"224.5\" cy=\"51.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"80.8\" cy=\"191.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"167.0\" cy=\"121.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"224.5\" cy=\"121.5\" r=\"3.4\" fill=\"currentColor\"/><circle cx=\"253.2\" cy=\"104.0\" r=\"3.4\" fill=\"currentColor\"/></svg></div>Each dot in the scatterplot represents one of 10 students, where <i>x</i> is the student’s score on quiz 1 and <i>y</i> is the student’s score on quiz 2. How many of these students had a greater score on quiz 2 than on quiz 1?",
+    "choices": [
+     "2",
+     "4",
+     "6",
+     "8"
+    ],
+    "correct": 2,
+    "explanation": "Choice C is correct. A student had a greater score on quiz 2 than on quiz 1 exactly when the student’s dot (<i>x</i>, <i>y</i>) has <i>y</i> &gt; <i>x</i>, that is, when the dot lies above the line <i>y</i> = <i>x</i>. On this graph that line passes through (60, 60) and (100, 100); it is not the diagonal from corner to corner, since the vertical axis starts at 40. The dots at (65, 75), (70, 90), (75, 80), (80, 95), (85, 90), (90, 95) each have <i>y</i> &gt; <i>x</i>. The other 4 dots, at (65, 55), (80, 75), (90, 75), (95, 80), have <i>y</i> &lt; <i>x</i>. Therefore, 6 of the students had a greater score on quiz 2 than on quiz 1.<br><br>Choice A is incorrect. This is the number of dots below the segment that joins the lower-left corner of the graph, (60, 40), to the upper-right corner, (100, 100). Because the axes start at different values, that segment is not the line <i>y</i> = <i>x</i>.<br><br>Choice B is incorrect. This is the number of students whose score on quiz 2 was less than their score on quiz 1.<br><br>Choice D is incorrect. This counts the dots above the segment that joins the lower-left corner of the graph, (60, 40), to the upper-right corner, (100, 100). Because the axes start at different values, that segment is not the line <i>y</i> = <i>x</i>, and it also counts the dots at (65, 55) and (80, 75), whose quiz 2 scores are lower.",
     "source": "Moretti Test Prep & Tutoring"
    },
    {
@@ -2382,38 +2326,26 @@ window.SECTION_BANKS = {
     "source": "Moretti Test Prep & Tutoring"
    },
    {
-    "qid": "63c00e2b",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
-    "difficulty": "easy",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i></div>The given equation relates the quantities <i>r</i>, <i>s</i>, and <i>t</i>. Which equation correctly expresses <i>r</i> in terms of <i>s</i> and <i>t</i>?",
-    "choices": [
-     "<i>r</i> = <i>s</i> + <i>t</i> + 38",
-     "<i>r</i> = <i>s</i> + <i>t</i> − 38",
-     "<i>r</i> = 38(<i>s</i> + <i>t</i>)",
-     "<i>r</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>s</i> + <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span>"
-    ],
-    "correct": 2,
-    "explanation": "Choice C is correct. Multiplying both sides of the given equation by 38 yields <i>r</i> = 38(<i>s</i> + <i>t</i>).<br><br>Choice A is incorrect. This equation is equivalent to <i>r</i> − 38 = <i>s</i> + <i>t</i>, not <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i>.<br><br>Choice B is incorrect. This equation is equivalent to <i>r</i> + 38 = <i>s</i> + <i>t</i>, not <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i>.<br><br>Choice D is incorrect. This equation is equivalent to 38<i>r</i> = <i>s</i> + <i>t</i>, not <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>r</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">38</span></span> = <i>s</i> + <i>t</i>.",
-    "source": "Non-Bluebook"
+    "qid": "8dd101d3",
+    "domain": "Algebra",
+    "skill": "Linear Equations in One Variable",
+    "difficulty": "medium",
+    "type": "fr",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><i>a</i>(<i>x</i> &minus; 3) + 2<i>x</i> = 7<i>x</i> + <i>b</i></div>In the given equation, <i>a</i> and <i>b</i> are constants. If <i>x</i> = 1 and <i>x</i> = 6 are both solutions to the given equation, what is the value of <i>b</i>?",
+    "answer": "-15",
+    "explanation": "The correct answer is &minus;15. Distributing on the left side of the given equation gives <i>ax</i> &minus; 3<i>a</i> + 2<i>x</i>, or (<i>a</i> + 2)<i>x</i> &minus; 3<i>a</i>. So the given equation is (<i>a</i> + 2)<i>x</i> &minus; 3<i>a</i> = 7<i>x</i> + <i>b</i>, a linear equation in <i>x</i>. A linear equation in one variable has either no solution, exactly one solution, or infinitely many solutions. Since this equation has two different solutions, 1 and 6, it must have infinitely many solutions, so the coefficients of <i>x</i> on each side are equal and the constant terms on each side are equal. The coefficients give <i>a</i> + 2 = 7, or <i>a</i> = 5. The constant terms give <i>b</i> = &minus;3<i>a</i>, so <i>b</i> = &minus;3(5), or &minus;15.<br><br>Alternatively, substituting 1 for <i>x</i> gives &minus;2<i>a</i> + 2 = 7 + <i>b</i>, and substituting 6 for <i>x</i> gives 3<i>a</i> + 12 = 42 + <i>b</i>. Subtracting the first equation from the second gives 5<i>a</i> + 10 = 35, so <i>a</i> = 5, and then &minus;2(5) + 2 = 7 + <i>b</i> gives <i>b</i> = &minus;15.",
+    "source": "Moretti Test Prep & Tutoring"
    },
    {
-    "qid": "88867d37",
+    "qid": "e0e04a16",
     "domain": "Advanced Math",
-    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
-    "difficulty": "easy",
-    "type": "mc",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">(<i>x</i> + 2)(<i>x</i> − 5)(<i>x</i> + 9) = 0</div>What is a positive solution to the given equation?",
-    "choices": [
-     "3",
-     "4",
-     "5",
-     "18"
-    ],
-    "correct": 2,
-    "explanation": "Choice C is correct. Applying the zero product property to the given equation yields three equations: <i>x</i> + 2 = 0, <i>x</i> − 5 = 0, and <i>x</i> + 9 = 0. Subtracting 2 from both sides of the equation <i>x</i> + 2 = 0 yields <i>x</i> = −2. Adding 5 to both sides of the equation <i>x</i> − 5 = 0 yields <i>x</i> = 5. Subtracting 9 from both sides of the equation <i>x</i> + 9 = 0 yields <i>x</i> = −9. Therefore, the solutions to the given equation are −2, 5, and −9. It follows that a positive solution to the given equation is 5.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
-    "source": "Non-Bluebook"
+    "skill": "Nonlinear Functions",
+    "difficulty": "medium",
+    "type": "fr",
+    "text": "The table gives two values of the quadratic function <i>f</i>.<table style=\"border-collapse:collapse; margin:0 auto;\" border=\"1\"><tr><th style=\"padding:4px 10px;\"><i>x</i></th><th style=\"padding:4px 10px;\"><i>f</i>(<i>x</i>)</th></tr><tr><td style=\"padding:4px 10px;\">−5</td><td style=\"padding:4px 10px;\">6</td></tr><tr><td style=\"padding:4px 10px;\">3</td><td style=\"padding:4px 10px;\">−2</td></tr></table>The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(<i>x</i> − 4) + 9. What is the value of <i>g</i>(−1)?",
+    "answer": "15",
+    "explanation": "The correct answer is 15. Substituting −1 for <i>x</i> in the definition of <i>g</i> gives <i>g</i>(−1) = <i>f</i>(−1 − 4) + 9, or <i>f</i>(−5) + 9. The table shows that <i>f</i>(−5) = 6, so <i>g</i>(−1) = 6 + 9, or 15.",
+    "source": "Moretti Test Prep & Tutoring"
    },
    {
     "qid": "6676f055",
@@ -2433,28 +2365,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "13e5a5d5",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
-    "difficulty": "easy",
-    "type": "fr",
-    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">5|<i>x</i>| = 45</div>What is the positive solution to the given equation?",
-    "answer": "9",
-    "explanation": "The correct answer is 9. Dividing both sides of the given equation by 5 yields |<i>x</i>| = 9. By the definition of absolute value, if |<i>x</i>| = 9, then <i>x</i> = 9 or <i>x</i> = −9. Therefore, the two solutions to the equation 5|<i>x</i>| = 45 are 9 and −9. It follows that the positive solution to the given equation is 9.",
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "e0e04a16",
-    "domain": "Advanced Math",
-    "skill": "Nonlinear Functions",
-    "difficulty": "medium",
-    "type": "fr",
-    "text": "The table gives two values of the quadratic function <i>f</i>.<table style=\"border-collapse:collapse; margin:0 auto;\" border=\"1\"><tr><th style=\"padding:4px 10px;\"><i>x</i></th><th style=\"padding:4px 10px;\"><i>f</i>(<i>x</i>)</th></tr><tr><td style=\"padding:4px 10px;\">−5</td><td style=\"padding:4px 10px;\">6</td></tr><tr><td style=\"padding:4px 10px;\">3</td><td style=\"padding:4px 10px;\">−2</td></tr></table>The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(<i>x</i> − 4) + 9. What is the value of <i>g</i>(−1)?",
-    "answer": "15",
-    "explanation": "The correct answer is 15. Substituting −1 for <i>x</i> in the definition of <i>g</i> gives <i>g</i>(−1) = <i>f</i>(−1 − 4) + 9, or <i>f</i>(−5) + 9. The table shows that <i>f</i>(−5) = 6, so <i>g</i>(−1) = 6 + 9, or 15.",
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
     "qid": "f44a29a8",
     "domain": "Advanced Math",
     "skill": "Nonlinear Functions",
@@ -2469,6 +2379,96 @@ window.SECTION_BANKS = {
     ],
     "correct": 0,
     "explanation": "Choice A is correct. It's given that an object's kinetic energy, in joules, is equal to the product of one-half the object's mass, in kilograms, and the square of the object's speed, in meters per second. This relationship can be represented by the equation K = (1/2)m<i>v</i><sup>2</sup>, where K is the kinetic energy, m is the mass, and <i>v</i> is the speed. Substituting a mass of 4 kilograms for m and a kinetic energy of 18 joules for K results in the equation 18 = (1/2)(4)<i>v</i><sup>2</sup>, or 18 = 2<i>v</i><sup>2</sup>. Dividing both sides of this equation by 2 yields 9 = <i>v</i><sup>2</sup>. Taking the square root of both sides yields <i>v</i> = −3 and <i>v</i> = 3. Since speed can't be expressed as a negative number, the speed of the object is 3 meters per second.<br><br>Choice B is incorrect and may result from computation errors. Choice C is incorrect. This is the value of <i>v</i><sup>2</sup> rather than <i>v</i>. Choice D is incorrect. This is the value of 4<i>v</i><sup>2</sup> rather than <i>v</i>.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "c8e9a011",
+    "domain": "Advanced Math",
+    "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i></span></span> = −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i></span></span></div>The given equation relates the variables <i>n</i>, <i>t</i>, and <i>w</i>, where <i>n</i> &gt; 0, <i>t</i> &gt; 0, and <i>w</i> &gt; <i>t</i>. Which expression is equivalent to <i>n</i>?",
+    "choices": [
+     "12<i>t</i><i>w</i>",
+     "6(<i>t</i> − <i>w</i>)",
+     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">6<i>t</i><i>w</i></span></span>",
+     "<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6<i>t</i><i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span></span>"
+    ],
+    "correct": 3,
+    "explanation": "Choice D is correct. Adding <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i></span></span> to each side of the given equation yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i></span></span> + <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i></span></span>. The fractions on the right side of this equation have a common denominator of <i>t</i><i>w</i>; therefore, the equation can be written as <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2<i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2<i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>, or <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2<i>w</i> − 2<i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>, which is equivalent to <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">12</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2(<i>w</i> − <i>t</i>)</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>. Dividing each side of this equation by 2 yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span>. Since <i>n</i>, <i>t</i>, <i>w</i>, and <i>w</i> − <i>t</i> are all positive quantities, taking the reciprocal of each side of the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span></span> yields an equivalent equation: <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">6</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>t</i><i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span></span>. Multiplying each side of this equation by 6 yields <i>n</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">6<i>t</i><i>w</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>w</i> − <i>t</i></span></span>.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect. This is equivalent to <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>n</i></span></span> rather than <i>n</i>.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "e635aede",
+    "domain": "Problem-Solving and Data Analysis",
+    "skill": "Percentages",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "In 2008, Zinah earned 14% more than in 2007, and in 2009 Zinah earned 4% more than in 2008. If Zinah earned <i>y</i> times as much in 2009 as in 2007, what is the value of <i>y</i>?",
+    "choices": [
+     "0.5600",
+     "1.0056",
+     "1.1800",
+     "1.1856"
+    ],
+    "correct": 3,
+    "explanation": "Choice D is correct. It's given that in 2008 Zinah earned 14% more than in 2007. Let <i>h</i> represent the amount Zinah earned in 2007 and let <i>j</i> represent the amount that Zinah earned in 2008. This situation can be represented by the equation <i>j</i> = (1 + 14/100)<i>h</i>, or <i>j</i> = 1.14<i>h</i>. It's also given that in 2009 Zinah earned 4% more than in 2008. Let <i>k</i> represent the amount Zinah earned in 2009. This situation can be represented by the equation <i>k</i> = (1 + 4/100)<i>j</i>, or <i>k</i> = 1.04<i>j</i>. Substituting 1.14<i>h</i> for <i>j</i> in the equation <i>k</i> = 1.04<i>j</i> yields <i>k</i> = (1.04)(1.14<i>h</i>), or <i>k</i> = 1.1856<i>h</i>. If Zinah earned <i>y</i> times as much in 2009 as in 2007, then the value of <i>y</i> is 1.1856.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect and may result from conceptual or calculation errors.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "2855cb58",
+    "domain": "Geometry and Trigonometry",
+    "skill": "Circles",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "A circle in the <i>xy</i>-plane has its center at (16, 17) and has a radius of 7<i>k</i>. Which equation represents this circle?",
+    "choices": [
+     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i>",
+     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i><sup>2</sup>",
+     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 7<i>k</i>",
+     "(<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 7<i>k</i><sup>2</sup>"
+    ],
+    "correct": 1,
+    "explanation": "Choice B is correct. The equation of a circle in the <i>xy</i>-plane can be written as (<i>x</i> − <i>h</i>)<sup>2</sup> + (<i>y</i> − <i>k</i>)<sup>2</sup> = <i>r</i><sup>2</sup>, where the center of the circle is (<i>h</i>, <i>k</i>) and the radius of the circle is <i>r</i>. It’s given that this circle has a center at (16, 17) and a radius of 7<i>k</i>. Substituting 16 for <i>h</i>, 17 for <i>k</i>, and 7<i>k</i> for <i>r</i> in (<i>x</i> − <i>h</i>)<sup>2</sup> + (<i>y</i> − <i>k</i>)<sup>2</sup> = <i>r</i><sup>2</sup> yields (<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = (7<i>k</i>)<sup>2</sup>, or (<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i><sup>2</sup>. Therefore, the equation that represents this circle is (<i>x</i> − 16)<sup>2</sup> + (<i>y</i> − 17)<sup>2</sup> = 49<i>k</i><sup>2</sup>.<br><br>Choice A is incorrect. This equation represents a circle with radius 7√<i>k</i>, not 7<i>k</i>.<br><br>Choice C is incorrect. This equation represents a circle with radius √7<i>k</i>, not 7<i>k</i>.<br><br>Choice D is incorrect. This equation represents a circle with radius √7<i>k</i>, not 7<i>k</i>.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "fb58c0db",
+    "domain": "Geometry and Trigonometry",
+    "skill": "Circles",
+    "difficulty": "hard",
+    "type": "fr",
+    "text": "Points <i>A</i> and <i>B</i> lie on a circle with radius 1, and arc <i>AB</i> has length <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">π</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">3</span></span>. What fraction of the circumference of the circle is the length of arc <i>AB</i>?",
+    "answer": "1/6",
+    "explanation": "The correct answer is 1/6. The circumference, <i>C</i>, of a circle is <i>C</i> = 2π<i>r</i>, where <i>r</i> is the length of the radius of the circle. For the given circle with a radius of 1, the circumference is <i>C</i> = 2(π)(1) or <i>C</i> = 2π. To find what fraction of the circumference the length of arc <i>AB</i> is, divide the length of the arc by the circumference, which gives (π/3) ÷ 2π. This division can be represented by (π/3) · (1/2π) = 1/6. Note that 1/6, .1666, .1667, 0.166, and 0.167 are examples of ways to enter a correct answer.",
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "cdcc4d61",
+    "domain": "Algebra",
+    "skill": "Linear Equations in Two Variables",
+    "difficulty": "hard",
+    "type": "fr",
+    "text": "In the <i>xy</i>-plane, line <i>l</i> has equation 3<i>x</i> + <i>By</i> = 0, where <i>B</i> is a nonzero constant. Line <i>l</i> is perpendicular to the line that passes through the points (2, 4) and (5, 19). What is the value of <i>B</i><sup>2</sup>?",
+    "answer": "225",
+    "explanation": "The correct answer is 225. The slope of the line through (2, 4) and (5, 19) is the difference of the <i>y</i>-coordinates divided by the difference of the <i>x</i>-coordinates, which is (19 − 4)/(5 − 2), or 5. Solving the equation of line <i>l</i> for <i>y</i> gives <i>By</i> = −3<i>x</i>, or <i>y</i> = −(3/<i>B</i>)<i>x</i>, so the slope of line <i>l</i> is −3/<i>B</i>. Two lines are perpendicular exactly when the product of their slopes is −1, so 5(−3/<i>B</i>) = −1, which gives −15/<i>B</i> = −1, or <i>B</i> = 15. Therefore <i>B</i><sup>2</sup> is 15<sup>2</sup>, or 225. (Check: line <i>l</i> is 3<i>x</i> + 15<i>y</i> = 0, whose slope is −<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>, and 5(−<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">1</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>) = −1.)",
+    "source": "Moretti Test Prep & Tutoring"
+   },
+   {
+    "qid": "a049f400",
+    "domain": "Algebra",
+    "skill": "Linear Inequalities in One or Two Variables",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\"><i>y</i> &lt; 5<i>x</i> + 6</div>For which of the following tables are all the values of <i>x</i> and their corresponding values of <i>y</i> solutions to the given inequality?",
+    "choices": [
+     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>17</td></tr><tr><td>5</td><td>27</td></tr><tr><td>7</td><td>37</td></tr></table>",
+     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>17</td></tr><tr><td>5</td><td>35</td></tr><tr><td>7</td><td>37</td></tr></table>",
+     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>25</td></tr><tr><td>5</td><td>35</td></tr><tr><td>7</td><td>45</td></tr></table>",
+     "<table class=\"dx-table\" style=\"margin:0.6em auto;\"><tr><th><i>x</i></th><th><i>y</i></th></tr><tr><td>3</td><td>21</td></tr><tr><td>5</td><td>31</td></tr><tr><td>7</td><td>41</td></tr></table>"
+    ],
+    "correct": 0,
+    "explanation": "Choice A is correct. Substituting 3 for <i>x</i> in the given inequality yields <i>y</i> &lt; 5(3) + 6, or <i>y</i> &lt; 21. Therefore, when <i>x</i> = 3, the corresponding value of <i>y</i> is less than 21. Substituting 5 for <i>x</i> in the given inequality yields <i>y</i> &lt; 5(5) + 6, or <i>y</i> &lt; 31. Therefore, when <i>x</i> = 5, the corresponding value of <i>y</i> is less than 31. Substituting 7 for <i>x</i> in the given inequality yields <i>y</i> &lt; 5(7) + 6, or <i>y</i> &lt; 41. Therefore, when <i>x</i> = 7, the corresponding value of <i>y</i> is less than 41. For the table in choice A, when <i>x</i> = 3, the corresponding value of <i>y</i> is 17, which is less than 21; when <i>x</i> = 5, the corresponding value of <i>y</i> is 27, which is less than 31; and when <i>x</i> = 7, the corresponding value of <i>y</i> is 37, which is less than 41. Therefore, the table in choice A gives values of <i>x</i> and their corresponding values of <i>y</i> that are all solutions to the given inequality.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors.",
     "source": "Non-Bluebook"
    }
   ],
