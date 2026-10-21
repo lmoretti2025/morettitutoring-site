@@ -87,6 +87,7 @@
     '#cu-root .cu-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(176,39,28,.22)}',
     '#cu-root .cu-btn[disabled],#cu-root .cu-btn[disabled]:hover{opacity:.45;cursor:default;transform:none;box-shadow:none}',
     '#cu-root .cu-btn.ghost{background:#fff;color:var(--text,#111);box-shadow:inset 0 0 0 1px var(--cu-line)}',
+    '#cu-root .cu-navbtns{display:flex;gap:.6rem;align-items:center}',
     '#cu-root .cu-units{display:grid;gap:1.1rem}',
     'html:has(#screen-curriculum.active){scrollbar-gutter:stable}',
     '#cu-root .cu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem;min-height:3rem}',
@@ -1025,7 +1026,7 @@
   function startCheck(c, l) {
     var p = l.parts[view.part];
     var pool = checkIds(p).filter(function (q) { return !!question(q); });
-    check = { lessonId: l.id, part: view.part, pool: pool, len: checkLen(l, p, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null };
+    check = { lessonId: l.id, part: view.part, pool: pool, len: checkLen(l, p, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null, hist: [] };
     nextQuestion(l);
   }
   function seenMap(l) {
@@ -1104,13 +1105,18 @@
     return '<div class="cu-streak" role="img" aria-label="' + check.results.length + ' of ' + check.len + ' answered, ' + right + ' right">' + segs + '</div>' +
       '<span class="lbl">Question <b>' + Math.min(check.n, check.len) + '</b> of ' + check.len + '</span>';
   }
-  function drawQuestion(c, l) {
+  /* GOING BACK (Luca, 2026-10-20): Previous shows an earlier question as it
+     was answered, the pick, the right answer and the reasons, read-only, so
+     the check's score stays what it was. ri is its place in check.hist. */
+  function drawQuestion(c, l, ri) {
     var main = $('#cu-main', root);
+    var rev = (ri != null && check.hist && check.hist[ri]) ? check.hist[ri] : null;
+    if (rev) ri = Number(ri); else ri = null;
     if (!check.pool.length || !check.current) {
       main.innerHTML = '<div class="cu-card cu-state">These questions could not be loaded. Check your connection and try again.</div>';
       return;
     }
-    var q = question(check.current);
+    var q = question(rev ? rev.qid : check.current);
     var body;
     if (q.type === 'fr') {
       body = '<div class="cu-fr"><input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
@@ -1121,20 +1127,27 @@
       }).join('') + '</div>';
     }
     var isMath = c.bank === 'math', isMc = q.type !== 'fr';
-    check.out = {};
-    check.shownAt = Date.now();
+    if (!rev) { check.out = {}; check.shownAt = Date.now(); }
+    var liveAt = check.answered ? check.hist.length - 1 : check.hist.length;   // where the live question sits in the list
+    var at = rev ? ri : liveAt, prevAt = at - 1;
+    var liveDone = rev && ri === check.hist.length - 1 && check.answered;      // the question just answered, seen again
+    var lastQ = check.results.length >= check.len;
     main.innerHTML =
       '<div class="cu-mhead"><span class="cu-pill">' + esc(l.num + ' ' + l.title) + ' &middot; check</span><h1>Check your understanding</h1>' +
         '<div class="cu-sub">' + pl(check.len, 'question') + ' on this part. Each one shows the answer and why, and the next part opens when you finish.</div></div>' +
-      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span><span class="cu-qtools">' +
+      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + (at + 1) + '</span><span class="cu-qtools">' +
         (isMc ? '<button type="button" class="cu-abc" data-abc aria-pressed="' + elimOn + '" title="Answer eliminator">ABC</button>' : '') +
         (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</span></div>' +
         '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div></div>' +
       '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
-        '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
+        '<span class="cu-navbtns">' + (prevAt >= 0 ? '<button type="button" class="cu-btn ghost" data-check-prev="' + prevAt + '">&larr; Previous</button>' : '') +
+        (rev && !liveDone ? '<button type="button" class="cu-btn" data-check-fwd="' + (ri + 1) + '">Next &rarr;</button>'
+          : rev ? '<button type="button" class="cu-btn" id="cu-go" data-check-go>' + (lastQ ? 'Finish' : 'Next question') + '</button>'
+          : '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button>') + '</span></div>';
     marginNotes(l, check.part);
     if (isMc) $('.cu-choices', main).classList.add('pad');   // room for the x, kept after answering so nothing shifts
     if (isMc && elimOn) $('.cu-choices', main).classList.add('elim');
+    if (rev) { showResult(q, rev); return; }
     var fr = $('#cu-fr', main);
     if (fr) {
       if (window.gridInGuard) window.gridInGuard(fr);
@@ -1163,20 +1176,34 @@
     check.answered = true;
     check.results.push(!!g.ok);
     logAnswer(c, l, q, g);
+    check.hist.push({ qid: check.current, given: g.given, ok: !!g.ok });
     var last = check.results.length >= check.len;
-    if (g.ok) {
-      markChoices(q, true);
+    feedback(q, g.ok);
+    go.textContent = last ? 'Finish' : 'Next question'; go.disabled = false;
+    var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
+    // Previous, now that this one is answered.
+    var nav = $('.cu-navbtns', main);
+    if (nav && check.hist.length > 1 && !$('[data-check-prev]', nav)) nav.insertAdjacentHTML('afterbegin', '<button type="button" class="cu-btn ghost" data-check-prev="' + (check.hist.length - 2) + '">&larr; Previous</button>');
+  }
+  function feedback(q, ok) {
+    var fb = $('#cu-fb', root);
+    markChoices(q, ok);
+    if (ok) {
       var byOk = choiceReasons(q);
       fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b>' + (byOk ? ' Here is where the other choices come from.' : '') + '</div>';
     } else {
-      markChoices(q, false);
       var by = choiceReasons(q);
       var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
       fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.' +
         (by ? '' : '<div class="ex">' + answer + (q.explanation || '') + '</div>') + '</div>';
     }
-    go.textContent = last ? 'Finish' : 'Next question'; go.disabled = false;
-    var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
+  }
+  // An earlier answer, drawn as it was graded.
+  function showResult(q, rev) {
+    if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.value = rev.given == null ? '' : String(rev.given); }
+    var keep = check.pick; check.pick = rev.given;
+    feedback(q, rev.ok);
+    check.pick = keep;
   }
   /* EVERY CHECK ANSWER GOES TO THE PRACTICE LOG (Luca, 2026-10-02), bank
      'cu', through the portal's outbox (index.html queuePracticeEvent), so
@@ -1343,6 +1370,11 @@
       return;
     }
     if (check && t.closest('[data-check-go]')) return submitAnswer(hit.c, hit.l);
+    if (check && (b = t.closest('[data-check-prev]'))) return drawQuestion(hit.c, hit.l, Number(b.getAttribute('data-check-prev')));
+    if (check && (b = t.closest('[data-check-fwd]'))) {
+      var to = Number(b.getAttribute('data-check-fwd'));
+      return to < check.hist.length ? drawQuestion(hit.c, hit.l, to) : drawQuestion(hit.c, hit.l);
+    }
   }
 
   /* THE CALCULATOR, A POP-OUT (Luca, 2026-10-02): a window over the page,
