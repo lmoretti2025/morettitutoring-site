@@ -43,5 +43,9 @@ window.CURRICULUM_VIDEOS = {
   'm2.8': ['r2:m2.8-1.mp4@0:00-8:18', 'r2:m2.8-1.mp4@8:18'],
   // 2.9, recorded 2026-10-15. Same rule for the boundaries: the second the
   // part's title slide appears, one second early.
-  'm2.9': ['r2:m2.9-1.mp4@0:00-5:08', 'r2:m2.9-1.mp4@5:08-9:36', 'r2:m2.9-1.mp4@9:36']
+  'm2.9': ['r2:m2.9-1.mp4@0:00-5:08', 'r2:m2.9-1.mp4@5:08-9:36', 'r2:m2.9-1.mp4@9:36'],
+  // 2.10, recorded 2026-10-20. One notes page and then all 14 questions, so
+  // the lesson is a single part and the whole 36:10 belongs to it - no
+  // boundaries to read off.
+  'm2.10': ['r2:m2.10-1.mp4']
 };
