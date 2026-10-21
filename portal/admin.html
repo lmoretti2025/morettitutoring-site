@@ -1280,8 +1280,11 @@
         <form class="ef" id="stu-edit" style="display:none;" novalidate>
           <fieldset>
             <legend>Student</legend>
-            <label class="fld">Name<input name="name" maxlength="80" autocomplete="off"></label>
-            <p class="ef-hint">Your calendar finds sessions by first name, so keep it matching the session titles.</p>
+            <div class="fld-row">
+              <label class="fld">Name<input name="name" maxlength="80" autocomplete="off"></label>
+              <label class="fld">Student email <span class="opt">signs in with this</span><input name="studentEmail" type="email" autocomplete="off"></label>
+            </div>
+            <p class="ef-hint">Your calendar finds sessions by first name, so keep it matching the session titles. A new student email signs them out everywhere; they sign in again with the new address, and their scores and files stay.</p>
           </fieldset>
           <fieldset>
             <legend>Family</legend>
@@ -2621,7 +2624,7 @@
     var dateOf = function (iso) { return iso ? toDateStr(new Date(iso)) : ''; };
     var mult = function (v) { var n = Number(v); return (n === 1.5 || n === 2) ? String(n) : '1'; };
     var init = {
-      name: s.name || currentStudent.name || '', guardianName: s.guardianName || '', guardianEmail: s.guardianEmail || '',
+      name: s.name || currentStudent.name || '', studentEmail: s.grantedEmail || '', guardianName: s.guardianName || '', guardianEmail: s.guardianEmail || '',
       guardian2Name: s.guardian2Name || '', guardian2Email: s.guardian2Email || '',
       testDate: dateOf(s.testDate), testDate2: dateOf(s.testDate2),
       targetScore: s.targetScore ? String(s.targetScore) : '', accomTimeMult: mult(s.accomTimeMult), accomBreakMult: mult(s.accomBreakMult),
@@ -2687,6 +2690,13 @@
     }
     if (!Object.keys(fields).length) { closeEdit(); editStatus('Nothing changed.'); return; }
     if (fields.name === '') { editField('name').classList.add('bad'); editStatus('A student needs a name.', 'warn'); return; }
+    // The student email is the sign-in address, changed through changeStudentEmail (2026-10-20), not updateStudentInfo.
+    var newSEmail = null;
+    if ('studentEmail' in fields) {
+      newSEmail = fields.studentEmail.toLowerCase(); delete fields.studentEmail;
+      if (!newSEmail) { editField('studentEmail').classList.add('bad'); editStatus('To take away a student’s sign-in, use Reset in Portal access. Here you can only change it to another address.', 'warn'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newSEmail)) { editField('studentEmail').classList.add('bad'); editStatus('The student email does not look like an email address.', 'warn'); return; }
+    }
     editBusy = key;
     var who = currentStudent.name || key;
     $('stu-edit-save').disabled = $('stu-edit-cancel').disabled = true;
@@ -2697,7 +2707,18 @@
     };
     // Luca has moved on to another student: say it on the page, by name.
     var elsewhere = function (msg) { if (!(currentStudent && currentStudent.key === key)) showNotice(who + '\u2019s details: ' + msg); };
-    postToBackend({ action: 'updateStudentInfo', adminKey: adminKey(), key: key, fields: fields }).then(function (d) {
+    var saveFields = function () { return postToBackend({ action: 'updateStudentInfo', adminKey: adminKey(), key: key, fields: fields }); };
+    var step = newSEmail === null ? saveFields() : postToBackend({ action: 'changeStudentEmail', adminKey: adminKey(), key: key, email: newSEmail }).then(function (r) {
+      if (!r || !r.ok) {
+        return { ok: false, error: 'invalid', field: 'studentEmail', message: r && r.error === 'email_on_another_student' ? 'That address already signs in for ' + (r.student || 'another student') + '.'
+          : r && r.error === 'bad_email' ? 'The student email does not look like an email address.'
+          : 'The student email was not changed' + (r && r.error ? ' (' + r.error + ')' : '') + '.' };
+      }
+      var note = 'They sign in again with ' + r.email + '.';
+      if (!Object.keys(fields).length) return { ok: true, warnings: [note] };
+      return saveFields().then(function (d) { if (d && d.ok) d.warnings = (d.warnings || []).concat([note]); return d; });
+    });
+    step.then(function (d) {
       done();
       var here = currentStudent && currentStudent.key === key;
       if (d && d.ok) {
@@ -6842,10 +6863,8 @@
       if (body) new MutationObserver(syncBadge).observe(body, { attributes: true, attributeFilter: ['style'] });
     } catch (e) {}
     $('rt-access').addEventListener('click', function () { tab.click(); });
-    $('rt-add').addEventListener('click', function () {
-      var quick = document.getElementById('mta-quick');
-      if (quick) quick.click();
-    });
+    // + Add student is the one way in: the full form (Luca, 2026-10-20: Quick add and Portal access's own buttons were one too many).
+    $('rt-add').addEventListener('click', function () { if (window.mtaNewStudentForm) window.mtaNewStudentForm(); });
     var isOpen = function () { return body && body.style.display !== 'none'; };
     var closePanel = function () { var close = document.getElementById('mta-close'); if (close) close.click(); };
     // Escape closes it and hands focus back to its button, unless a dialog is up.
@@ -6877,6 +6896,6 @@
 <!-- Portal access panel (invites, approval queue, login resets). Builds
      its own markup and styles from this file's CSS variables; removing this
      tag removes the feature. -->
-<script src="auth-admin.js?v=20260916a"></script>
+<script src="auth-admin.js?v=20261020a"></script>
 </body>
 </html>
