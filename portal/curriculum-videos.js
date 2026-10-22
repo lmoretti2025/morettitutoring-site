@@ -52,5 +52,9 @@ window.CURRICULUM_VIDEOS = {
   // the second the part's title slide appears, one second early.
   //   Part 2  "Expressing One Variable in Terms of Another"  appears 9:10  -> 9:09
   //   Part 3  "When there's a story"                         appears 18:14 -> 18:13
-  'm3.1': ['r2:m3.1-1.mp4@0:00-9:09', 'r2:m3.1-1.mp4@9:09-18:13', 'r2:m3.1-1.mp4@18:13']
+  'm3.1': ['r2:m3.1-1.mp4@0:00-9:09', 'r2:m3.1-1.mp4@9:09-18:13', 'r2:m3.1-1.mp4@18:13'],
+  // 3.2, recorded 2026-10-22. Two parts: the first three note pages have no
+  // questions of their own, so they belong to Part 1.
+  //   Part 2  "What is the value of the constant?"  appears 10:08 -> 10:07
+  'm3.2': ['r2:m3.2-1.mp4@0:00-10:07', 'r2:m3.2-1.mp4@10:07']
 };
