@@ -47,5 +47,10 @@ window.CURRICULUM_VIDEOS = {
   // 2.10, recorded 2026-10-20. One notes page and then all 14 questions, so
   // the lesson is a single part and the whole 36:10 belongs to it - no
   // boundaries to read off.
-  'm2.10': ['r2:m2.10-1.mp4']
+  'm2.10': ['r2:m2.10-1.mp4'],
+  // 3.1, recorded 2026-10-22. Boundaries read off the video the usual way:
+  // the second the part's title slide appears, one second early.
+  //   Part 2  "Expressing One Variable in Terms of Another"  appears 9:10  -> 9:09
+  //   Part 3  "When there's a story"                         appears 18:14 -> 18:13
+  'm3.1': ['r2:m3.1-1.mp4@0:00-9:09', 'r2:m3.1-1.mp4@9:09-18:13', 'r2:m3.1-1.mp4@18:13']
 };
