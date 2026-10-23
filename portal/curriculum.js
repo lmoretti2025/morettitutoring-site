@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261023v';
+  var DATA_SRC = 'curriculum-data.js?v=20261023w';
   var VIDEO_SRC = 'curriculum-videos.js?v=20261023a';
 
   /* ---------- small helpers ---------- */
@@ -1026,7 +1026,7 @@
   function startCheck(c, l) {
     var p = l.parts[view.part];
     var pool = checkIds(p).filter(function (q) { return !!question(q); });
-    check = { lessonId: l.id, part: view.part, pool: pool, len: checkLen(l, p, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null, hist: [] };
+    check = { lessonId: l.id, part: view.part, pool: pool, len: checkLen(l, p, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null, hist: [], order: null };
     nextQuestion(l);
   }
   function seenMap(l) {
@@ -1034,13 +1034,34 @@
     var k = pkey(l.id, check.part);
     return (prog.seen[k] = prog.seen[k] || {});
   }
+  var DIFF_RANK = { easy: 0, medium: 1, hard: 2 };
+  /* The set is chosen least-recently-seen first, so a second go brings different
+     questions, but it is then ASKED easiest first (Luca, 2026-10-23): a check
+     that opens on the hardest question in the pool reads as a wall. */
+  function chooseOrder(l) {
+    var seen = seenMap(l);
+    var pool = check.pool.slice();
+    pool.sort(function (a, b) { return ((seen[a] || 0) - (seen[b] || 0)) || (Math.random() - 0.5); });
+    var picked = pool.slice(0, check.len);
+    picked.sort(function (a, b) {
+      var qa = question(a), qb = question(b);
+      var da = DIFF_RANK[String((qa && qa.difficulty) || '').toLowerCase()];
+      var db = DIFF_RANK[String((qb && qb.difficulty) || '').toLowerCase()];
+      if (da === undefined) da = 1;
+      if (db === undefined) db = 1;
+      return da - db;
+    });
+    return picked;
+  }
   function nextQuestion(l) {
-    var seen = seenMap(l), last = check.current;
-    var fresh = check.pool.filter(function (id) { return !check.asked[id]; });   // never one twice in a check
-    if (!fresh.length) return;
-    // Least recently seen first (never seen = oldest), ties broken at random.
-    fresh.sort(function (a, b) { return ((seen[a] || 0) - (seen[b] || 0)) || (Math.random() - 0.5); });
-    check.current = fresh[0];
+    var seen = seenMap(l);
+    if (!check.order || !check.order.length) check.order = chooseOrder(l);
+    var nextId = null;
+    for (var i = 0; i < check.order.length; i++) {
+      if (!check.asked[check.order[i]]) { nextId = check.order[i]; break; }
+    }
+    if (!nextId) return;
+    check.current = nextId;
     check.asked[check.current] = true;
     check.n++;
     seen[check.current] = Date.now();

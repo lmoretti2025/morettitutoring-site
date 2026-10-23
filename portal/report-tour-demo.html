@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Report Walkthrough Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!--
+  DEMO ONLY (2026-09-26). A guided walkthrough of a diagnostic report for Luca
+  to react to before any of it touches report.html. The student and every
+  number are made up (but add up: 98 questions, 67 right, 31 missed).
+
+  Two layers. The story: one idea per screen. The evidence: "See the numbers"
+  on each screen opens a sheet with everything the full report says about
+  that chapter (every skill, difficulty, all four modules, the habits, the
+  whole bridge, the four-week plan). In the real version both are built from
+  the report's own data, and a screen with nothing to say is skipped.
+-->
+<style>
+  :root {
+    --bg: #F2F2F2; --card: #FFFFFF; --ink: #111111; --mid: rgba(17,17,17,0.62); --faint: rgba(17,17,17,0.42);
+    --line: rgba(17,17,17,0.10); --track: rgba(17,17,17,0.08); --brand: #B0271C;
+    --content: #C8372B; --clock: #2F6DB5; --slow: #A67C1F; --good: #2E8A5E;
+    --serif: 'Caladea', Georgia, serif; --sans: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+    --ease: cubic-bezier(.2,.8,.2,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-weight: 300;
+         overflow: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+
+  /* ---- chrome ---- */
+  .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 5; padding: max(14px, env(safe-area-inset-top)) 16px 10px;
+         background: linear-gradient(var(--bg) 70%, rgba(242,242,242,0)); }
+  .progress { display: flex; gap: 5px; max-width: 720px; margin: 0 auto; }
+  .progress i { flex: 1; height: 3px; border-radius: 3px; background: var(--track); overflow: hidden; position: relative; }
+  .progress i::after { content: ''; position: absolute; inset: 0; background: var(--brand); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease); }
+  .progress i.done::after { transform: scaleX(1); }
+  .top { display: flex; justify-content: space-between; align-items: center; max-width: 720px; margin: 12px auto 0; font-size: 12px; color: var(--faint); }
+  .top b { font-weight: 500; color: var(--ink); }
+  .skip { background: none; border: 0; color: var(--mid); font: inherit; font-size: 12px; cursor: pointer; padding: 6px 0; }
+  .skip:hover { color: var(--ink); }
+  .demo-tag { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 20px; padding: 3px 9px; margin-left: 6px; }
+
+  /* ---- screens ---- */
+  .stage { position: fixed; inset: 0; }
+  .screen { position: absolute; inset: 0; display: flex; padding: 100px 16px 110px; opacity: 0; pointer-events: none;
+            transition: opacity .6s var(--ease); overflow-y: auto; }
+  .screen.on { opacity: 1; pointer-events: auto; }
+  .inner { width: 100%; max-width: 640px; margin: auto; }   /* auto margins: a tall screen scrolls instead of clipping its top */
+  .eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--brand); font-weight: 500; margin-bottom: 16px; }
+  h1, h2 { font-family: var(--serif); font-weight: 700; letter-spacing: -.01em; line-height: 1.08; }
+  h1 { font-size: clamp(40px, 9vw, 72px); }
+  h2 { font-size: clamp(30px, 6.4vw, 48px); }
+  p.say { font-size: clamp(16px, 3.8vw, 19px); line-height: 1.6; color: var(--mid); margin-top: 20px; max-width: 34em; }
+  p.say strong { color: var(--ink); font-weight: 500; }
+  .small { font-size: 12px; color: var(--faint); margin-top: 16px; line-height: 1.5; }
+
+  .r { opacity: 0; transform: translateY(18px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+  .screen.on .r { opacity: 1; transform: none; }
+  .screen.on .r:nth-child(2) { transition-delay: .12s; } .screen.on .r:nth-child(3) { transition-delay: .5s; }
+  .screen.on .r:nth-child(4) { transition-delay: .9s; } .screen.on .r:nth-child(5) { transition-delay: 1.3s; }
+  .screen.on .r:nth-child(6) { transition-delay: 1.7s; } .screen.on .r:nth-child(7) { transition-delay: 2s; }
+
+  .btn { display: inline-flex; align-items: center; gap: 10px; margin-top: 30px; background: var(--brand); color: #fff;
+         border: 0; border-radius: 999px; padding: 15px 26px; font: 500 15px var(--sans); cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(176,39,28,.22); }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .more { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; background: var(--card); border: 1px solid var(--line);
+          border-radius: 999px; padding: 10px 18px; font: 500 13px var(--sans); color: var(--ink); cursor: pointer; transition: border-color .2s, transform .2s var(--ease); }
+  .more:hover { border-color: var(--ink); transform: translateY(-1px); }
+  .more::before { content: '+'; font-size: 16px; line-height: 1; color: var(--brand); }
+
+  .track { height: 8px; border-radius: 8px; background: var(--track); overflow: hidden; position: relative; }
+  .fill { height: 100%; border-radius: 8px; background: var(--ink); width: 0; transition: width 1.4s var(--ease) .7s; }
+
+  /* ---- score ---- */
+  .hero { font-family: var(--serif); font-weight: 700; font-size: clamp(88px, 26vw, 168px); line-height: .9; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .halves { display: grid; gap: 18px; margin-top: 28px; }
+  .half-top { display: flex; justify-content: space-between; font-size: 14px; color: var(--mid); margin-bottom: 8px; }
+  .half-top b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* ---- misses ---- */
+  .dots { display: grid; grid-template-columns: repeat(auto-fill, 18px); gap: 7px; margin-top: 28px; }
+  .dot { width: 18px; height: 18px; border-radius: 50%; background: rgba(17,17,17,.18); transition: background .6s var(--ease), border-radius .6s var(--ease); }
+  .dots.split .dot.content { background: var(--content); }
+  .dots.split .dot.clock { background: var(--clock); border-radius: 4px; }
+  .key { display: grid; gap: 12px; margin-top: 24px; }
+  .key div { display: flex; align-items: baseline; gap: 12px; font-size: 15px; color: var(--mid); opacity: 0; transition: opacity .6s var(--ease); }
+  .key div b { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--ink); min-width: 1.6em; font-variant-numeric: tabular-nums; }
+  .sw { width: 12px; height: 12px; flex: none; align-self: center; display: inline-block; }
+  .sw.content { background: var(--content); border-radius: 50%; } .sw.clock { background: var(--clock); border-radius: 3px; }
+  .sw.slow { border: 2.5px solid var(--slow); border-radius: 50%; }
+  .dots.split ~ .key div { opacity: 1; } .dots.split ~ .key div:nth-child(2) { transition-delay: .3s; }
+  .dots.split ~ .key div:nth-child(3) { transition-delay: .6s; }
+
+  /* ---- skill rows ---- */
+  .rows { display: grid; gap: 22px; margin-top: 30px; }
+  .row-top { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; margin-bottom: 9px; }
+  .row-top span { font-weight: 400; } .row-top em { font-style: normal; color: var(--mid); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .row .fill.good { background: var(--good); } .row .fill.gap { background: var(--content); }
+  .row .note { font-size: 13px; color: var(--faint); margin-top: 7px; }
+  .row .fill { transition-delay: calc(.7s + var(--i, 0) * .18s); }
+
+  /* ---- clock ---- */
+  .clock-wrap { margin-top: 28px; background: var(--card); border-radius: 18px; padding: 20px 18px 16px; }
+  .clock-bars { display: flex; align-items: flex-end; gap: 3px; height: 150px; border-bottom: 1px solid var(--line); }
+  .cb { flex: 1; border-radius: 3px 3px 0 0; background: rgba(17,17,17,.2); height: 0; transition: height .9s var(--ease); position: relative; }
+  .cb.long { background: var(--slow); } .cb.rushed { background: var(--clock); } .cb.blank { background: none; border: 1.5px dashed var(--clock); border-bottom: 0; }
+  .cb:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); white-space: nowrap;
+                     background: var(--ink); color: #fff; font-size: 12px; padding: 5px 9px; border-radius: 6px; z-index: 2; }
+  .clock-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--faint); margin-top: 8px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--mid); margin-top: 14px; }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+
+  /* ---- habits ---- */
+  .habits { display: grid; gap: 10px; margin-top: 28px; }
+  .habit { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; background: var(--card); border-radius: 16px; padding: 16px 18px;
+           opacity: 0; transform: translateY(12px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .screen.on .habit { opacity: 1; transform: none; transition-delay: calc(.6s + var(--i) * .25s); }
+  .habit .n { font-family: var(--serif); font-size: 30px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .habit h3 { font-size: 15px; font-weight: 500; } .habit p { font-size: 13.5px; color: var(--mid); margin-top: 3px; line-height: 1.5; }
+  .habit.ok .n { color: var(--good); font-size: 24px; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: 1px; }
+  .tag.watch { background: rgba(200,55,43,.1); color: var(--content); } .tag.fine { background: rgba(46,138,94,.12); color: var(--good); }
+
+  /* ---- path ---- */
+  .path { margin-top: 28px; display: grid; gap: 10px; }
+  .step { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 16px 18px; background: var(--card); border-radius: 14px;
+          opacity: 0; transform: translateX(-14px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .screen.on .step { opacity: 1; transform: none; transition-delay: calc(.8s + var(--i) * .45s); }
+  .step span { font-size: 15px; } .step small { display: block; font-size: 12px; color: var(--faint); margin-top: 2px; }
+  .step b { font-family: var(--serif); font-size: 24px; color: var(--good); font-variant-numeric: tabular-nums; }
+  .meter { margin-top: 24px; }
+  .meter-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--mid); margin-bottom: 9px; }
+  .meter-top b { font-family: var(--serif); font-size: 26px; color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .meter .track { height: 12px; overflow: visible; }
+  .meter .fill { background: linear-gradient(90deg, #6E6E6E, var(--good)); transition: width 2.2s var(--ease) .8s; }
+  .target-mark { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--ink); border-radius: 2px; }
+  .target-mark::after { content: 'Target 1350'; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--mid); white-space: nowrap; }
+
+  /* ---- plan ---- */
+  .plan { margin-top: 28px; display: grid; gap: 12px; counter-reset: n; }
+  .task { display: grid; grid-template-columns: auto 1fr; gap: 16px; padding: 20px; border-radius: 16px; background: var(--card); }
+  .task::before { counter-increment: n; content: counter(n); font-family: var(--serif); font-size: 34px; font-weight: 700; line-height: 1; color: var(--brand); }
+  .task h3 { font-size: 16px; font-weight: 500; } .task p { font-size: 14px; color: var(--mid); margin-top: 4px; line-height: 1.55; }
+  .task a { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--brand); text-decoration: none; }
+
+  /* ---- nav ---- */
+  .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; padding: 14px 16px max(18px, env(safe-area-inset-bottom));
+         background: linear-gradient(rgba(242,242,242,0), var(--bg) 40%); }
+  .nav-in { max-width: 720px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .arrow { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+           font-size: 20px; cursor: pointer; transition: opacity .3s, transform .2s var(--ease); }
+  .arrow:hover { transform: translateY(-1px); } .arrow[disabled] { opacity: 0; pointer-events: none; }
+  .arrow.next { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .hint { font-size: 12px; color: var(--faint); transition: opacity .4s; }
+
+  /* ---- the numbers: bottom sheet ---- */
+  .sheet { position: fixed; inset: 0; z-index: 20; background: rgba(17,17,17,0); pointer-events: none; transition: background .35s var(--ease); }
+  .sheet.open { background: rgba(17,17,17,.32); pointer-events: auto; }
+  .sheet-card { position: absolute; left: 0; right: 0; bottom: 0; max-width: 760px; margin: 0 auto; max-height: 88vh; display: flex; flex-direction: column;
+                background: var(--card); border-radius: 22px 22px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.12);
+                transform: translateY(102%); transition: transform .45s var(--ease); }
+  .sheet.open .sheet-card { transform: none; }
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px 12px; border-bottom: 1px solid var(--line); }
+  .sheet-head h3 { font-family: var(--serif); font-size: 24px; font-weight: 700; }
+  .sheet-head small { display: block; font-family: var(--sans); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); font-weight: 500; margin-bottom: 2px; }
+  .x { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--bg); font-size: 18px; cursor: pointer; color: var(--ink); }
+  .sheet-body { overflow-y: auto; padding: 8px 20px max(28px, env(safe-area-inset-bottom)); font-size: 14px; line-height: 1.55; }
+  .sheet-body h4 { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); font-weight: 500; margin: 22px 0 10px; }
+  .sheet-body p { color: var(--mid); margin: 8px 0; } .sheet-body p b { color: var(--ink); font-weight: 500; }
+  .tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .tbl th { text-align: left; font-size: 11.5px; font-weight: 500; color: var(--faint); padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); }
+  .tbl td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .tbl td.num, .tbl th.num { text-align: right; white-space: nowrap; }
+  .tbl td.barcell { width: 34%; }
+  .mini { height: 6px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .mini i { display: block; height: 100%; border-radius: 6px; background: var(--ink); }
+  .mini i.good { background: var(--good); } .mini i.gap { background: var(--content); } .mini i.clock { background: var(--clock); } .mini i.slow { background: var(--slow); }
+  .domain td { font-size: 11.5px; font-weight: 500; color: var(--faint); letter-spacing: .04em; padding-top: 16px; border-bottom: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--bg); border-radius: 14px; padding: 14px; }
+  .stat b { display: block; font-family: var(--serif); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 12.5px; color: var(--mid); }
+  .stack { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 2px; background: var(--card); }
+  .stack i { display: block; height: 100%; }
+  .week { display: grid; grid-template-columns: 76px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .week b { font-weight: 500; }
+
+  @media (max-width: 420px) { .tbl td.barcell { width: 26%; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; transition-delay: 0s !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="progress" id="progress"></div>
+  <div class="top"><span><b>Maya’s diagnostic</b><span class="demo-tag">Demo</span></span><button class="skip" id="skip">Skip to full report</button></div>
+</div>
+
+<main class="stage" id="stage">
+
+  <section class="screen" data-name="hello">
+    <div class="inner">
+      <p class="eyebrow r">SAT Diagnostic &middot; September 20</p>
+      <h1 class="r">Hi Maya.<br>Here’s what your test is telling us.</h1>
+      <p class="say r">A few short screens: what happened, and what to do about it. Tap <strong>See the numbers</strong> on any screen for the full detail behind it.</p>
+      <div class="r"><button class="btn" data-go="next">Show me &rarr;</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="score">
+    <div class="inner">
+      <p class="eyebrow r">Your score</p>
+      <div class="hero r" data-count="1180">400</div>
+      <div class="halves r">
+        <div><div class="half-top"><span>Reading &amp; Writing</span><b>610</b></div><div class="track"><div class="fill" data-w="68.3"></div></div></div>
+        <div><div class="half-top"><span>Math</span><b>570</b></div><div class="track"><div class="fill" data-w="61.7"></div></div></div>
+      </div>
+      <p class="say r">A solid start. Reading &amp; Writing is <strong>a little ahead</strong> of Math, which tells us where the first points are.</p>
+      <div class="r"><button class="more" data-sheet="d-score">See the numbers</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="misses">
+    <div class="inner">
+      <p class="eyebrow r">Where the points went</p>
+      <h2 class="r">You missed 31 questions. They weren’t all the same kind of miss.</h2>
+      <div class="r">
+        <div class="dots" id="dots" role="img" aria-label="31 missed questions: 21 you didn't know yet, 10 lost to the clock"></div>
+        <div class="key">
+          <div><span class="sw content"></span><b>21</b>you didn’t know yet. That’s content to learn.</div>
+          <div><span class="sw clock"></span><b>10</b>were lost to the clock: rushed, or never reached.</div>
+          <div><span class="sw slow"></span><b>7</b>more you got right, but so slowly it cost you later.</div>
+        </div>
+      </div>
+      <p class="say r">So a third of your misses <strong>aren’t about what you know</strong>. They’re about time, and time is the fastest thing to fix.</p>
+      <div class="r"><button class="more" data-sheet="d-misses">See the numbers</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="strengths">
+    <div class="inner">
+      <p class="eyebrow r">What you’ve got</p>
+      <h2 class="r">These are already working.</h2>
+      <div class="rows r">
+        <div class="row" style="--i:0"><div class="row-top"><span>Words in context</span><em>9 of 10</em></div><div class="track"><div class="fill good" data-w="90"></div></div></div>
+        <div class="row" style="--i:1"><div class="row-top"><span>Linear equations</span><em>8 of 9</em></div><div class="track"><div class="fill good" data-w="89"></div></div></div>
+        <div class="row" style="--i:2"><div class="row-top"><span>Ratios &amp; percentages</span><em>4 of 4</em></div><div class="track"><div class="fill good" data-w="100"></div></div></div>
+      </div>
+      <p class="say r">We won’t spend much time here. <strong>Keeping these sharp</strong> is enough.</p>
+      <div class="r"><button class="more" data-sheet="d-skills">See every skill</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="gaps">
+    <div class="inner">
+      <p class="eyebrow r">Where the points are</p>
+      <h2 class="r">Three areas hold most of your missing points.</h2>
+      <div class="rows r">
+        <div class="row" style="--i:0"><div class="row-top"><span>Nonlinear functions</span><em>5 of 13</em></div><div class="track"><div class="fill gap" data-w="38"></div></div><p class="note">The biggest single chunk. Mostly quadratics and exponentials.</p></div>
+        <div class="row" style="--i:1"><div class="row-top"><span>Inferences</span><em>3 of 7</em></div><div class="track"><div class="fill gap" data-w="43"></div></div><p class="note">Picking an answer that goes one step past the text.</p></div>
+        <div class="row" style="--i:2"><div class="row-top"><span>Geometry</span><em>2 of 6</em></div><div class="track"><div class="fill gap" data-w="33"></div></div><p class="note">Formulas you have, but aren’t reaching for yet.</p></div>
+      </div>
+      <p class="say r">These show up on every SAT, so <strong>each one you fix pays off every time</strong>.</p>
+      <div class="r"><button class="more" data-sheet="d-gaps">See the numbers</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="clock">
+    <div class="inner">
+      <p class="eyebrow r">How you used the clock</p>
+      <h2 class="r">Math, second half: the clock caught up with you.</h2>
+      <div class="clock-wrap r">
+        <div class="clock-bars" id="clockbars" role="img" aria-label="Time per question in Math module 2: question 9 took 4 minutes, the last 6 questions were rushed or left blank"></div>
+        <div class="clock-axis"><span>Question 1</span><span>Question 22</span></div>
+        <div class="legend"><span><i style="background:var(--slow)"></i>Stuck too long</span><span><i style="background:var(--clock)"></i>Rushed</span><span><i style="border:1.5px dashed var(--clock)"></i>Never reached</span></div>
+      </div>
+      <p class="say r">You spent <strong>4 minutes on question 9</strong>. That left under 3 minutes for the last 6 questions. The fix is a skill, not speed: know when to move on.</p>
+      <div class="r"><button class="more" data-sheet="d-clock">See all four modules</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="habits">
+    <div class="inner">
+      <p class="eyebrow r">How you worked the test</p>
+      <h2 class="r">A few habits worth knowing about.</h2>
+      <div class="habits">
+        <div class="habit" style="--i:0"><div class="n">3</div><div><h3>Changed right answers to wrong ones <span class="tag watch">Watch</span></h3><p>You went back to 6 answers. Only 2 changes helped. Your first instinct is usually right.</p></div></div>
+        <div class="habit" style="--i:1"><div class="n">4</div><div><h3>Answered too fast to have read it <span class="tag watch">Watch</span></h3><p>Reading &amp; Writing questions answered in under 15 seconds. 3 of them were wrong.</p></div></div>
+        <div class="habit" style="--i:2"><div class="n">5</div><div><h3>Probably lucky guesses</h3><p>Hard questions answered right, very fast. Your real level may be a touch below 1180.</p></div></div>
+        <div class="habit ok" style="--i:3"><div class="n">&#10003;</div><div><h3>Focused the whole way <span class="tag fine">Good</span></h3><p>No time away from the screen, taken in the daytime. This is a clean read.</p></div></div>
+      </div>
+      <div class="r" style="transition-delay:1.8s"><button class="more" data-sheet="d-habits">See the numbers</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="path">
+    <div class="inner">
+      <p class="eyebrow r">Your path</p>
+      <h2 class="r">From 1180 to 1350.</h2>
+      <div class="path">
+        <div class="step" style="--i:0"><span>Relearn nonlinear functions<small>8 missed questions</small></span><b>+60</b></div>
+        <div class="step" style="--i:1"><span>Move on at the two-minute mark<small>the 10 clock misses</small></span><b>+50</b></div>
+        <div class="step" style="--i:2"><span>Tighten inferences<small>4 missed questions</small></span><b>+40</b></div>
+        <div class="step" style="--i:3"><span>Geometry formulas<small>4 missed questions</small></span><b>+30</b></div>
+      </div>
+      <div class="meter r">
+        <div class="meter-top"><span>Where that puts you</span><b data-count="1360" data-from="1180" data-delay="2600">1180</b></div>
+        <div class="track"><div class="fill" data-w="86.7"></div><div class="target-mark" style="left:83.3%"></div></div>
+      </div>
+      <p class="small r" style="margin-top:28px">Estimates from this one test. Real gains come from the work.</p>
+      <div class="r"><button class="more" data-sheet="d-path">See every point on the table</button></div>
+    </div>
+  </section>
+
+  <section class="screen" data-name="plan">
+    <div class="inner">
+      <p class="eyebrow r">Your three things</p>
+      <h2 class="r">Start here.</h2>
+      <div class="plan r">
+        <div class="task"><div><h3>Nonlinear functions</h3><p>Quadratics and exponentials, from the ground up. We’ll start on this in your first session.</p><a href="#" onclick="return false">Practice this skill &rarr;</a></div></div>
+        <div class="task"><div><h3>The two-minute rule</h3><p>If a Math question passes two minutes, mark it and move on. Come back if there’s time.</p><a href="#" onclick="return false">Try a timed set &rarr;</a></div></div>
+        <div class="task"><div><h3>Inferences</h3><p>One short set a day. Ask: does the text actually say this?</p><a href="#" onclick="return false">Practice this skill &rarr;</a></div></div>
+      </div>
+      <div class="r"><button class="more" data-sheet="d-weeks">Your next four weeks</button></div>
+      <div class="r"><button class="btn ghost" id="toReport">See the full report &rarr;</button></div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button class="arrow" id="prev" aria-label="Back">&larr;</button>
+    <span class="hint" id="hint">Tap, swipe or use arrow keys</span>
+    <button class="arrow next" id="next" aria-label="Next">&rarr;</button>
+  </div>
+</nav>
+
+<div class="sheet" id="sheet" aria-hidden="true">
+  <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-head"><h3 id="sheet-title"></h3><button class="x" id="sheet-x" aria-label="Close">&times;</button></div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </div>
+</div>
+
+<!-- ======================= THE NUMBERS ======================= -->
+
+<template id="d-score" data-eyebrow="Your score" data-title="The full score">
+  <div class="grid2">
+    <div class="stat"><b>67 / 98</b><span>questions right</span></div>
+    <div class="stat"><b>1180</b><span>of 1600</span></div>
+  </div>
+  <h4>By section and module</h4>
+  <table class="tbl">
+    <tr><th>Module</th><th class="num">Right</th><th></th><th class="num">Level</th></tr>
+    <tr><td>Reading &amp; Writing 1</td><td class="num">21 / 27</td><td class="barcell"><div class="mini"><i style="width:78%"></i></div></td><td class="num">Standard</td></tr>
+    <tr><td>Reading &amp; Writing 2</td><td class="num">17 / 27</td><td class="barcell"><div class="mini"><i style="width:63%"></i></div></td><td class="num">Harder</td></tr>
+    <tr><td>Math 1</td><td class="num">15 / 22</td><td class="barcell"><div class="mini"><i style="width:68%"></i></div></td><td class="num">Standard</td></tr>
+    <tr><td>Math 2</td><td class="num">14 / 22</td><td class="barcell"><div class="mini"><i style="width:64%"></i></div></td><td class="num">Easier</td></tr>
+  </table>
+  <p><b>How the SAT adapts.</b> Do well enough on the first module of a section and the second one gets harder, and harder questions are worth more. You earned the harder module in Reading &amp; Writing. In Math you got the easier one, which caps how high that section can go. Getting into the harder Math module is worth about 60 points on its own.</p>
+  <h4>Section scores</h4>
+  <table class="tbl">
+    <tr><td>Reading &amp; Writing</td><td class="num">610</td><td class="barcell"><div class="mini"><i style="width:68%"></i></div></td></tr>
+    <tr><td>Math</td><td class="num">570</td><td class="barcell"><div class="mini"><i style="width:62%"></i></div></td></tr>
+  </table>
+</template>
+
+<template id="d-misses" data-eyebrow="Where the points went" data-title="Every miss, sorted">
+  <h4>By section</h4>
+  <table class="tbl">
+    <tr><th>Section</th><th class="num">Didn’t know</th><th class="num">Clock</th><th class="num">Slow but right</th></tr>
+    <tr><td>Reading &amp; Writing</td><td class="num">13</td><td class="num">3</td><td class="num">2</td></tr>
+    <tr><td>Math</td><td class="num">8</td><td class="num">7</td><td class="num">5</td></tr>
+    <tr><td><b>Total</b></td><td class="num"><b>21</b></td><td class="num"><b>10</b></td><td class="num"><b>7</b></td></tr>
+  </table>
+  <h4>What each kind means</h4>
+  <p><b>Didn’t know it yet.</b> You worked at it and still missed it. That’s a skill to learn, and it’s on the next screens.</p>
+  <p><b>Lost to the clock.</b> Rushed in the last minutes (6) or never reached (4). Fixing pacing gets these back without learning anything new.</p>
+  <p><b>Slow but right.</b> Right answers that took over three minutes. They count, but they cost time the later questions needed. Where they came from:</p>
+  <table class="tbl">
+    <tr><td>Nonlinear functions</td><td class="num">2</td></tr><tr><td>Linear equations</td><td class="num">2</td></tr>
+    <tr><td>Geometry</td><td class="num">1</td></tr><tr><td>Inferences</td><td class="num">1</td></tr><tr><td>Command of evidence</td><td class="num">1</td></tr>
+  </table>
+</template>
+
+<template id="d-skills" data-eyebrow="What you've got" data-title="Every skill on the test">
+  <p>All 18 skills, grouped the way the SAT groups them. <span class="tag fine">Strength</span> 80% or better. <span class="tag watch">Focus</span> under 50%.</p>
+  <table class="tbl" id="skilltbl"></table>
+</template>
+
+<template id="d-gaps" data-eyebrow="Where the points are" data-title="Why these three">
+  <h4>By difficulty</h4>
+  <table class="tbl">
+    <tr><th>Level</th><th class="num">Right</th><th></th></tr>
+    <tr><td>Easy</td><td class="num">30 / 33</td><td class="barcell"><div class="mini"><i style="width:91%"></i></div></td></tr>
+    <tr><td>Medium</td><td class="num">26 / 38</td><td class="barcell"><div class="mini"><i style="width:68%"></i></div></td></tr>
+    <tr><td>Hard</td><td class="num">11 / 27</td><td class="barcell"><div class="mini"><i style="width:41%"></i></div></td></tr>
+  </table>
+  <p>Easy questions are nearly all there. The points are in <b>medium</b> questions, which is good news: those move fastest with practice.</p>
+  <h4>The missed questions</h4>
+  <table class="tbl">
+    <tr><th>Skill</th><th class="num">Easy</th><th class="num">Medium</th><th class="num">Hard</th></tr>
+    <tr><td>Nonlinear functions</td><td class="num">1</td><td class="num">4</td><td class="num">3</td></tr>
+    <tr><td>Inferences</td><td class="num">0</td><td class="num">2</td><td class="num">2</td></tr>
+    <tr><td>Geometry</td><td class="num">0</td><td class="num">2</td><td class="num">2</td></tr>
+  </table>
+  <p><b>Why these and not others.</b> They lose the most points, they show up on every test, and in each one the misses were real attempts, not the clock. Command of evidence and boundaries are next in line.</p>
+</template>
+
+<template id="d-clock" data-eyebrow="How you used the clock" data-title="All four modules">
+  <table class="tbl">
+    <tr><th>Module</th><th class="num">Time used</th><th class="num">Per question</th><th class="num">Rushed / blank</th></tr>
+    <tr><td>Reading &amp; Writing 1</td><td class="num">29:40 of 32</td><td class="num">66s</td><td class="num">0 / 0</td></tr>
+    <tr><td>Reading &amp; Writing 2</td><td class="num">32:00 of 32</td><td class="num">71s</td><td class="num">3 / 0</td></tr>
+    <tr><td>Math 1</td><td class="num">34:10 of 35</td><td class="num">93s</td><td class="num">1 / 0</td></tr>
+    <tr><td>Math 2</td><td class="num">35:00 of 35</td><td class="num">95s</td><td class="num">3 / 3</td></tr>
+  </table>
+  <h4>Where the Math time went</h4>
+  <div class="stack" role="img" aria-label="Math time: 58 percent on questions answered right at a normal pace, 17 percent on slow right answers, 20 percent on misses, 5 percent left for the last 6 questions">
+    <i style="width:58%;background:rgba(17,17,17,.28)"></i><i style="width:17%;background:var(--slow)"></i><i style="width:20%;background:var(--content)"></i><i style="width:5%;background:var(--clock)"></i>
+  </div>
+  <div class="legend"><span><i style="background:rgba(17,17,17,.28)"></i>Right, normal pace 58%</span><span><i style="background:var(--slow)"></i>Right, too slow 17%</span><span><i style="background:var(--content)"></i>Misses 20%</span><span><i style="background:var(--clock)"></i>Last 6 questions 5%</span></div>
+  <p>A good pace is about <b>95 seconds a question</b> in Math and <b>70</b> in Reading &amp; Writing. Your average was right on it. The problem is a few questions that ate 3 to 4 minutes each. Cut those short and the last questions get their time back.</p>
+</template>
+
+<template id="d-habits" data-eyebrow="How you worked the test" data-title="The habits, in detail">
+  <h4>Going back to answers</h4>
+  <table class="tbl">
+    <tr><td>Wrong to right</td><td class="num">2</td><td class="barcell"><div class="mini"><i class="good" style="width:33%"></i></div></td></tr>
+    <tr><td>Right to wrong</td><td class="num">3</td><td class="barcell"><div class="mini"><i class="gap" style="width:50%"></i></div></td></tr>
+    <tr><td>Wrong to a different wrong</td><td class="num">1</td><td class="barcell"><div class="mini"><i style="width:17%"></i></div></td></tr>
+  </table>
+  <p>Changing an answer only helps when you’ve found a specific reason. A second guess without one cost you a point overall.</p>
+  <h4>Answered too fast</h4>
+  <p><b>4 questions in under 15 seconds</b>, all in Reading &amp; Writing module 2, 3 of them wrong. That isn’t enough time to read the passage, so these are about slowing down, not about the skill.</p>
+  <h4>Probable guesses</h4>
+  <p><b>5 hard questions answered right in under 20 seconds.</b> Some were likely lucky. That’s why the path says “estimates”: your true level may sit 20 to 30 points lower.</p>
+  <h4>Test conditions</h4>
+  <table class="tbl">
+    <tr><td>Time away from the screen</td><td class="num">None</td></tr>
+    <tr><td>Time of day</td><td class="num">Saturday, 10:12 am</td></tr>
+    <tr><td>Interrupted</td><td class="num">No</td></tr>
+  </table>
+</template>
+
+<template id="d-path" data-eyebrow="Your path" data-title="Every point on the table">
+  <p>If every miss on this test were fixed, the score would be <b>1600</b>. That’s 420 points in 31 questions. Here’s where they sit, biggest first:</p>
+  <table class="tbl">
+    <tr><th>Fix</th><th class="num">Misses</th><th class="num">Points</th></tr>
+    <tr><td>Nonlinear functions</td><td class="num">8</td><td class="num">+60</td></tr>
+    <tr><td>Pacing (the clock)</td><td class="num">10</td><td class="num">+50</td></tr>
+    <tr><td>Inferences</td><td class="num">4</td><td class="num">+40</td></tr>
+    <tr><td>Geometry</td><td class="num">4</td><td class="num">+30</td></tr>
+    <tr><td>Command of evidence</td><td class="num">3</td><td class="num">+25</td></tr>
+    <tr><td>Boundaries</td><td class="num">2</td><td class="num">+20</td></tr>
+    <tr><td>Everything else</td><td class="num">8</td><td class="num">+45</td></tr>
+  </table>
+  <p>Some misses count in two rows (a nonlinear question you also rushed), so the rows add to more than 31. The first four alone clear your <b>target of 1350</b>. Points for a single question aren’t fixed on the SAT, so these are estimates built from this test.</p>
+</template>
+
+<template id="d-weeks" data-eyebrow="Your three things" data-title="Your next four weeks">
+  <p>About <b>4 hours a week</b> on your own, plus our sessions.</p>
+  <div class="week"><b>Week 1</b><span>Nonlinear functions: quadratics. Two-minute rule on every Math set.</span></div>
+  <div class="week"><b>Week 2</b><span>Nonlinear functions: exponentials. One short inferences set a day.</span></div>
+  <div class="week"><b>Week 3</b><span>Geometry formulas. One timed Math module to check pacing.</span></div>
+  <div class="week"><b>Week 4</b><span>Mixed review, then a full practice test to measure the gain.</span></div>
+</template>
+
+<script>
+(function () {
+  var screens = [].slice.call(document.querySelectorAll('.screen'));
+  var progress = document.getElementById('progress');
+  var prevBtn = document.getElementById('prev'), nextBtn = document.getElementById('next');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cur = -1, timers = [];
+
+  screens.forEach(function () { progress.appendChild(document.createElement('i')); });
+
+  var dots = document.getElementById('dots');
+  for (var i = 0; i < 31; i++) {
+    var d = document.createElement('span');
+    d.className = 'dot ' + (i < 21 ? 'content' : 'clock');
+    dots.appendChild(d);
+  }
+
+  // Math module 2, seconds per question.
+  var secs = [55, 70, 48, 90, 62, 75, 80, 66, 240, 95, 70, 88, 60, 110, 72, 85, 30, 22, 18, 0, 0, 0];
+  var bars = document.getElementById('clockbars');
+  secs.forEach(function (s, i) {
+    var b = document.createElement('div');
+    b.className = 'cb' + (s >= 200 ? ' long' : s === 0 ? ' blank' : i >= 16 ? ' rushed' : '');
+    b.dataset.h = s === 0 ? 40 : Math.round(s / 240 * 100);
+    b.dataset.tip = 'Q' + (i + 1) + ': ' + (s === 0 ? 'never reached' : s >= 60 ? Math.floor(s / 60) + 'm ' + (s % 60) + 's' : s + 's');
+    bars.appendChild(b);
+  });
+
+  // Every skill, for the "See every skill" sheet.
+  var SKILLS = [
+    ['Reading & Writing: Information and ideas', [['Central ideas', 4, 5], ['Inferences', 3, 7], ['Command of evidence', 5, 8]]],
+    ['Reading & Writing: Craft and structure', [['Words in context', 9, 10], ['Text structure', 3, 4], ['Cross-text connections', 1, 2]]],
+    ['Reading & Writing: Expression of ideas', [['Transitions', 5, 6], ['Rhetorical synthesis', 3, 4]]],
+    ['Reading & Writing: Standard English', [['Boundaries', 3, 5], ['Form, structure, sense', 2, 3]]],
+    ['Math: Algebra', [['Linear equations', 8, 9], ['Linear functions', 3, 3], ['Systems of equations', 2, 3]]],
+    ['Math: Advanced math', [['Nonlinear functions', 5, 13], ['Equivalent expressions', 3, 4]]],
+    ['Math: Problem solving and data', [['Ratios & percentages', 4, 4], ['Statistics', 2, 2]]],
+    ['Math: Geometry and trigonometry', [['Geometry', 2, 6]]]
+  ];
+  function skillTable(tbl) {
+    var h = '';
+    SKILLS.forEach(function (g) {
+      h += '<tr class="domain"><td colspan="3">' + g[0].replace('&', '&amp;') + '</td></tr>';
+      g[1].forEach(function (s) {
+        var p = s[1] / s[2], cls = p >= 0.8 ? 'good' : p < 0.5 ? 'gap' : '';
+        var tag = p >= 0.8 ? ' <span class="tag fine">Strength</span>' : p < 0.5 ? ' <span class="tag watch">Focus</span>' : '';
+        h += '<tr><td>' + s[0].replace('&', '&amp;') + tag + '</td><td class="num">' + s[1] + ' / ' + s[2] + '</td>' +
+             '<td class="barcell"><div class="mini"><i class="' + cls + '" style="width:' + Math.round(p * 100) + '%"></i></div></td></tr>';
+      });
+    });
+    tbl.innerHTML = h;
+  }
+
+  function later(fn, ms) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
+  function countUp(el) {
+    var to = +el.dataset.count, from = +(el.dataset.from || 400), delay = +(el.dataset.delay || 350);
+    el.textContent = from;
+    if (reduce) { el.textContent = to; return; }
+    later(function () {
+      var t0 = performance.now(), dur = 1500;
+      (function tick(t) {
+        var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(from + (to - from) * e);
+        if (p < 1) timers.push(requestAnimationFrame(tick));
+      })(t0);
+    }, delay);
+  }
+  function enter(s) {
+    s.querySelectorAll('[data-count]').forEach(countUp);
+    s.querySelectorAll('.fill[data-w]').forEach(function (f) { f.style.width = f.dataset.w + '%'; });
+    if (s.dataset.name === 'misses') later(function () { dots.classList.add('split'); }, 1100);
+    if (s.dataset.name === 'clock') [].forEach.call(bars.children, function (b, i) { later(function () { b.style.height = b.dataset.h + '%'; }, 500 + i * 45); });
+  }
+  function leave(s) {
+    s.querySelectorAll('.fill[data-w]').forEach(function (f) { f.style.width = '0'; });
+    if (s.dataset.name === 'misses') dots.classList.remove('split');
+    if (s.dataset.name === 'clock') [].forEach.call(bars.children, function (b) { b.style.height = '0'; });
+  }
+  function go(n) {
+    if (n < 0 || n >= screens.length || n === cur) return;
+    timers.forEach(function (t) { clearTimeout(t); cancelAnimationFrame(t); }); timers = [];
+    if (cur >= 0) { screens[cur].classList.remove('on'); leave(screens[cur]); }
+    cur = n;
+    screens[n].classList.add('on'); screens[n].scrollTop = 0;
+    enter(screens[n]);
+    [].forEach.call(progress.children, function (p, i) { p.classList.toggle('done', i <= n); });
+    prevBtn.disabled = n === 0;
+    nextBtn.disabled = n === screens.length - 1;
+    if (n > 0) document.getElementById('hint').style.opacity = 0;
+  }
+
+  // ---- the sheet ----
+  var sheet = document.getElementById('sheet'), sheetBody = document.getElementById('sheet-body'), sheetTitle = document.getElementById('sheet-title');
+  function openSheet(id) {
+    var t = document.getElementById(id);
+    sheetTitle.innerHTML = '<small>' + t.dataset.eyebrow + '</small>' + t.dataset.title;
+    sheetBody.innerHTML = ''; sheetBody.appendChild(t.content.cloneNode(true)); sheetBody.scrollTop = 0;
+    var st = sheetBody.querySelector('#skilltbl'); if (st) skillTable(st);
+    sheet.classList.add('open'); sheet.setAttribute('aria-hidden', 'false');
+    document.getElementById('sheet-x').focus();
+  }
+  function closeSheet() { sheet.classList.remove('open'); sheet.setAttribute('aria-hidden', 'true'); }
+  var isOpen = function () { return sheet.classList.contains('open'); };
+  document.querySelectorAll('[data-sheet]').forEach(function (b) { b.onclick = function () { openSheet(b.dataset.sheet); }; });
+  document.getElementById('sheet-x').onclick = closeSheet;
+  sheet.addEventListener('click', function (e) { if (e.target === sheet) closeSheet(); });
+  // Pull the sheet down by its header to close it.
+  var sy0 = null, head = document.querySelector('.sheet-head');
+  head.addEventListener('touchstart', function (e) { sy0 = e.touches[0].clientY; }, { passive: true });
+  head.addEventListener('touchend', function (e) { if (sy0 !== null && e.changedTouches[0].clientY - sy0 > 60) closeSheet(); sy0 = null; });
+
+  prevBtn.onclick = function () { go(cur - 1); };
+  nextBtn.onclick = function () { go(cur + 1); };
+  document.querySelectorAll('[data-go="next"]').forEach(function (b) { b.onclick = function () { go(cur + 1); }; });
+  function toReport() { alert('In the real version, this opens the full report as it is today.'); }
+  document.getElementById('skip').onclick = toReport;
+  document.getElementById('toReport').onclick = toReport;
+
+  document.addEventListener('keydown', function (e) {
+    if (isOpen()) { if (e.key === 'Escape') closeSheet(); return; }
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'ArrowLeft') go(cur - 1);
+  });
+  var sx = null, sy = null, stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchend', function (e) {
+    if (sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  });
+  stage.addEventListener('click', function (e) {
+    if (e.target.closest('button, a, .clock-wrap, .habit, .step, .task')) return;
+    if (window.getSelection && String(window.getSelection())) return;
+    go(cur + (e.clientX > innerWidth * 0.3 ? 1 : -1));
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
