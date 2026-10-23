@@ -56,5 +56,10 @@ window.CURRICULUM_VIDEOS = {
   // 3.2, recorded 2026-10-22. Two parts: the first three note pages have no
   // questions of their own, so they belong to Part 1.
   //   Part 2  "What is the value of the constant?"  appears 10:08 -> 10:07
-  'm3.2': ['r2:m3.2-1.mp4@0:00-10:07', 'r2:m3.2-1.mp4@10:07']
+  'm3.2': ['r2:m3.2-1.mp4@0:00-10:07', 'r2:m3.2-1.mp4@10:07'],
+  // 3.11, recorded 2026-10-23. Three parts: What regression is has no
+  // questions of its own, so it belongs to Part 1.
+  //   Part 2  "Without a table"      appears 8:03  -> 8:02
+  //   Part 3  "Adding the brackets"  appears 13:03 -> 13:02
+  'm3.11': ['r2:m3.11-1.mp4@0:00-8:02', 'r2:m3.11-1.mp4@8:02-13:02', 'r2:m3.11-1.mp4@13:02']
 };
