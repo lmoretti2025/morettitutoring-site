@@ -3911,6 +3911,12 @@
     var max = Math.max.apply(null, D.map(function (d) { return (d.min || 0) + (d.sess || 0); })) || 1;
     var last7 = D.slice(-7), active7 = last7.filter(function (d) { return d.min >= 5; }).length;
     var sum7 = last7.reduce(function (t, d) { return t + (d.min || 0); }, 0);
+    /* The header counts what the red bars count (Luca, 2026-10-23: it said 1h 51m with Saturday's
+       time before the session in it): days since the last session, the session day only after it. */
+    var curMin = function (d) { return (d.day === sinceDay && typeof d.after === 'number') ? Math.min(d.min || 0, Math.round(d.after)) : (d.min || 0); };
+    var sinceDays = sinceDay ? D.filter(function (d) { return d.day >= sinceDay; }) : null;
+    var sumSince = sinceDays ? sinceDays.reduce(function (t, d) { return t + curMin(d); }, 0) : 0;
+    var activeSince = sinceDays ? sinceDays.filter(function (d) { return curMin(d) >= 5; }).length : 0;
     var bars = D.map(function (d) {
       var dt = new Date(d.day + 'T12:00:00'), m = Math.round(d.min || 0), ss = Math.round(d.sess || 0);
       var cls = (sinceDay ? d.day >= sinceDay : D.indexOf(d) >= D.length - 7) ? 'cur' : 'old';
@@ -3929,7 +3935,9 @@
           : (ss ? '<i class="ss" style="height:' + Math.max(4, Math.round(100 * ss / max)) + '%"></i>' : '') + '<i style="height:' + h(m) + '%"></i>') + '</span>' +
         '<span class="dt-d">' + 'SMTWTFS'.charAt(dt.getDay()) + '<small>' + (dt.getMonth() + 1) + '/' + dt.getDate() + '</small></span></div>';
     }).join('');
-    return '<div class="dt"><div class="dt-hed">Every day<span>last 14 days &middot; ' + active7 + ' of the last 7 days active &middot; ' + mins(sum7) + ' in the last 7</span></div>' +
+    return '<div class="dt"><div class="dt-hed">Every day<span>last 14 days &middot; ' + (sinceDays
+        ? mins(sumSince) + ' since the last session, on ' + activeSince + ' of ' + sinceDays.length + ' day' + (sinceDays.length === 1 ? '' : 's')
+        : active7 + ' of the last 7 days active &middot; ' + mins(sum7) + ' in the last 7') + '</span></div>' +
       '<div class="dt-row">' + bars + '</div>' +
       '<div class="dt-key"><i class="cur"></i>since the last session <i class="old"></i>before it' +
       (D.some(function (d) { return d.sess; }) ? ' <i class="ss"></i>in a session' : '') + '</div></div>';
