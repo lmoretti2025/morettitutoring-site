@@ -158,6 +158,8 @@
   .dt-bar { width: 100%; height: 74px; display: flex; align-items: flex-end; background: rgba(17,17,17,0.035); border-radius: 5px; overflow: hidden; }
   .dt-bar i { display: block; width: 100%; background: rgba(17,17,17,0.22); border-radius: 5px 5px 0 0; }
   .dt-day.cur .dt-bar i { background: var(--red); }
+  .dt-day.cur .dt-bar i.pre { background: rgba(17,17,17,0.22); border-radius: 0; }
+  .dt-bar i.ss.mid { border-radius: 0; }   /* before the last session, on its day */
   .dt-bar { flex-direction: column; justify-content: flex-end; }
   .dt-bar i.ss, .dt-day.cur .dt-bar i.ss { background: repeating-linear-gradient(135deg, rgba(17,17,17,.16) 0 3px, rgba(17,17,17,.05) 3px 6px); border-radius: 5px 5px 0 0; }
   .dt-bar i.ss + i { border-radius: 0; }
@@ -3912,10 +3914,19 @@
     var bars = D.map(function (d) {
       var dt = new Date(d.day + 'T12:00:00'), m = Math.round(d.min || 0), ss = Math.round(d.sess || 0);
       var cls = (sinceDay ? d.day >= sinceDay : D.indexOf(d) >= D.length - 7) ? 'cur' : 'old';
-      return '<div class="dt-day ' + cls + (d.day === today ? ' today' : '') + '" title="' + escHtml(dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })) + ': ' + mins(m) + ' on their own' + (ss ? ', plus ' + mins(ss) + ' in a session' : '') + '">' +
-        '<span class="dt-v">' + (m ? (m >= 60 ? Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '') : m + 'm') : '') + '</span>' +
-        '<span class="dt-bar">' + (ss ? '<i class="ss" style="height:' + Math.max(4, Math.round(100 * ss / max)) + '%"></i>' : '') +
-          '<i style="height:' + (m ? Math.max(6, Math.round(100 * m / max)) : 0) + '%"></i></span>' +
+      /* The session day splits at the session's end (Luca, 2026-10-23): the time before it is last
+         week's, so it is grey and left out of the number; only what came after is red. */
+      var split = d.day === sinceDay && typeof d.after === 'number';
+      var aft = split ? Math.min(m, Math.round(d.after)) : m, pre = split ? m - aft : 0;
+      var hm = function (v) { return v ? (v >= 60 ? Math.floor(v / 60) + 'h' + (v % 60 ? ' ' + (v % 60) + 'm' : '') : v + 'm') : ''; };
+      var h = function (v) { return v ? Math.max(6, Math.round(100 * v / max)) : 0; };
+      return '<div class="dt-day ' + cls + (d.day === today ? ' today' : '') + '" title="' + escHtml(dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })) + ': ' +
+          (split ? mins(pre) + ' before the session, ' + mins(aft) + ' after it' : mins(m) + ' on their own') + (ss ? ', plus ' + mins(ss) + ' in a session' : '') + '">' +
+        '<span class="dt-v">' + hm(aft) + '</span>' +
+        // Bottom to top in time order on the split day: before, the session, after.
+        '<span class="dt-bar">' + (split
+          ? (aft ? '<i style="height:' + h(aft) + '%"></i>' : '') + (ss ? '<i class="ss mid" style="height:' + Math.max(4, Math.round(100 * ss / max)) + '%"></i>' : '') + (pre ? '<i class="pre" style="height:' + h(pre) + '%"></i>' : '')
+          : (ss ? '<i class="ss" style="height:' + Math.max(4, Math.round(100 * ss / max)) + '%"></i>' : '') + '<i style="height:' + h(m) + '%"></i>') + '</span>' +
         '<span class="dt-d">' + 'SMTWTFS'.charAt(dt.getDay()) + '<small>' + (dt.getMonth() + 1) + '/' + dt.getDate() + '</small></span></div>';
     }).join('');
     return '<div class="dt"><div class="dt-hed">Every day<span>last 14 days &middot; ' + active7 + ' of the last 7 days active &middot; ' + mins(sum7) + ' in the last 7</span></div>' +
