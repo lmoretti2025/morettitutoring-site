@@ -19530,7 +19530,6 @@ window.Portal = {
     runnerShownKey = null;
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeBackHandler = runnerBack;
-    window.dxPracticeBackHandler = runnerBack;
     window.dxPracticeExitHandler = endPracticeRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Practice: Selected Mistakes');
@@ -20659,7 +20658,9 @@ window.Portal = {
   function qbPracticeSkill(subject, skill) {
     if (subject === 'math' && (QB_MATH_TEMP_DISABLED || !(window.QUESTION_BANK_MATH || []).length)) return;
     showSkills(subject);
-    selectedSkills = [skill];
+    // The bank's own spelling of the skill, matched as matchQbSkillEntry does (case and spacing aside).
+    var hit = allSkills(subject).filter(function (e) { return normalizeSkillKey(e.skill) === normalizeSkillKey(skill); })[0];
+    selectedSkills = [hit ? hit.skill : skill];
     renderSkillsList();
     renderSelectionBar();
     // Put the card on screen — the list is long, and nothing else hints
@@ -20675,7 +20676,12 @@ window.Portal = {
   window.qbBandStat = function () { try { var r = qbAttemptRecords().filter(function (x) { return bankMode !== 'challenge' || String(x.qid).indexOf('chal|') === 0; }); var ok = r.filter(function (x) { return x.correct; }).length; return { n: r.length, pct: r.length ? Math.round(100 * ok / r.length) : 0 }; } catch (e) { return null; } };
   window.qbBankMode = function () { return bankMode; };
   window.qbPractice = {
-    open: function (subject, skill) { setBankMode('qb'); qbPracticeSkill(subject, skill); },
+    // Waits for the banks like level() below: on a fresh visit a math skill opened from the statistics did nothing (2026-10-23 bug check).
+    open: function (subject, skill) {
+      Promise.all([window.__questionBankReady || Promise.resolve(), window.__questionBankMathReady || Promise.resolve()]).then(function () {
+        setBankMode('qb'); qbPracticeSkill(subject, skill);
+      });
+    },
     // Every topic in a subject, one difficulty only (Home's weak-skill tile when nothing stands out, 2026-10-15).
     level: function (subject, diff) {
       // The banks load in the background: wait for them, or the topic list is empty.
@@ -21479,6 +21485,16 @@ window.Portal = {
   window.startRushRound = startRushRound;
 
   function startWeaknessPractice(opts) {
+    /* From Home on a fresh visit the banks had not downloaded yet, so no question matched and it said
+       "Couldn't find matching Question Bank questions" for a student with clear weak skills
+       (found in the 2026-10-23 bug check). Wait for both, then start. */
+    if (!(window.__questionBankSettled && window.__questionBankMathSettled)) {
+      var wb = document.getElementById('qb-weak-btn');
+      if (wb) wb.disabled = true;
+      Promise.all([window.__questionBankReady || Promise.resolve(), window.__questionBankMathReady || Promise.resolve()])
+        .then(function () { if (wb) wb.disabled = false; startWeaknessPractice(opts); });
+      return;
+    }
     setBankMode('qb');
     var only = (opts && opts.only) || null;
     var btn = document.getElementById('qb-weak-btn');
