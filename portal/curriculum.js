@@ -1014,7 +1014,7 @@
      list (checkQids) when it has one, else the list the deck practises
      (qids), so the two can be sized apart. Least recently seen first, kept
      per part on the device, so a second go brings different questions. */
-  var CHECK_LEN = 8;
+  var CHECK_LEN = 10;
   /* Parts whose check asks every question in its pool, not CHECK_LEN of them
      (Luca, 2026-10-02). Keyed by lesson id and part title. */
   var ASK_ALL = { 'm2.1|Slope-Intercept Form': true };
