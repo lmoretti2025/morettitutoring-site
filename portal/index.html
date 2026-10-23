@@ -13009,6 +13009,21 @@ window.Portal = {
     return _v1Promise;
   }
   window.loadArchivedTests = loadArchivedTests;
+  /* The archived DIAGNOSTIC bank (banks-v1.js, 126KB), for a report on a diagnostic taken
+     before the 2026-10-13 re-deal: the same rule report.html follows (2026-10-23). */
+  var _v1BanksPromise = null;
+  window.loadArchivedBanks = function () {
+    if (window.SECTION_BANKS_V1) return Promise.resolve(true);
+    if (_v1BanksPromise) return _v1BanksPromise;
+    _v1BanksPromise = new Promise(function (res) {
+      var sc = document.createElement('script');
+      sc.src = 'banks-v1.js?v=20261013a';
+      sc.onload = function () { res(!!window.SECTION_BANKS_V1); };
+      sc.onerror = function () { res(false); };
+      document.head.appendChild(sc);
+    });
+    return _v1BanksPromise;
+  };
   window.needsArchive = needsArchive;
 
   window.resolveQuestionByKey = function (key) {
@@ -22842,6 +22857,34 @@ window.Portal = {
 
 window.renderNativeReport = function (data) {
   'use strict';
+  /* WHICH VERSION OF THE QUESTIONS (ported from report.html's head, 2026-10-23). An attempt
+     taken before the 2026-10-13 release was answered against the archive (practice-tests-v1.js,
+     banks-v1.js); graded against the live files it would be scored on questions the student
+     never saw. Same rule as report.html: the stamp at submit (tv) if any, a test that only
+     exists now is new, otherwise the submit time against the cutover. */
+  var V1_TEST_IDS = ['sat-practice-1','sat-practice-2','sat-practice-3','sat-practice-4',
+                     'sat-practice-5','sat-practice-6','sat-practice-7','sat-practice-8',
+                     'sat-practice-9','sat-practice-10','sat-practice-11','sat-practice-12'];
+  var CUTOVER_MS = Date.parse('2026-10-13T03:03:19Z');
+  function versionOf(att) {
+    if (!att) return 2;
+    if (att.tv) return att.tv === 1 ? 1 : 2;
+    if (att.pt && V1_TEST_IDS.indexOf(att.pt) < 0) return 2;
+    var t = att.ts ? Date.parse(att.ts) : NaN;
+    return (!isFinite(t) || t < CUTOVER_MS) ? 1 : 2;
+  }
+  var TEST_VERSION = data ? versionOf(data) : 2;
+  if (data && !data.__v1Loaded) {
+    var wantTests = (TEST_VERSION === 1 && data.pt) || (data.pp && data.pp.pt && versionOf(data.pp) === 1);
+    var wantBanks = TEST_VERSION === 1 && !data.pt;
+    if ((wantTests && !window.SAT_PRACTICE_TESTS_V1) || (wantBanks && !window.SECTION_BANKS_V1)) {
+      data.__v1Loaded = true;   // once: a failed load renders without the detail rather than looping
+      Promise.all([wantTests && window.loadArchivedTests ? window.loadArchivedTests() : null,
+                   wantBanks && window.loadArchivedBanks ? window.loadArchivedBanks() : null])
+        .then(function () { window.renderNativeReport(data); });
+      return;
+    }
+  }
   // Re-entrancy guard: #pt-native-report persists between reports (only
   // hidden/shown) and several sections below build with appendChild, so
   // clear them first or a second report stacks on top of the previous one.
@@ -23236,9 +23279,58 @@ window.renderNativeReport = function (data) {
     var mo = moduleOnlyOf(sectionKey);
     return mo ? (sectionKey === 'math' ? 'Math' : 'Reading & Writing') + ', ' + (mo === 'module1' ? 'Module 1' : 'Module 2 (' + (mo === 'Harder' ? 'harder' : 'easier') + ')') : '';
   }
+  /* THE TESTS AND THE DIAGNOSTIC BANK AS THIS ATTEMPT SAW THEM, and each question by its qid
+     when the attempt recorded them (all from report.html, 2026-10-23: the portal copy had kept
+     grading every attempt against the live files). No fallback from the archive to the live
+     tests: a report with no question detail is honest, a regrade against other questions is not. */
+  function ptTests() {
+    if (TEST_VERSION === 1) return window.SAT_PRACTICE_TESTS_V1 || [];
+    return window.SAT_PRACTICE_TESTS || [];
+  }
+  function dxBanks() {
+    if (TEST_VERSION === 1 && window.SECTION_BANKS_V1) return window.SECTION_BANKS_V1;
+    return window.SECTION_BANKS || {};
+  }
+  // Some OTHER attempt (the previous-sitting comparison) can sit on the other side of the cutover.
+  function ptTestsFor(att) {
+    if (versionOf(att) === 1) return window.SAT_PRACTICE_TESTS_V1 || [];
+    return window.SAT_PRACTICE_TESTS || [];
+  }
+  var _qidIndex = null;
+  function findByQid(qid) {
+    if (!_qidIndex) {
+      _qidIndex = {};
+      var add = function (arr) {
+        if (Array.isArray(arr)) arr.forEach(function (it) { if (it && it.qid && !_qidIndex[it.qid]) _qidIndex[it.qid] = it; });
+      };
+      [window.SAT_PRACTICE_TESTS_V1, window.SAT_PRACTICE_TESTS].forEach(function (T) {
+        (T || []).forEach(function (t) {
+          Object.keys(t.sections || {}).forEach(function (sk) {
+            Object.keys(t.sections[sk] || {}).forEach(function (mk) { add(t.sections[sk][mk]); });
+          });
+        });
+      });
+      // And the diagnostic, archive first, so a pre-cutover attempt resolves to the item it saw.
+      [window.SECTION_BANKS_V1, window.SECTION_BANKS].forEach(function (B) {
+        Object.keys(B || {}).forEach(function (sk) {
+          var mods = (B || {})[sk];
+          if (mods && typeof mods === 'object') Object.keys(mods).forEach(function (mk) { add(mods[mk]); });
+        });
+      });
+      add(window.RETIRED_ITEMS);
+    }
+    return _qidIndex[qid] || null;
+  }
+  function questionsFor(bank, sec) {
+    var byPos = sectionQuestions(bank, sec && sec.v);
+    if (!sec || !Array.isArray(sec.q) || !sec.q.length) return byPos;
+    var out = [];
+    for (var i = 0; i < sec.q.length; i++) out.push((sec.q[i] && findByQid(sec.q[i])) || byPos[i]);
+    return out;
+  }
   function getBank(sectionKey) {
     if (data.pt) {
-      var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+      var pt = ptTests().filter(function (t) { return t.id === data.pt; })[0];
       if (pt && pt.sections) {
         var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
         if (pt.sections[ptKey]) {
@@ -23250,14 +23342,14 @@ window.renderNativeReport = function (data) {
         }
       }
     }
-    return window.SECTION_BANKS[sectionKey];
+    return dxBanks()[sectionKey];
   }
 
   // A practice-test section (from getBank) has no `label`; only
   // SECTION_BANKS entries do. The section key means the same category either
   // way, so SECTION_BANKS' label is the right display name.
   function sectionLabel(sectionKey, bank) {
-    var label = (window.SECTION_BANKS[sectionKey] && window.SECTION_BANKS[sectionKey].label) || bank.label || sectionKey;
+    var label = (dxBanks()[sectionKey] && dxBanks()[sectionKey].label) || bank.label || sectionKey;
     return label;
   }
 
@@ -23320,7 +23412,7 @@ window.renderNativeReport = function (data) {
   data.s.forEach(function (sec) {
     var bank = getBank(sec.k);
     if (!bank) return;
-    var qs = sectionQuestions(bank, sec.v), c = 0, rows = [];
+    var qs = questionsFor(bank, sec), c = 0, rows = [];
     var secDomains = {}; // this section's own domain/skill breakdown — kept
                           // separate from the global domains{}/skills{} so
                           // the report can show what's weak within THIS
@@ -23603,7 +23695,7 @@ window.renderNativeReport = function (data) {
           var wrongHere = view.rows.filter(function (r) { return r.q && r.q.type === 'mc' && !r.skipped && !r.ok; }).length;
           var raw = (data.s || []).filter(function (x) { return x.k === view.key; })[0];
           var bank = raw && getBank(raw.k);
-          var d = bank ? MS.decodeSection(raw, sectionQuestions(bank, raw.v), { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined }) : null;
+          var d = bank ? MS.decodeSection(raw, questionsFor(bank, raw), { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined }) : null;
           if (d && d.recorded && d.rows.some(function (r) { return r.masks; })) { sum += MS.guessingLift(d.rows).elim; elimAware = true; }
           else sum += wrongHere / 3;
         });
@@ -23618,7 +23710,7 @@ window.renderNativeReport = function (data) {
   // 2026-09-12), so the report names the test as it is numbered now, found
   // by its id, which never changes. The saved title is the fallback.
   if (data.pt) {
-    var ptNow = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+    var ptNow = ptTests().filter(function (t) { return t.id === data.pt; })[0];
     if (ptNow && ptNow.title) data.ptTitle = ptNow.title;
   }
   var first = (data.n || 'Student').split(' ')[0];
@@ -25588,7 +25680,7 @@ window.renderNativeReport = function (data) {
         var bank = getBank(sec.k);
         var view = sections.filter(function (x) { return x.key === sec.k; })[0];
         if (!bank || !view) return;
-        var qs = sectionQuestions(bank, sec.v);
+        var qs = questionsFor(bank, sec);
         var d = MS.decodeSection(sec, qs, { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined });
         if (d && d.recorded && d.rows.length === qs.length) parts.push({ sec: sec, bank: bank, view: view, qs: qs, d: d });
       });
@@ -29281,11 +29373,13 @@ window.renderNativeReport = function (data) {
         var pp = data.pp, ppItems = [];
         var bankFor = function (k) {
           if (pp.pt) {
-            var T = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === pp.pt; })[0];
+            // pp is the PREVIOUS attempt, which may predate the cutover even when this
+            // one does not, so it gets its own version rather than this report's.
+            var T = ptTestsFor(pp).filter(function (t) { return t.id === pp.pt; })[0];
             var tk = k === 'reading-writing' ? 'readingWriting' : k;
             if (T && T.sections && T.sections[tk]) return T.sections[tk];
           }
-          return (window.SECTION_BANKS || {})[k];
+          return dxBanks()[k];
         };
         pp.s.forEach(function (S, si) {
           var bank = bankFor(S.k);
