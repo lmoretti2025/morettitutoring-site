@@ -3499,20 +3499,33 @@
     // (which only sees each question's latest attempt).
     var logWeek = pr.logStarted && String(pr.logStarted).slice(0, 10) <= p.from;
     var practiceN = pr.n, practiceRight = pr.right, practiceSub, practiceMore = [];
-    if (pr.n || logWeek || !snap) {
+    if (pr.n || (pr.cu && pr.cu.n) || logWeek || !snap) {
       var parts = [];
       [['qb', 'Question Bank'], ['chal', 'Challenge'], ['rush', 'Rush']].forEach(function (b) {
         var x = pr.byBank && pr.byBank[b[0]];
         if (x && x.n) parts.push(b[1] + ' ' + x.n);
       });
+      /* Course checks count too (Luca, 2026-10-25: "sloka did the 60 algebra questions and the statistics
+         didn't show that"): they were only in the curriculum table further down, so the number at the
+         top could say 0 for a week of check questions. The percent stays the Question Bank's alone. */
+      if (pr.cu && pr.cu.n) { practiceN += pr.cu.n; practiceRight += pr.cu.right; parts.push('Course checks ' + pr.cu.n + ' (' + pr.cu.right + ' right)'); }
       /* The percent is the Question Bank's alone: Challenge is harder on
          purpose and Rush is timed, so pooling them read as a different
          student depending on the mix (stats audit, 2026-09-25). */
       var qbx = pr.byBank && pr.byBank.qb;
-      practiceSub = pr.n
-        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : 'no Question Bank answers'))
+      practiceSub = practiceN
+        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : (pr.cu && pr.cu.n ? pct(pr.cu.right, pr.cu.n) + ' right in course checks' : 'no Question Bank answers')))
         : 'none since the last session';
-      if (pr.n && (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)))) practiceMore.push(parts.join(' · '));
+      if (practiceN && (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)))) practiceMore.push(parts.join(' · '));
+      // More than one kind: say which, right under the number (the chips under More stay as they were).
+      if (pr.cu && pr.cu.n && parts.length > 1) {
+        var bits = [pr.cu.n + ' course check' + (pr.cu.n === 1 ? '' : 's')];
+        [['qb', 'Question Bank'], ['chal', 'Challenge'], ['rush', 'Rush']].forEach(function (b) {
+          var x = pr.byBank && pr.byBank[b[0]];
+          if (x && x.n) bits.push(x.n + ' ' + b[1] + (b[0] === 'qb' ? ' (' + pct(x.right, x.n) + ' right)' : ''));
+        });
+        practiceSub = bits.join(' · ');
+      }
       // Saved & Mistakes retries and explanation reads (backend v25).
       var extraBits = [];
       if (pr.retry && pr.retry.n) extraBits.push(pr.retry.n + ' mistake' + (pr.retry.n === 1 ? '' : 's') + ' retried, ' + pr.retry.right + ' right');
@@ -3529,7 +3542,7 @@
     }
 
     var stats = [];
-    stats.push('<div class="prep-stat"><div class="num">' + practiceN + '</div><div class="lbl">Practice questions</div><div class="sub">' + practiceSub + '</div></div>');
+    stats.push('<div class="prep-stat"><div class="num">' + practiceN + '</div><div class="lbl">Questions answered</div><div class="sub">' + practiceSub + '</div></div>');
     stats.push('<div class="prep-stat"><div class="num">' + (snap ? (snap.vocabCount || 0) : '—') + '</div><div class="lbl">Vocabulary</div><div class="sub">words reviewed</div></div>');
     var t = snap && snap.test;
     var testSub = 'none this week';
