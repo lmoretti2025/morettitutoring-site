@@ -343,6 +343,10 @@
   .cu-prep-head b { color: var(--text); font-weight: 600; }
   .prep-topics td.cu-done { color: var(--green); white-space: nowrap; }
   .summary-tile.live .num { color: var(--green); }
+  .unbooked-tile { text-align: left; font: inherit; cursor: pointer; border-color: rgba(176,39,28,0.25); }
+  .unbooked-tile .num { color: var(--red); }
+  .unbooked-tile.on { background: rgba(176,39,28,0.06); border-color: var(--red); }
+  .unbooked { display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--red); background: rgba(176,39,28,0.08); border-radius: 999px; padding: 0.2rem 0.6rem; white-space: nowrap; }
   .weakest-label { font-size: 0.78rem; }
   /* What the evidence says */
   .ev-row { display: grid; grid-template-columns: minmax(9rem, 13rem) 1fr; gap: 0.3rem 1rem; padding: 0.6rem 0; border-top: 1px solid var(--border); }
@@ -1991,6 +1995,13 @@
       b.querySelector('.count-pill').textContent = counts[p];
     });
   }
+  summaryRowEl.addEventListener('click', function (e) {
+    if (!e.target.closest('#unbooked-tile')) return;
+    unbookedOnly = !unbookedOnly;
+    rowsArrive = true;
+    renderSummary();
+    renderTable();
+  });
   $('prog-filter').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-prog]');
     if (!b) return;
@@ -2027,7 +2038,14 @@
          is not. */
       (onlineCount(active)
         ? '<div class="summary-tile live"><div class="num">' + onlineCount(active) + '</div><div class="lbl">On the site now</div></div>'
-        : '');
+        : '') +
+      (function () {
+        var n = active.filter(isUnbooked).length;
+        if (!n && !unbookedOnly) return '';
+        return '<button type="button" class="summary-tile unbooked-tile' + (unbookedOnly ? ' on' : '') + '" id="unbooked-tile" aria-pressed="' + unbookedOnly + '">' +
+          '<div class="num">' + n + '</div><div class="lbl">Nothing booked</div><div class="sub">' +
+          (unbookedOnly ? 'Showing just them. Click to show everyone.' : 'in the next ' + UNBOOKED_DAYS + ' days. Click to see who.') + '</div></button>';
+      })();
     // The first time the numbers appear they count up, as the portal's
     // scores do; after that a repaint just shows the new number.
     if (!summaryRowEl.classList.contains('settled') && !summaryCounted && window.mtaCountUp) {
@@ -2060,14 +2078,25 @@
       nextSessionByKey = map;
       nextSessionState = 'ok';
       keep('sessions', map);
+      renderSummary();
       renderTable();
       prefetchSoonStudents();
     }).catch(function () { if (nextSessionState !== 'ok') { nextSessionState = 'error'; renderTable(); } });
+  }
+  /* NOTHING BOOKED (Luca, 2026-10-25): a student with no session in the next 14 days is easy to miss
+     until they have drifted off (Nikolas). Counted at the top, marked in red, and the count filters to them. */
+  var UNBOOKED_DAYS = 14, unbookedOnly = false;
+  function isUnbooked(s) {
+    if (nextSessionState !== 'ok' || !s || s.archived || s.status === 'Inquiry') return false;
+    var n = nextSessionByKey[s.key];
+    return !n || n.ms > Date.now() + UNBOOKED_DAYS * 86400000;
   }
   function nextSessionCell(key) {
     if (nextSessionState === 'loading') return '<span class="sk sk-line" style="display:inline-block;width:90px;"></span>';
     if (nextSessionState === 'error') return '<span class="no-score" title="The calendar could not be read just now">&mdash;</span>';
     var n = nextSessionByKey[key];
+    var st = allStudents.filter(function (x) { return x.key === key; })[0];
+    if (isUnbooked(st)) return '<span class="unbooked" title="No session on your calendar in the next ' + UNBOOKED_DAYS + ' days">Nothing booked</span>';
     if (!n) return '<span class="no-score">None booked</span>';
     var d = new Date(n.ms), today = new Date(); today.setHours(0, 0, 0, 0);
     var days = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - today) / 86400000);
@@ -2095,7 +2124,7 @@
     renderProgFilter();
     // No SAT columns in a tutoring or admissions view.
     bodyEl.closest('table').classList.toggle('no-sat-cols', progFilter === 'tutoring' || progFilter === 'admissions');
-    var rows = allStudents.filter(function (s) { return (showHidden || !s.archived) && inProgFilter(s); });
+    var rows = allStudents.filter(function (s) { return (showHidden || !s.archived) && inProgFilter(s) && (!unbookedOnly || isUnbooked(s)); });
     rows.sort(function (a, b) {
       var va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
       if (va < vb) return -1 * sortDir;
