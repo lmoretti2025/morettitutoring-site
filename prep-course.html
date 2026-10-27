@@ -133,6 +133,15 @@ p{margin:0}
 .js .meet-f{opacity:0;transform:translate3d(0,60px,0) scale(.96);transition:opacity 1s ease .15s,transform 1.4s cubic-bezier(.16,1,.3,1) .15s}
 .js .meet-f.in{opacity:1;transform:none}
 .meet{border:0!important}
+/* keeps playing as you scroll (Luca, 2026-10-27): once the frame scrolls away mid-play, the video floats in the
+   bottom-right corner and slides back into the frame when you scroll up to it. The x closes it. */
+.meet-x{display:none}
+.meet-f.dock{background:#0C0A09 url(img/sat/luca-intro-poster.webp) center/cover}
+.meet-f.dock video{position:fixed;z-index:70;right:20px;bottom:20px;width:min(380px,calc(100vw - 32px));height:auto;aspect-ratio:16/9;border-radius:14px;box-shadow:0 24px 60px -18px rgba(12,10,9,.6),0 0 0 1px rgba(255,255,255,.1);animation:meetIn .45s cubic-bezier(.16,1,.3,1)}
+.meet-f.dock .meet-x{display:flex;position:fixed;z-index:71;right:12px;bottom:calc(20px + min(380px,calc(100vw - 32px))*9/16 - 16px);width:32px;height:32px;border-radius:50%;border:0;background:#111;color:#fff;font-size:18px;line-height:1;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+@keyframes meetIn{from{opacity:0;transform:translate3d(0,24px,0) scale(.94)}}
+@media(max-width:700px){.meet-f.dock video{right:12px;bottom:12px;width:min(260px,62vw);border-radius:10px}.meet-f.dock .meet-x{right:6px;bottom:calc(12px + min(260px,62vw)*9/16 - 14px);width:28px;height:28px;font-size:16px}}
+@media(prefers-reduced-motion:reduce){.meet-f.dock video{animation:none}}
 @media(max-width:700px){.meet{padding:0 16px}.meet-f{border-radius:14px}.meet-p{padding:.6rem}.meet-p .pl{padding:.3rem .8rem .3rem .3rem;gap:.45rem;box-shadow:0 10px 24px -10px rgba(176,39,28,.75),0 0 0 4px rgba(255,255,255,.12)}.meet-p .pl i{width:28px;height:28px}.meet-p .pl b{font-size:.76rem}}
 @media(prefers-reduced-motion:reduce){.js .meet-f{opacity:1;transform:none;transition:none}}
 @media(prefers-reduced-motion:reduce){.js .prow .ptx,.js .prow .ptx>*,.js .prow .pmedia{opacity:1!important;transform:none!important;transition:none!important}.dwin,.phero .shell{transform:none!important;opacity:1!important}.phero .reel{opacity:1}}
@@ -1558,23 +1567,30 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <button class="meet-p" id="meetp" type="button" aria-label="Play Luca's 75-second introduction, with sound">
       <span class="pl" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M6 4l15 8-15 8z"/></svg></i><b>Meet Luca <em>&middot; 1:15</em></b></span>
     </button>
+    <button class="meet-x" id="meetx" type="button" aria-label="Close the video">&times;</button>
   </div></div>
 </section>
 <script>
 (function(){
-  var f=document.getElementById('meetf'),v=document.getElementById('meetv'),b=document.getElementById('meetp');
+  var f=document.getElementById('meetf'),v=document.getElementById('meetv'),b=document.getElementById('meetp'),x=document.getElementById('meetx');
   if(!f||!v||!b)return;
+  var seen=true,started=false;
+  function dock(on){ if(on===f.classList.contains('dock'))return; f.classList.toggle('dock',on); }
+  function reset(){ started=false;dock(false);f.classList.remove('on');v.controls=false; }
   b.addEventListener('click',function(){
-    f.classList.add('on');v.controls=true;
-    var p=v.play();if(p&&p.catch)p.catch(function(){f.classList.remove('on');v.controls=false;});
+    started=true;f.classList.add('on');v.controls=true;
+    var p=v.play();if(p&&p.catch)p.catch(function(){reset();});
     if(window.gtag)try{gtag('event','intro_video_play')}catch(e){}
   });
-  v.addEventListener('ended',function(){f.classList.remove('on');v.controls=false;try{v.currentTime=0;v.load();}catch(e){}});
+  if(x)x.addEventListener('click',function(){v.pause();reset();});
+  v.addEventListener('ended',function(){reset();try{v.currentTime=0;v.load();}catch(e){}});
+  v.addEventListener('play',function(){ if(!seen)dock(true); });
   if(!('IntersectionObserver' in window)){f.classList.add('in');return;}
   new IntersectionObserver(function(es){es.forEach(function(e){
     if(e.isIntersecting)f.classList.add('in');
-    else if(!v.paused&&e.boundingClientRect.top<0)v.pause();
-  });},{threshold:0}).observe(f);
+    seen=e.intersectionRatio>=.35;
+    if(seen)dock(false); else if(started&&!v.paused)dock(true);
+  });},{threshold:[0,.35,1]}).observe(f);
 })();
 </script>
 
