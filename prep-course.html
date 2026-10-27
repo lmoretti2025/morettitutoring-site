@@ -114,6 +114,27 @@ p{margin:0}
 .js .prow.show .ptx>:nth-child(2){transition-delay:.12s}.js .prow.show .ptx>:nth-child(3){transition-delay:.24s}
 .js .dwin{transform:scale(var(--dz,1));transform-origin:50% 0;will-change:transform}
 .phero .shell{transform:translate3d(0,var(--hy,0),0);opacity:var(--ho,1);will-change:transform,opacity}
+/* Meet Luca (2026-10-27, Luca: "the first thing parents see when they get onto the SAT page under the hero"):
+   his 75-second intro straddles the hero's lower edge, dark above, white below. It waits on its poster with a
+   play button and plays with sound only when tapped; captions are on the track for anyone watching muted. */
+.meet{position:relative;z-index:2;margin-top:clamp(-110px,-7vw,-40px);padding:0 var(--gut);overflow-x:clip}
+.meet-w{position:relative;max-width:1080px;margin:0 auto}
+.meet-w::before{content:"";position:absolute;z-index:-1;left:-100vw;right:-100vw;top:50%;bottom:0;background:#fff}
+.meet-f{position:relative;border-radius:22px;overflow:hidden;background:#0C0A09;aspect-ratio:16/9;box-shadow:0 40px 90px -40px rgba(12,10,9,.55),0 0 0 1px rgba(255,255,255,.07)}
+.meet-f video{display:block;width:100%;height:100%;object-fit:cover;background:#0C0A09}
+.meet-p{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:clamp(.8rem,2.4vw,1.6rem);border:0;margin:0;cursor:pointer;background:none;color:#fff;font:inherit;transition:opacity .5s ease}
+.meet-p .pl{display:inline-flex;align-items:center;gap:.7rem;padding:.55rem 1.25rem .55rem .55rem;border-radius:999px;background:rgba(176,39,28,.94);box-shadow:0 14px 34px -12px rgba(176,39,28,.75),0 0 0 6px rgba(255,255,255,.12);transition:transform .45s cubic-bezier(.16,1,.3,1),background .3s}
+.meet-p .pl i{width:clamp(36px,3.6vw,46px);height:clamp(36px,3.6vw,46px);border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.meet-p .pl svg{width:42%;height:42%;margin-left:10%;fill:var(--red)}
+.meet-p .pl b{font-size:clamp(.82rem,1.1vw,.95rem);font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.meet-p .pl em{font-style:normal;opacity:.75;font-weight:400}
+.meet-p:hover .pl,.meet-p:focus-visible .pl{transform:scale(1.05);background:var(--red-lift)}
+.meet-f.on .meet-p{opacity:0;pointer-events:none}
+.js .meet-f{opacity:0;transform:translate3d(0,60px,0) scale(.96);transition:opacity 1s ease .15s,transform 1.4s cubic-bezier(.16,1,.3,1) .15s}
+.js .meet-f.in{opacity:1;transform:none}
+.meet{border:0!important}
+@media(max-width:700px){.meet{padding:0 16px}.meet-f{border-radius:14px}.meet-p{padding:.6rem}.meet-p .pl{padding:.3rem .8rem .3rem .3rem;gap:.45rem;box-shadow:0 10px 24px -10px rgba(176,39,28,.75),0 0 0 4px rgba(255,255,255,.12)}.meet-p .pl i{width:28px;height:28px}.meet-p .pl b{font-size:.76rem}}
+@media(prefers-reduced-motion:reduce){.js .meet-f{opacity:1;transform:none;transition:none}}
 @media(prefers-reduced-motion:reduce){.js .prow .ptx,.js .prow .ptx>*,.js .prow .pmedia{opacity:1!important;transform:none!important;transition:none!important}.dwin,.phero .shell{transform:none!important;opacity:1!important}.phero .reel{opacity:1}}
 .capsteps{max-width:980px;margin:clamp(2.6rem,5vw,3.4rem) auto 0;text-align:center}
 .capsteps h3{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,2.6vw,2rem);color:#fff;margin:0}
@@ -1526,6 +1547,36 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <p class="free rv d3">The first call and the diagnostic are both free.</p>
   </div>
 </section>
+
+<section class="meet" id="meet" aria-label="Meet Luca, a 75-second introduction">
+  <div class="meet-w"><div class="meet-f" id="meetf">
+    <video id="meetv" preload="none" playsinline poster="img/sat/luca-intro-poster.webp">
+      <source src="img/sat/luca-intro-720.mp4" type="video/mp4" media="(max-width: 760px)">
+      <source src="img/sat/luca-intro-1080.mp4" type="video/mp4">
+      <track kind="captions" src="img/sat/luca-intro.vtt" srclang="en" label="English">
+    </video>
+    <button class="meet-p" id="meetp" type="button" aria-label="Play Luca's 75-second introduction, with sound">
+      <span class="pl" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M6 4l15 8-15 8z"/></svg></i><b>Meet Luca <em>&middot; 1:15</em></b></span>
+    </button>
+  </div></div>
+</section>
+<script>
+(function(){
+  var f=document.getElementById('meetf'),v=document.getElementById('meetv'),b=document.getElementById('meetp');
+  if(!f||!v||!b)return;
+  b.addEventListener('click',function(){
+    f.classList.add('on');v.controls=true;
+    var p=v.play();if(p&&p.catch)p.catch(function(){f.classList.remove('on');v.controls=false;});
+    if(window.gtag)try{gtag('event','intro_video_play')}catch(e){}
+  });
+  v.addEventListener('ended',function(){f.classList.remove('on');v.controls=false;try{v.currentTime=0;v.load();}catch(e){}});
+  if(!('IntersectionObserver' in window)){f.classList.add('in');return;}
+  new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting)f.classList.add('in');
+    else if(!v.paused&&e.boundingClientRect.top<0)v.pause();
+  });},{threshold:0}).observe(f);
+})();
+</script>
 
 <div class="pnav" id="pnav" role="navigation" aria-label="SAT Prep">
   <div class="in">
