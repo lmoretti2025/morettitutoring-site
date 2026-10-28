@@ -5,7 +5,7 @@
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hero=document.querySelector('.phero'); if(hero) requestAnimationFrame(function(){ hero.classList.add('lit'); });
   var rows=[].slice.call(document.querySelectorAll('.prow,.pmore'));
-  var restart=function(r){ var im=r.querySelector('.pmedia img'); if(!im||!/rec-/.test(im.src)) return; var b=im.getAttribute('src'); im.src=b+'#t'+Date.now(); };
+  var restart=function(r){ var v=r.querySelector('.pmedia video'); if(v&&window.recRestart) window.recRestart(v); };
   if(!('IntersectionObserver' in window)||reduce){ rows.forEach(function(r){ r.classList.add('show'); }); }
   else {
     var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('show'); restart(e.target); io.unobserve(e.target); } }); },{threshold:.22,rootMargin:'0px 0px -6% 0px'});

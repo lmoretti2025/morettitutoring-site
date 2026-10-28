@@ -176,7 +176,7 @@ p{margin:0}
 .chap{border-bottom:0!important}   /* a heading flows straight into what it introduces */
 .phero{min-height:88vh!important;min-height:88svh!important;align-items:center!important;padding-bottom:clamp(3rem,7vh,5rem)!important}
 .phero .shell{position:relative;z-index:1}
-.phero .reel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;filter:blur(2.5px) saturate(.8);transform:scale(1.04)}
+.phero .reel img,.phero .reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;filter:blur(2.5px) saturate(.8);transform:scale(1.04)}
 .phero .reel::after{background:radial-gradient(ellipse 60% 55% at 50% 48%,rgba(12,10,9,.9) 0%,rgba(12,10,9,.78) 70%,rgba(12,10,9,.72) 100%),linear-gradient(180deg,transparent 70%,var(--void) 100%)!important}
 .diagwin{background:#fff;padding:0 0 clamp(4.5rem,9vw,7rem);scroll-margin-top:calc(var(--navh,62px) + 46px)}
 .dwin{max-width:1120px;margin:0 auto;border-radius:16px;overflow:hidden;background:#F2F2F2;box-shadow:0 40px 90px -40px rgba(12,10,9,.45),0 0 0 1px rgba(0,0,0,.08)}
@@ -195,7 +195,7 @@ p{margin:0}
 .ptx h3 em{font-style:normal;color:var(--red)}
 .ptx p:not(.pk){font-size:clamp(1rem,1.4vw,1.1rem);line-height:1.6;color:var(--muted);margin:1rem 0 0;max-width:40ch}
 .pmedia{margin:0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 30px 70px -32px rgba(12,10,9,.4),0 0 0 1px rgba(0,0,0,.07)}
-.pmedia img{display:block;width:100%;height:auto}
+.pmedia img,.pmedia video{display:block;width:100%;height:auto}
 .pmore{max-width:1080px;margin:0 auto}
 @media(max-width:860px){.prow,.prow.flip{grid-template-columns:1fr;gap:1.4rem}.prow.flip .ptx{order:0}.ptx p:not(.pk){max-width:none}}
 /* walkthrough steps (2026-10-14) */
@@ -926,8 +926,8 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 #proof .pf:hover .shotwrap{transform:translateY(-6px) rotate(-1deg);box-shadow:0 26px 40px -22px rgba(0,0,0,.45)}
 /* program doors: a gentle lift, the recording grows a touch */
 .door:hover{transform:translateY(-6px)}
-.door-im img{transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
-.door:hover .door-im img{transform:scale(1.03)}
+.door-im img,.door-im video{transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
+.door:hover .door-im img,.door:hover .door-im video{transform:scale(1.03)}
 /* how it works: a red line draws from step 1 to step 3 as the section comes up; each step lights as it is reached */
 .hh-steps{position:relative}
 .hh-line{position:absolute;left:19px;right:calc(33.333% - 19px);top:18px;height:2px;background:rgba(176,39,28,.15);list-style:none;pointer-events:none}
@@ -1603,7 +1603,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 .door p{font-size:1rem;line-height:1.55;color:rgba(255,255,255,.85);margin:.8rem 0 0;max-width:38ch}
 .door .go{display:inline-block;margin-top:1.2rem;font-weight:600;font-size:.92rem;border-bottom:1px solid rgba(255,255,255,.45);padding-bottom:2px}
 .door-im{flex:1;min-height:0;margin:0 0 0 2.2rem;border-radius:14px 0 0 0;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
-.door-im img{display:block;width:100%;height:100%;object-fit:cover;object-position:0 0}
+.door-im img,.door-im video{display:block;width:100%;height:100%;object-fit:cover;object-position:0 0}
 .plat-more{text-align:center;margin:0 auto}
 #overview h1{font-size:clamp(2.6rem,6.2vw,5.4rem)}
 .satgo{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem 1rem;margin-top:34px}
@@ -1611,6 +1611,15 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 .satsep{color:var(--muted)}
 .plat-more a{color:var(--red);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(176,39,28,.35)}
 @media(max-width:860px){.doors-grid{grid-template-columns:1fr}.door{min-height:440px}}
+/* Explore SAT prep and Explore math tutoring level with each other (Luca, 2026-10-27): side by side, the two
+   cards share rows, so the text areas match and each link sits at the bottom of its own; the screenshots start level too. */
+@supports (grid-template-rows: subgrid){@media(min-width:861px){
+.doors-grid{grid-template-rows:auto 1fr}
+.door{display:grid;grid-row:span 2;grid-template-rows:subgrid;row-gap:0}
+.door-tx{display:flex;flex-direction:column;align-items:flex-start}
+.door .go{margin-top:auto}
+.door p{margin-bottom:1.2rem}
+}}
 </style>
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What does it cost?", "acceptedAnswer": {"@type": "Answer", "text": "Sessions are billed by the hour, individually or from a prepaid pack, and how many your student needs depends on where they start and where they are aiming. So you see the plan and the total in writing before anything is scheduled. The first call is free, and so is the diagnostic that follows it. The payment terms are in the terms."}}, {"@type": "Question", "name": "Why one tutor instead of a company?", "acceptedAnswer": {"@type": "Answer", "text": "Every session is with me. The person who reads your student’s data is the person who teaches them, every week. There are no handoffs to junior tutors and no rotating staff."}}, {"@type": "Question", "name": "Online or in person?", "acceptedAnswer": {"@type": "Answer", "text": "Online, or in person at the Cranford Public Library. Same sessions, same materials, same portal, and many families mix the two."}}, {"@type": "Question", "name": "When should we start?", "acceptedAnswer": {"@type": "Answer", "text": "Ideally three to four months before the test. Juniors usually start once PSAT scores come back, aiming for a March or May SAT. After the diagnostic I’ll give you a realistic timeline for your student."}}, {"@type": "Question", "name": "Does the PSAT matter for National Merit?", "acceptedAnswer": {"@type": "Answer", "text": "For strong sophomores and juniors, yes. National Merit eligibility comes from the junior-year PSAT, and New Jersey’s cutoff is one of the highest in the country, so a student near it should prepare for the October PSAT as seriously as for the SAT."}}, {"@type": "Question", "name": "How will I know it’s working?", "acceptedAnswer": {"@type": "Answer", "text": "You get an update after every session: what we worked on, how the practice went, and any new score. Every practice test lands in the portal with the same full report as the diagnostic."}}]}
@@ -1697,11 +1706,11 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <div class="doors-grid">
       <a class="door door-sat rv" href="prep-course.html">
         <div class="door-tx"><span class="k">SAT and PSAT</span><h3>SAT prep</h3><p>A free full-length diagnostic, weekly sessions with me, and a full recorded course: 59 video lessons, every one taught by me, all on one platform.</p><span class="go">Explore SAT prep &rarr;</span></div>
-        <div class="door-im"><img src="img/sat/rec-test.webp" alt="" loading="lazy"></div>
+        <div class="door-im"><video data-rec="img/sat/rec-test.mp4" poster="img/sat/rec-test-poster.webp" muted loop playsinline preload="none" aria-hidden="true"></video></div>
       </a>
       <a class="door door-math rv d1" href="math-program.html">
         <div class="door-tx"><span class="k">Algebra 1 to college math</span><h3>Math tutoring</h3><p>The gap is usually a year or two back. The first sessions find it, and a plan built on your student&rsquo;s own course fixes it first.</p><span class="go">Explore math tutoring &rarr;</span></div>
-        <div class="door-im"><img src="img/sat/rec-math-home.webp" alt="" loading="lazy"></div>
+        <div class="door-im"><video data-rec="img/sat/rec-math-home.mp4" poster="img/sat/rec-math-home-poster.webp" muted loop playsinline preload="none" aria-hidden="true"></video></div>
       </a>
     </div>
   </div>
@@ -2109,7 +2118,7 @@ document.documentElement.classList.add('js');
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hero=document.querySelector('.phero'); if(hero) requestAnimationFrame(function(){ hero.classList.add('lit'); });
   var rows=[].slice.call(document.querySelectorAll('.prow,.pmore'));
-  var restart=function(r){ var im=r.querySelector('.pmedia img'); if(!im||!/rec-/.test(im.src)) return; var b=im.getAttribute('src'); im.src=b+'#t'+Date.now(); };
+  var restart=function(r){ var v=r.querySelector('.pmedia video'); if(v&&window.recRestart) window.recRestart(v); };
   if(!('IntersectionObserver' in window)||reduce){ rows.forEach(function(r){ r.classList.add('show'); }); }
   else {
     var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('show'); restart(e.target); io.unobserve(e.target); } }); },{threshold:.22,rootMargin:'0px 0px -6% 0px'});
@@ -2280,6 +2289,7 @@ document.documentElement.classList.add('js');
   heads.forEach(function (h) { io.observe(h); }); if (proof) io.observe(proof); if (steps) io.observe(steps);
 })();
 </script>
+<script src="recvideo.js?v=20261027a"></script>
 <script src="site.js"></script>
 <script src="lead-form.js?v=20261012b"></script>
 </body>

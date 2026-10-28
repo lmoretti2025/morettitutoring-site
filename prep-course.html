@@ -114,6 +114,36 @@ p{margin:0}
 .js .prow.show .ptx>:nth-child(2){transition-delay:.12s}.js .prow.show .ptx>:nth-child(3){transition-delay:.24s}
 .js .dwin{transform:scale(var(--dz,1));transform-origin:50% 0;will-change:transform}
 .phero .shell{transform:translate3d(0,var(--hy,0),0);opacity:var(--ho,1);will-change:transform,opacity}
+/* Meet Luca (2026-10-27, Luca: "the first thing parents see when they get onto the SAT page under the hero"):
+   his 73-second intro straddles the hero's lower edge, dark above, white below. It waits on its poster with a
+   play button and plays with sound only when tapped; captions are on the track for anyone watching muted. */
+.meet{position:relative;z-index:2;margin-top:clamp(-110px,-7vw,-40px);padding:0 var(--gut);overflow-x:clip}
+.meet-w{position:relative;max-width:1080px;margin:0 auto}
+.meet-w::before{content:"";position:absolute;z-index:-1;left:-100vw;right:-100vw;top:50%;bottom:0;background:#fff}
+.meet-f{position:relative;border-radius:22px;overflow:hidden;background:#0C0A09;aspect-ratio:16/9;box-shadow:0 40px 90px -40px rgba(12,10,9,.55),0 0 0 1px rgba(255,255,255,.07)}
+.meet-f video{display:block;width:100%;height:100%;object-fit:cover;background:#0C0A09}
+.meet-p{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:clamp(.8rem,2.4vw,1.6rem);border:0;margin:0;cursor:pointer;background:none;color:#fff;font:inherit;transition:opacity .5s ease}
+.meet-p .pl{display:inline-flex;align-items:center;gap:.7rem;padding:.55rem 1.25rem .55rem .55rem;border-radius:999px;background:rgba(176,39,28,.94);box-shadow:0 14px 34px -12px rgba(176,39,28,.75),0 0 0 6px rgba(255,255,255,.12);transition:transform .45s cubic-bezier(.16,1,.3,1),background .3s}
+.meet-p .pl i{width:clamp(36px,3.6vw,46px);height:clamp(36px,3.6vw,46px);border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.meet-p .pl svg{width:42%;height:42%;margin-left:10%;fill:var(--red)}
+.meet-p .pl b{font-size:clamp(.82rem,1.1vw,.95rem);font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.meet-p .pl em{font-style:normal;opacity:.75;font-weight:400}
+.meet-p:hover .pl,.meet-p:focus-visible .pl{transform:scale(1.05);background:var(--red-lift)}
+.meet-f.on .meet-p{opacity:0;pointer-events:none}
+.js .meet-f{opacity:0;transform:translate3d(0,60px,0) scale(.96);transition:opacity 1s ease .15s,transform 1.4s cubic-bezier(.16,1,.3,1) .15s}
+.js .meet-f.in{opacity:1;transform:none}
+.meet{border:0!important}
+/* keeps playing as you scroll (Luca, 2026-10-27): once the frame scrolls away mid-play, the video floats in the
+   bottom-right corner and slides back into the frame when you scroll up to it. The x closes it. */
+.meet-x{display:none}
+.meet-f.dock{background:#0C0A09 url(img/sat/luca-intro-poster.webp?v=2) center/cover}
+.meet-f.dock video{position:fixed;z-index:70;right:20px;bottom:20px;width:min(380px,calc(100vw - 32px));height:auto;aspect-ratio:16/9;border-radius:14px;box-shadow:0 24px 60px -18px rgba(12,10,9,.6),0 0 0 1px rgba(255,255,255,.1);animation:meetIn .45s cubic-bezier(.16,1,.3,1)}
+.meet-f.dock .meet-x{display:flex;position:fixed;z-index:71;right:12px;bottom:calc(20px + min(380px,calc(100vw - 32px))*9/16 - 16px);width:32px;height:32px;border-radius:50%;border:0;background:#111;color:#fff;font-size:18px;line-height:1;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+@keyframes meetIn{from{opacity:0;transform:translate3d(0,24px,0) scale(.94)}}
+@media(max-width:700px){.meet-f.dock video{right:12px;bottom:12px;width:min(260px,62vw);border-radius:10px}.meet-f.dock .meet-x{right:6px;bottom:calc(12px + min(260px,62vw)*9/16 - 14px);width:28px;height:28px;font-size:16px}}
+@media(prefers-reduced-motion:reduce){.meet-f.dock video{animation:none}}
+@media(max-width:700px){.meet{padding:0 16px}.meet-f{border-radius:14px}.meet-p{padding:.6rem}.meet-p .pl{padding:.3rem .8rem .3rem .3rem;gap:.45rem;box-shadow:0 10px 24px -10px rgba(176,39,28,.75),0 0 0 4px rgba(255,255,255,.12)}.meet-p .pl i{width:28px;height:28px}.meet-p .pl b{font-size:.76rem}}
+@media(prefers-reduced-motion:reduce){.js .meet-f{opacity:1;transform:none;transition:none}}
 @media(prefers-reduced-motion:reduce){.js .prow .ptx,.js .prow .ptx>*,.js .prow .pmedia{opacity:1!important;transform:none!important;transition:none!important}.dwin,.phero .shell{transform:none!important;opacity:1!important}.phero .reel{opacity:1}}
 .capsteps{max-width:980px;margin:clamp(2.6rem,5vw,3.4rem) auto 0;text-align:center}
 .capsteps h3{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,2.6vw,2rem);color:#fff;margin:0}
@@ -177,7 +207,7 @@ p{margin:0}
 .chap{border-bottom:0!important}   /* a heading flows straight into what it introduces */
 .phero{min-height:88vh!important;min-height:88svh!important;align-items:center!important;padding-bottom:clamp(3rem,7vh,5rem)!important}
 .phero .shell{position:relative;z-index:1}
-.phero .reel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;filter:blur(2.5px) saturate(.8);transform:scale(1.04)}
+.phero .reel img,.phero .reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;filter:blur(2.5px) saturate(.8);transform:scale(1.04)}
 .phero .reel::after{background:radial-gradient(ellipse 60% 55% at 50% 48%,rgba(12,10,9,.9) 0%,rgba(12,10,9,.78) 70%,rgba(12,10,9,.72) 100%),linear-gradient(180deg,transparent 70%,var(--void) 100%)!important}
 .diagwin{background:#fff;padding:0 0 clamp(4.5rem,9vw,7rem);scroll-margin-top:calc(var(--navh,62px) + 46px)}
 .dwin{max-width:1120px;margin:0 auto;border-radius:16px;overflow:hidden;background:#F2F2F2;box-shadow:0 40px 90px -40px rgba(12,10,9,.45),0 0 0 1px rgba(0,0,0,.08)}
@@ -196,7 +226,7 @@ p{margin:0}
 .ptx h3 em{font-style:normal;color:var(--red)}
 .ptx p:not(.pk){font-size:clamp(1rem,1.4vw,1.1rem);line-height:1.6;color:var(--muted);margin:1rem 0 0;max-width:40ch}
 .pmedia{margin:0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 30px 70px -32px rgba(12,10,9,.4),0 0 0 1px rgba(0,0,0,.07)}
-.pmedia img{display:block;width:100%;height:auto}
+.pmedia img,.pmedia video{display:block;width:100%;height:auto}
 .pmore{max-width:1080px;margin:0 auto}
 @media(max-width:860px){.prow,.prow.flip{grid-template-columns:1fr;gap:1.4rem}.prow.flip .ptx{order:0}.ptx p:not(.pk){max-width:none}}
 /* walkthrough steps (2026-10-14) */
@@ -1514,7 +1544,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 
 <!-- HERO: centered, the product large -->
 <section class="xhero phero" id="overview">
-  <div class="reel" aria-hidden="true"><img src="img/sat/hero-bg.webp" alt="" decoding="async"></div>
+  <div class="reel" aria-hidden="true"><video data-rec="img/sat/hero-bg.mp4" poster="img/sat/hero-bg-poster.webp" muted loop playsinline preload="none" aria-hidden="true"></video></div>
   <div class="shell">
     <p class="eyebrow rv">SAT Prep &middot; one-on-one, online or in Cranford, NJ</p>
     <h1 class="rv d1 h1-long">SAT prep for students <br>aiming at <em>1500 and above.</em></h1>
@@ -1526,6 +1556,43 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <p class="free rv d3">The first call and the diagnostic are both free.</p>
   </div>
 </section>
+
+<section class="meet" id="meet" aria-label="Meet Luca, a 73-second introduction">
+  <div class="meet-w"><div class="meet-f" id="meetf">
+    <video id="meetv" preload="none" playsinline poster="img/sat/luca-intro-poster.webp?v=2">
+      <source src="img/sat/luca-intro-720.mp4?v=2" type="video/mp4" media="(max-width: 760px)">
+      <source src="img/sat/luca-intro-1080.mp4?v=2" type="video/mp4">
+      <track kind="captions" src="img/sat/luca-intro.vtt?v=2" srclang="en" label="English">
+    </video>
+    <button class="meet-p" id="meetp" type="button" aria-label="Play Luca's 73-second introduction, with sound">
+      <span class="pl" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M6 4l15 8-15 8z"/></svg></i><b>Meet Luca <em>&middot; 1:13</em></b></span>
+    </button>
+    <button class="meet-x" id="meetx" type="button" aria-label="Close the video">&times;</button>
+  </div></div>
+</section>
+<script>
+(function(){
+  var f=document.getElementById('meetf'),v=document.getElementById('meetv'),b=document.getElementById('meetp'),x=document.getElementById('meetx');
+  if(!f||!v||!b)return;
+  var seen=true,started=false;
+  function dock(on){ if(on===f.classList.contains('dock'))return; f.classList.toggle('dock',on); }
+  function reset(){ started=false;dock(false);f.classList.remove('on');v.controls=false; }
+  b.addEventListener('click',function(){
+    started=true;f.classList.add('on');v.controls=true;
+    var p=v.play();if(p&&p.catch)p.catch(function(){reset();});
+    if(window.gtag)try{gtag('event','intro_video_play')}catch(e){}
+  });
+  if(x)x.addEventListener('click',function(){v.pause();reset();});
+  v.addEventListener('ended',function(){reset();try{v.currentTime=0;v.load();}catch(e){}});
+  v.addEventListener('play',function(){ if(!seen)dock(true); });
+  if(!('IntersectionObserver' in window)){f.classList.add('in');return;}
+  new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting)f.classList.add('in');
+    seen=e.intersectionRatio>=.35;
+    if(seen)dock(false); else if(started&&!v.paused)dock(true);
+  });},{threshold:[0,.35,1]}).observe(f);
+})();
+</script>
 
 <div class="pnav" id="pnav" role="navigation" aria-label="SAT Prep">
   <div class="in">
@@ -1572,27 +1639,27 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     </article>
     <article class="prow">
       <div class="ptx"><p class="pk">Practice tests</p><h3>Full-length tests that feel like <em>test day.</em></h3><p>14 adaptive practice tests built like the real digital SAT, with the same timer, highlighter, answer cross-out and question map. Each one comes back with a full report.</p></div>
-      <figure class="pmedia"><img src="img/sat/rec-test.webp" width="1300" height="815" alt="A practice test in the portal: highlighting a phrase in the passage, crossing out two choices, turning on the line reader, crossing out two choices, picking an answer and jumping to the next question" loading="lazy" decoding="async"></figure>
+      <figure class="pmedia"><video data-rec="img/sat/rec-test.mp4" poster="img/sat/rec-test-poster.webp" width="1300" height="815" muted loop playsinline preload="none" aria-label="A practice test in the portal: highlighting a phrase in the passage, crossing out two choices, turning on the line reader, crossing out two choices, picking an answer and jumping to the next question"></video></figure>
     </article>
     <article class="prow flip">
       <div class="ptx"><p class="pk">Question bank</p><h3>4,000+ questions, <em>every one explained.</em></h3><p>Pick any skill and set up a round. Students say how sure they were, see the right answer at once, and read why each choice is right or wrong.</p></div>
-      <figure class="pmedia"><img src="img/sat/rec-qb.webp" width="1300" height="945" alt="The question bank: choosing Words in Context, setting up a round, answering, and opening the full explanation" loading="lazy" decoding="async"></figure>
+      <figure class="pmedia"><video data-rec="img/sat/rec-qb.mp4" poster="img/sat/rec-qb-poster.webp" width="1300" height="945" muted loop playsinline preload="none" aria-label="The question bank: choosing Words in Context, setting up a round, answering, and opening the full explanation"></video></figure>
     </article>
     <article class="prow">
       <div class="ptx"><p class="pk">The course</p><h3>A full video course, <em>taught by me.</em></h3><p>59 video lessons across Math and Reading &amp; Writing, about 15 hours, all recorded by me critically inspecting question types and how to master the SAT. A short check follows each part, every wrong choice is explained, and the next part opens once the check is done.</p></div>
-      <figure class="pmedia"><img src="img/sat/rec-cu.webp" width="1300" height="898" alt="The course: the course map, a lesson video with worked handwriting, and the check question that follows it" loading="lazy" decoding="async"></figure>
+      <figure class="pmedia"><video data-rec="img/sat/rec-cu.mp4" poster="img/sat/rec-cu-poster.webp" width="1300" height="898" muted loop playsinline preload="none" aria-label="The course: the course map, a lesson video with worked handwriting, and the check question that follows it"></video></figure>
     </article>
     <article class="prow flip">
       <div class="ptx"><p class="pk">Mistakes log</p><h3>Every miss, <em>saved for later.</em></h3><p>Each wrong answer lands in the log with its skill, its difficulty and how many tries it took.</p></div>
-      <figure class="pmedia"><img src="img/sat/rec-mis.webp" width="1300" height="851" alt="The mistakes log: opening a missed question, revealing the answer and reading the explanation" loading="lazy" decoding="async"></figure>
+      <figure class="pmedia"><video data-rec="img/sat/rec-mis.mp4" poster="img/sat/rec-mis-poster.webp" width="1300" height="851" muted loop playsinline preload="none" aria-label="The mistakes log: opening a missed question, revealing the answer and reading the explanation"></video></figure>
     </article>
     <article class="prow">
       <div class="ptx"><p class="pk">Rush</p><h3>Timed sets that <em>build speed.</em></h3><p>Each question gets its own clock, set by its skill and difficulty, so students learn what test-day pace feels like and how to manage the pressure.</p></div>
-      <figure class="pmedia"><img src="img/sat/rec-rush.webp" width="1200" height="829" alt="Rush mode: the last seconds of a question, the screen turning red as time runs out, then an answer picked" loading="lazy" decoding="async"></figure>
+      <figure class="pmedia"><video data-rec="img/sat/rec-rush.mp4" poster="img/sat/rec-rush-poster.webp" width="1200" height="829" muted loop playsinline preload="none" aria-label="Rush mode: the last seconds of a question, the screen turning red as time runs out, then an answer picked"></video></figure>
     </article>
     <article class="prow flip">
       <div class="ptx"><p class="pk">Vocabulary</p><h3>Ten minutes of <em>vocabulary</em> a day.</h3><p>A focused round that starts with the words a student is still learning, timed to ten minutes so it becomes a habit.</p></div>
-      <figure class="pmedia"><img src="img/sat/rec-vocab.webp" width="1216" height="896" alt="Vocabulary practice: a ten-minute round answered word by word" loading="lazy" decoding="async"></figure>
+      <figure class="pmedia"><video data-rec="img/sat/rec-vocab.mp4" poster="img/sat/rec-vocab-poster.webp" width="1216" height="896" muted loop playsinline preload="none" aria-label="Vocabulary practice: a ten-minute round answered word by word"></video></figure>
     </article>
     <article class="prow">
       <div class="ptx"><p class="pk">Weekly updates</p><h3>You always know <em>how it&rsquo;s going.</em></h3><p>After every session, an email from me: what we worked on, how practice went, any new score, and what comes next.</p></div>
@@ -1925,7 +1992,7 @@ document.documentElement.classList.add('js');
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hero=document.querySelector('.phero'); if(hero) requestAnimationFrame(function(){ hero.classList.add('lit'); });
   var rows=[].slice.call(document.querySelectorAll('.prow,.pmore'));
-  var restart=function(r){ var im=r.querySelector('.pmedia img'); if(!im||!/rec-/.test(im.src)) return; var b=im.getAttribute('src'); im.src=b+'#t'+Date.now(); };
+  var restart=function(r){ var v=r.querySelector('.pmedia video'); if(v&&window.recRestart) window.recRestart(v); };
   if(!('IntersectionObserver' in window)||reduce){ rows.forEach(function(r){ r.classList.add('show'); }); }
   else {
     var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('show'); restart(e.target); io.unobserve(e.target); } }); },{threshold:.22,rootMargin:'0px 0px -6% 0px'});
@@ -2002,6 +2069,7 @@ document.documentElement.classList.add('js');
 })();
 </script>
 <script src="tiles.js?v=20261014a"></script>
+<script src="recvideo.js?v=20261027a"></script>
 <script src="site.js"></script>
 <script src="lead-form.js?v=20261012b"></script>
 </body>
