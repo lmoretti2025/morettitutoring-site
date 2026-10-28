@@ -2737,6 +2737,18 @@
   /* ═══ COLLECTIONS AND NOTES (2026-09-22) ═══ */
   .iq-col-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 1rem 0 0.2rem; }
   .iq-col-bar[hidden] { display: none; }
+  /* Filters (Luca, 2026-10-28: "filter ... by date, source, etc"): when, where it came from, section,
+     difficulty. They narrow every tab, the Practice button and the viewer's Previous/Next alike. */
+  .iq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.9rem 0 0.1rem; }
+  .iq-filters[hidden] { display: none; }
+  .iq-filter { position: relative; display: inline-flex; align-items: center; }
+  .iq-filter select { -webkit-appearance: none; appearance: none; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); background: rgba(17,17,17,0.045); border: none; border-radius: 999px; padding: 0.45rem 1.9rem 0.45rem 0.9rem; cursor: pointer; transition: background 0.15s var(--ease), color 0.15s var(--ease); max-width: 15rem; text-overflow: ellipsis; }
+  .iq-filter select:hover { background: rgba(17,17,17,0.08); }
+  .iq-filter select:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  .iq-filter.on select { background: var(--red); color: #fff; }
+  .iq-filter::after { content: '\25BE'; position: absolute; right: 0.75rem; font-size: 0.7rem; color: var(--mid); pointer-events: none; }
+  .iq-filter.on::after { color: #fff; }
+  .iq-filters-clear { font-family: var(--hel); font-size: 0.76rem; font-weight: 600; color: var(--red); background: none; border: none; cursor: pointer; padding: 0.3rem 0.2rem; }
   .iq-col-chip { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; padding: 0.45rem 0.9rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); cursor: pointer; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
   .iq-col-chip:hover { background: rgba(17,17,17,0.08); }
   .iq-col-chip.active { background: var(--red); color: #fff; }
@@ -5216,6 +5228,7 @@ window.Portal = {
       <!-- Collections tab only: one chip per collection the student made,
            plus "+ New collection". The active chip filters the list. -->
       <div class="iq-col-bar" id="iq-col-bar" hidden></div>
+      <div class="iq-filters" id="iq-filters" hidden></div>
 
       <div class="vp-pool-count" id="iq-pool-count"></div>
     </div>
@@ -19364,9 +19377,64 @@ window.Portal = {
 
   function currentFiltered() {
     var base = baseRecords();
-    if (activeTab !== 'mistakes' || !focus) return base;
-    return base.filter(function (r) { return focus.skill ? r.skill === focus.skill : r.domain === focus.domain; });
+    if (activeTab === 'mistakes' && focus) base = base.filter(function (r) { return focus.skill ? r.skill === focus.skill : r.domain === focus.domain; });
+    return base.filter(passesIqFilters);
   }
+
+  /* ═══ FILTERS ═══ (Luca, 2026-10-28) when it was missed (or saved, or put in the collection), where it
+     came from (a practice test, the diagnostic, the Question Bank...), section and difficulty. Kept for
+     the visit; a choice that no longer exists on the tab falls back to all. */
+  var iqFilter = { when: 'all', src: 'all', sec: 'all', diff: 'all' };
+  var IQ_WHEN = [['all', 'Any time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+  function iqFilterActive() { return iqFilter.when !== 'all' || iqFilter.src !== 'all' || iqFilter.sec !== 'all' || iqFilter.diff !== 'all'; }
+  function passesIqFilters(r) {
+    if (iqFilter.when !== 'all') {
+      var t = Date.parse(r.attemptedAt || '');
+      if (isNaN(t) || t < Date.now() - Number(iqFilter.when) * 86400000) return false;
+    }
+    if (iqFilter.src !== 'all' && r.testLabel !== iqFilter.src) return false;
+    if (iqFilter.sec !== 'all' && r.sectionKey !== iqFilter.sec) return false;
+    if (iqFilter.diff !== 'all' && String(r.difficulty || '').toLowerCase() !== iqFilter.diff) return false;
+    return true;
+  }
+  function renderIqFilters(base) {
+    var host = document.getElementById('iq-filters');
+    if (!host) return;
+    if (!base.length) { host.hidden = true; return; }
+    var srcs = sortTestLabels(base.reduce(function (out, r) { if (r.testLabel && out.indexOf(r.testLabel) === -1) out.push(r.testLabel); return out; }, []));
+    var secs = SECTION_ORDER.filter(function (k) { return base.some(function (r) { return r.sectionKey === k; }); });
+    var diffs = DIFFICULTIES.filter(function (d) { return base.some(function (r) { return String(r.difficulty || '').toLowerCase() === d; }); });
+    if (iqFilter.src !== 'all' && srcs.indexOf(iqFilter.src) === -1) iqFilter.src = 'all';
+    if (iqFilter.sec !== 'all' && secs.indexOf(iqFilter.sec) === -1) iqFilter.sec = 'all';
+    if (iqFilter.diff !== 'all' && diffs.indexOf(iqFilter.diff) === -1) iqFilter.diff = 'all';
+    function sel(name, label, opts) {
+      return '<label class="iq-filter' + (iqFilter[name] !== 'all' ? ' on' : '') + '"><select data-iq-filter="' + name + '" aria-label="' + label + '">' +
+        opts.map(function (o) { return '<option value="' + escHtml(o[0]) + '"' + (iqFilter[name] === o[0] ? ' selected' : '') + '>' + escHtml(o[1]) + '</option>'; }).join('') +
+        '</select></label>';
+    }
+    var secName = { 'reading-writing': 'Reading and Writing', math: 'Math' };
+    host.innerHTML = sel('when', 'When', IQ_WHEN) +
+      (srcs.length > 1 ? sel('src', 'Source', [['all', 'Every source']].concat(srcs.map(function (x) { return [x, x]; }))) : '') +
+      (secs.length > 1 ? sel('sec', 'Section', [['all', 'Both sections']].concat(secs.map(function (k) { return [k, secName[k] || k]; }))) : '') +
+      (diffs.length > 1 ? sel('diff', 'Difficulty', [['all', 'Any difficulty']].concat(diffs.map(function (d) { return [d, d.charAt(0).toUpperCase() + d.slice(1)]; }))) : '') +
+      (iqFilterActive() ? '<button type="button" class="iq-filters-clear">Clear filters</button>' : '');
+    host.hidden = false;
+  }
+  (function wireIqFilters() {
+    var host = document.getElementById('iq-filters');
+    if (!host) return;
+    host.addEventListener('change', function (e) {
+      var name = e.target && e.target.getAttribute && e.target.getAttribute('data-iq-filter');
+      if (!name) return;
+      iqFilter[name] = e.target.value;
+      renderList();
+    });
+    host.addEventListener('click', function (e) {
+      if (!(e.target.closest && e.target.closest('.iq-filters-clear'))) return;
+      iqFilter = { when: 'all', src: 'all', sec: 'all', diff: 'all' };
+      renderList();
+    });
+  })();
 
   /* The count is the filtered set on this screen (no per-row picking), so
      "practice these" means the questions currently shown. The bar appears
@@ -19416,6 +19484,7 @@ window.Portal = {
     renderColBar();            // first: it picks the collection to show when none is chosen
     paintMistakesCount();
     var base = baseRecords();
+    renderIqFilters(base);
     if (!base.length && activeTab === 'mistakes' && understoodMistakes().length) {
       poolCountEl.innerHTML = 'Every question here is marked understood' + understoodToggleHtml();
       setPracticeCount(0);
@@ -19441,10 +19510,11 @@ window.Portal = {
     var filtered = currentFiltered();
     setPracticeCount(filtered.length);
     var plural = function (n) { return n + ' question' + (n === 1 ? '' : 's'); };
+    var focused = activeTab === 'mistakes' && focus;
     poolCountEl.innerHTML = (filtered.length === base.length ? escHtml(plural(filtered.length))
-      : escHtml(plural(filtered.length) + ' in ' + (focus.skill || focus.domain) + ' \u00b7 ') +
-        '<a href="#" class="iq-focus-clear">Show all ' + base.length + '</a>') + understoodToggleHtml();
-    if (!filtered.length) { listEl.innerHTML = ''; return; }
+      : focused ? escHtml(plural(filtered.length) + ' in ' + (focus.skill || focus.domain) + ' \u00b7 ') + '<a href="#" class="iq-focus-clear">Show all ' + base.length + '</a>'
+      : escHtml(plural(filtered.length) + ' of ' + base.length)) + understoodToggleHtml();
+    if (!filtered.length) { listEl.innerHTML = '<div class="pb-empty-note">Nothing here matches these filters.</div>'; return; }
 
     // Flat, most-recent-first (`filtered` is already sorted by loadRecords),
     // each row showing its section/difficulty as a pill instead of being

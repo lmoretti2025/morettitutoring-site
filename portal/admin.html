@@ -130,16 +130,8 @@
   .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
   .prep-topics tr.cu-row { cursor: pointer; }
   .prep-topics tr.cu-row:hover > td { background: var(--soft, #faf8f5); }
-  .prep-topics .cu-tw { display: inline-block; width: 1em; color: var(--faint); font-size: 0.8em; }
-  .prep-topics tr.cu-ans > td { padding: 0 0 0.6rem 1.6rem; background: var(--soft, #faf8f5); }
-  .cu-atab { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-  .cu-atab th { text-align: left; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0.3rem 0.5rem; }
-  .cu-atab th.n, .cu-atab td.n { text-align: center; white-space: nowrap; }
-  .cu-atab td { padding: 0.3rem 0.5rem; border-top: 1px solid var(--line, #eee); vertical-align: top; line-height: 1.45; }
-  .cu-atab tr.cu-a-no td { color: var(--text); }
-  .cu-atab tr.cu-a-no td.n:last-child { color: #b0271c; font-weight: 700; }
-  .cu-atab tr.cu-a-ok td.n:last-child { color: #1d6b3a; }
-  .cu-atab .cu-a-wait { color: var(--faint); font-style: italic; }
+  .prep-topics .cu-open { display: inline-block; margin-left: 0.4rem; font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.45rem; border-radius: 999px; background: rgba(0,0,0,0.05); color: var(--mid); white-space: nowrap; }
+  .prep-topics .cu-open.bad { background: rgba(176,39,28,0.1); color: var(--red); }
   .prep-topics th { text-align: left; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.5rem 0.4rem 0; }
   .prep-topics td { padding: 0.35rem 0.5rem 0.35rem 0; border-top: 1px solid var(--border); }
   .prep-topics td.n, .prep-topics th.n { text-align: right; }
@@ -757,6 +749,26 @@
   .fp-who { flex: 1 1 auto; min-width: 0; }
   .fp-who b { font-weight: 700; }
   .fp-why { display: block; font-size: 0.72rem; color: var(--faint); line-height: 1.4; margin-top: 0.1rem; }
+  /* MISTAKES TAB (2026-10-28, Luca: "see incorrect questions from QB for each student") */
+  .mx-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.2rem 0 0.9rem; }
+  .mx-bar select { font: inherit; font-size: 0.82rem; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--text); }
+  .mx-count { font-size: 0.8rem; color: var(--mid); margin-bottom: 0.4rem; }
+  .mx-row { border-top: 1px solid var(--border); }
+  .mx-row:first-child { border-top: 0; }
+  .mx-sum { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 5.2rem 1fr auto; gap: 0.2rem 0.8rem; align-items: baseline; padding: 0.6rem 0.2rem; font-family: var(--hel); }
+  .mx-sum:hover { background: var(--bg); }
+  .mx-sum:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+  .mx-when { font-size: 0.78rem; color: var(--mid); }
+  .mx-what { font-size: 0.88rem; color: var(--text); min-width: 0; }
+  .mx-what small { display: block; font-size: 0.74rem; color: var(--faint); margin-top: 0.1rem; }
+  .mx-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; justify-content: flex-end; }
+  .mx-tag { font-size: 0.66rem; font-weight: 700; padding: 0.12rem 0.5rem; border-radius: 999px; white-space: nowrap; background: rgba(0,0,0,0.05); color: var(--mid); }
+  .mx-tag.easy { background: rgba(94,139,111,0.14); color: var(--green); }
+  .mx-tag.medium { background: rgba(201,168,76,0.18); color: #8a6d1f; }
+  .mx-tag.hard { background: rgba(176,39,28,0.1); color: var(--red); }
+  .mx-tag.fixed { background: rgba(94,139,111,0.14); color: var(--green); }
+  .mx-tag.open { background: rgba(176,39,28,0.1); color: var(--red); }
+  @media (max-width: 640px) { .mx-sum { grid-template-columns: 1fr auto; } .mx-when { grid-column: 1 / -1; } }
   .fp-pill { flex: none; font-size: 0.66rem; font-weight: 700; padding: 0.12rem 0.5rem; border-radius: 999px; white-space: nowrap; margin-top: 0.1rem; }
   .fp-pill.send { background: rgba(94,139,111,0.14); color: var(--green); }
   .fp-pill.draft { background: rgba(201,168,76,0.18); color: #8a6d1f; }
@@ -1082,6 +1094,7 @@
     .sched-hint { display: none; }
   }
 </style>
+<link rel="stylesheet" href="question-viewer.css?v=20261028a">
 </head>
 <body>
 
@@ -1170,6 +1183,7 @@
     <div class="tabbar">
       <button type="button" class="tab is-on" data-tab="week">This week</button>
       <button type="button" class="tab" data-tab="scores" id="tab-btn-scores">Scores</button>
+      <button type="button" class="tab" data-tab="misses">Mistakes</button>
       <button type="button" class="tab" data-tab="homework">Schedule</button>
       <button type="button" class="tab" data-tab="account">Account</button>
     </div>
@@ -1254,6 +1268,24 @@
           <div id="stu-evidence"><div class="empty">Loading&hellip;</div></div>
         </div>
       </details>
+    </section>
+
+    <!-- MISTAKES (2026-10-28): every question they missed in the Question Bank, Challenge and Rush, from PracticeLog
+         (the same read as the evidence panel). Loaded the first time the tab opens. Tap a row for the question. -->
+    <section id="tab-misses" style="display:none;">
+      <div class="card">
+        <h2>Question Bank mistakes</h2>
+        <p class="card-sub">Every question missed in the Question Bank, Challenge questions and Rush, newest first. Tap one to open it as they saw it, with their answer.</p>
+        <div class="mx-bar" id="mx-bar">
+          <select id="mx-status" aria-label="Status"><option value="all">Still wrong and fixed</option><option value="open">Still wrong</option><option value="fixed">Fixed since</option></select>
+          <select id="mx-subj" aria-label="Subject"><option value="all">Both subjects</option><option value="math">Math</option><option value="rw">Reading and Writing</option></select>
+          <select id="mx-src" aria-label="Source"><option value="all">Every source</option><option value="qb">Question Bank</option><option value="chal">Challenge</option><option value="rush">Rush</option></select>
+          <select id="mx-days" aria-label="When"><option value="all">Any time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select>
+          <select id="mx-diff" aria-label="Difficulty"><option value="all">Any difficulty</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
+        </div>
+        <div class="mx-count" id="mx-count"></div>
+        <div id="mx-list"><div class="empty">Loading&hellip;</div></div>
+      </div>
     </section>
 
     <section id="tab-homework" style="display:none;">
@@ -1549,6 +1581,7 @@
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="signals.js?v=20261019a"></script>
+<script src="question-viewer.js?v=20261028a"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -2582,6 +2615,8 @@
     loadStudentPrep(student.key);
     loadFridayNote(student.key);
     loadRecapAdmin(student.key);
+    mx.key = ''; mx.items = null;
+    if (activeTab === 'misses') loadMisses();
   }
 
   document.querySelectorAll('#student .tabbar .tab').forEach(function (btn) {
@@ -2593,13 +2628,14 @@
     document.querySelectorAll('#student .tabbar .tab').forEach(function (b) {
       b.classList.toggle('is-on', b.getAttribute('data-tab') === tab);
     });
-    ['week', 'scores', 'homework', 'account'].forEach(function (t) {
+    ['week', 'scores', 'misses', 'homework', 'account'].forEach(function (t) {
       $('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
     });
     replayAnim($('tab-' + tab), 'tab-in');
     // Drawn again on the way in, so the bars grow where they can be seen
     // rather than behind another tab.
     if (tab === 'scores' && currentDetail) { try { renderTrend(currentDetail); } catch (e) {} }
+    if (tab === 'misses') loadMisses();
     if (tab === 'homework') {
       if (!schedCalendar) initSchedCalendar();
       else { schedCalendar.updateSize(); schedCalendar.refetchEvents(); }
@@ -3650,13 +3686,10 @@
     var more = practiceCard + (habits ? '<div class="mcard">' + habits + '</div>' : '') + (pooled ? '<div class="mcard">' + pooled + '</div>' : '');
     $('stu-prep').innerHTML = renderPortalTime(snap, mins, p.snapError) + '<div class="prep-stats">' + stats.join('') + '</div>' +
       nextHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
-    /* Opening a part shows the answers in it; the bank loads on the first open. */
+    /* A part with answers opens them in the report's question viewer (Luca, 2026-10-28: "the same interface
+       ... for the comp check questions ... not these half assed drop downs"), at the first one they missed. */
     Array.prototype.forEach.call(document.querySelectorAll('tr.cu-row'), function (tr) {
-      tr.addEventListener('click', function () {
-        var k = tr.getAttribute('data-cu-part');
-        if (cuOpenParts[k]) delete cuOpenParts[k]; else cuOpenParts[k] = 1;
-        if (lastPrep && lastPrep.prep) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
-      });
+      tr.addEventListener('click', function () { cuOpenPart(tr.getAttribute('data-cu-part'), tr); });
     });
     var pm = $('stu-prep-more');
     if (pm) pm.addEventListener('toggle', function () { moreOpen.prep = pm.open; });
@@ -3685,51 +3718,29 @@
     document.head.appendChild(sc);
     return null;
   }
-  /* THE ANSWERS THEMSELVES (Luca, 2026-10-04). The rows above are a tally;
-     going through a part together needs the questions. A bank is big, so one
-     is fetched only when a part is actually opened, and only once. */
-  var cuOpenParts = {}, cuBankState = {};
-  function cuBank(which) {
-    var g = which === 'math' ? 'QUESTION_BANK_MATH' : 'QUESTION_BANK';
-    if (window[g]) return window[g];
-    if (cuBankState[which]) return null;
-    cuBankState[which] = 'loading';
-    var sc = document.createElement('script');
-    sc.src = (which === 'math' ? 'question-bank-math.js' : 'question-bank.js') + '?d=' + new Date().toISOString().slice(0, 10);
-    sc.onload = function () {
-      cuBankState[which] = 'done';
-      if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
-    };
-    sc.onerror = function () { cuBankState[which] = 'failed'; };
-    document.head.appendChild(sc);
-    return null;
-  }
-  function cuQuestion(which, qid) {
-    var bank = cuBank(which);
-    if (!bank) return null;
-    var ix = cuBankState[which + ':ix'];
-    if (!ix) { ix = cuBankState[which + ':ix'] = {}; bank.forEach(function (q) { ix[q.qid] = q; }); }
-    return ix[qid] || null;
-  }
-  // What the student put: a letter for multiple choice, the text for a grid-in.
-  function cuGiven(q, g) {
-    if (g === '' || g == null) return '\u2014';
-    if (q && q.type !== 'fr' && /^\d+$/.test(String(g))) return 'ABCDE'.charAt(Number(g)) || String(g);
-    return String(g);
-  }
-  function cuAnswerRows(which, items) {
-    var loading = !cuBank(which);
-    return items.slice().sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; }).map(function (it) {
-      var q = cuQuestion(which, it.q);
-      var stem = q ? String(q.text || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : '';
-      var key = q ? (q.type === 'fr' ? String(q.answerValue == null ? '' : q.answerValue) : ('ABCDE'.charAt(q.correct) || '')) : '';
-      return '<tr class="' + (it.c ? 'cu-a-ok' : 'cu-a-no') + '">' +
-        '<td>' + (stem ? escHtml(stem.slice(0, 150)) + (stem.length > 150 ? '\u2026' : '')
-                       : (loading ? '<span class="cu-a-wait">loading the question\u2026</span> ' : '') + '<code>' + escHtml(it.q) + '</code>') + '</td>' +
-        '<td class="n">' + escHtml(cuGiven(q, it.g)) + '</td>' +
-        '<td class="n">' + (key ? escHtml(key) : '\u2014') + '</td>' +
-        '<td class="n">' + (it.c ? '\u2713' : '\u2717') + '</td></tr>';
-    }).join('');
+  /* THE ANSWERS THEMSELVES (Luca, 2026-10-04; in the question viewer from 2026-10-28). The rows above are
+     a tally; going through a part together needs the questions. A bank is big, so one is fetched only
+     when a part is actually opened (mxLoadBank), and only once. */
+  var cuParts = {};
+  function cuOpenPart(pk, tr) {
+    var part = cuParts[pk];
+    if (!part || !window.openBankQuestionViewer) return;
+    var items = part.items.slice().sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
+    var tag = tr && tr.querySelector('.cu-open'), was = tag && tag.textContent;
+    if (tag) tag.textContent = 'Opening\u2026';
+    mxLoadBank(part.which).catch(function () {}).then(function () {
+      if (tag) tag.textContent = was;
+      var first = 0;
+      for (var i = 0; i < items.length; i++) if (!items[i].c) { first = i; break; }
+      var rows = items.map(function (it) {
+        var q = mxIndex[it.q] || { type: 'fr', text: 'This question is no longer in the bank (id ' + escHtml(it.q) + ').' };
+        var g = it.g, num = (g === '' || g == null || isNaN(Number(g))) ? null : Number(g);
+        return { q: q, sectionKey: part.which === 'math' ? 'math' : 'reading-writing', ok: !!it.c, okLabel: 'Correct',
+                 givenIdx: (q.type !== 'fr' && q.choices) ? num : null, givenText: g == null ? '' : String(g),
+                 meta: 'Course check' + (it.at ? ' \u00b7 ' + new Date(it.at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '') };
+      });
+      window.openBankQuestionViewer(rows, first, part.name);
+    });
   }
   function cuLessonByNum(data, num) {
     var hit = null;
@@ -3900,17 +3911,16 @@
       ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Watched</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
         list.map(function (r) {
           var which = r.lessonId.charAt(0) === 'm' ? 'math' : 'rw';
-          var has = !!(r.items && r.items.length), pk = r.lessonId + '|' + r.part, open = has && cuOpenParts[pk];
-          return '<tr' + (has ? ' class="cu-row" data-cu-part="' + escHtml(pk) + '"' : '') + '><td>' +
-            (has ? '<span class="cu-tw">' + (open ? '\u25be' : '\u25b8') + '</span>' : '') + escHtml(nameOf(r)) + '</td>' +
+          var has = !!(r.items && r.items.length), pk = r.lessonId + '|' + r.part;
+          if (has) cuParts[pk] = { which: which, items: r.items, name: nameOf(r) };
+          var wrong = has ? r.items.filter(function (it) { return !it.c; }).length : 0;
+          return '<tr' + (has ? ' class="cu-row" data-cu-part="' + escHtml(pk) + '" title="Open the check questions"' : '') + '><td>' +
+            escHtml(nameOf(r)) + (has ? ' <span class="cu-open' + (wrong ? ' bad' : '') + '">' + (wrong ? wrong + ' missed \u203a' : 'Review \u203a') + '</span>' : '') + '</td>' +
             '<td class="n">' + (r.video ? mins(r.video) : '—') + '</td>' +
             '<td class="n">' + cuWatchCell(cuWatchShare(cu, r.lessonId, r.part)) + '</td>' +
             '<td class="n">' + (r.check ? mins(r.check) : '—') + '</td>' +
             '<td class="n">' + (r.n ? r.right + ' of ' + r.n + ' right' : '—') + '</td>' +
-            '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>' +
-            (open ? '<tr class="cu-ans"><td colspan="6"><table class="cu-atab"><thead><tr><th>Question</th>' +
-              '<th class="n">Put</th><th class="n">Answer</th><th class="n"></th></tr></thead><tbody>' +
-              cuAnswerRows(which, r.items) + '</tbody></table></td></tr>' : '');
+            '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>';
         }).join('') + '</tbody></table>'
       : '<div class="empty">No curriculum work since the last session.</div>';
     return '<div class="prep-sec">Curriculum since the last session</div>' +
@@ -5087,6 +5097,163 @@
         : '<span class="ev-read">' + reading + '</span>' + (detail ? '<span class="ev-detail">' + detail + '</span>' : ''));
     return '<div class="ev-row"><div class="ev-title">' + title + '</div><div class="ev-body">' + body + '</div></div>';
   }
+  /* One adminStudentEvidence request per student shared by the evidence
+     panel and the Mistakes tab; kept two minutes, dropped on a failure. */
+  var evidenceMemo = {};
+  function evidenceFor(key) {
+    var m = evidenceMemo[key];
+    if (m && Date.now() - m.at < 120000) return m.p;
+    var p = postToBackend({ action: 'adminStudentEvidence', adminKey: adminKey(), key: key }).then(function (ev) {
+      if (!ev || !ev.ok) delete evidenceMemo[key];
+      return ev;
+    }, function (e) { delete evidenceMemo[key]; throw e; });
+    evidenceMemo[key] = { at: Date.now(), p: p };
+    return p;
+  }
+
+  /* ═══ MISTAKES ═══ (2026-10-28) every question this student missed in the
+     Question Bank, Challenge questions or Rush, one row per question: when
+     it was last missed, how many times, the answer they gave, and whether a
+     later try (there or a Saved & Mistakes retry) got it right. The
+     question itself comes from the bank files, loaded only when a row is
+     opened. */
+  var mx = { key: '', items: null };
+  var MX_SRC = { qb: 'Question Bank', chal: 'Challenge', rush: 'Rush' };
+  var MX_BANKS = {
+    rw: { src: 'question-bank.js?v=20261025b', glob: 'QUESTION_BANK' },
+    math: { src: 'question-bank-math.js?v=20261025d', glob: 'QUESTION_BANK_MATH' },
+    chal: { src: 'challenge-questions.js?v=20260926a', glob: ['CHALLENGE_RW', 'CHALLENGE_MATH'] }
+  };
+  var mxLoads = {}, mxIndex = {};
+  function mxLoadBank(name) {
+    if (mxLoads[name]) return mxLoads[name];
+    var b = MX_BANKS[name];
+    var index = function () { [].concat(b.glob).forEach(function (g) { (window[g] || []).forEach(function (q) { if (q && q.qid) mxIndex[String(q.qid)] = q; }); }); };
+    if ([].concat(b.glob).every(function (g) { return window[g]; })) { index(); return (mxLoads[name] = Promise.resolve()); }
+    mxLoads[name] = new Promise(function (resolve, reject) {
+      var el = document.createElement('script');
+      el.src = b.src; el.async = true;
+      el.onload = function () { index(); resolve(); };
+      el.onerror = function () { delete mxLoads[name]; reject(new Error('load')); };
+      document.head.appendChild(el);
+    });
+    return mxLoads[name];
+  }
+  function mxBuild(events) {
+    var by = {};
+    events.forEach(function (e) {
+      if (!e || !e.q) return;
+      var subj = e.s === 'math' ? 'math' : 'rw';
+      var id = subj + '|' + e.q;
+      var t = Date.parse(e.at || '') || 0;
+      if (e.b === 'qb' || e.b === 'chal' || e.b === 'rush') {
+        var it = by[id] || (by[id] = { id: id, q: e.q, subj: subj, src: e.b, skill: e.sk || '', diff: e.d || '', misses: 0, lastMiss: 0, firstMiss: 0, given: null, fixedAt: 0 });
+        if (!it.skill && e.sk) it.skill = e.sk;
+        if (!it.diff && e.d) it.diff = e.d;
+        if (e.c) { if (it.misses && t >= it.lastMiss) it.fixedAt = t; }
+        else {
+          it.misses++;
+          if (t >= it.lastMiss) { it.lastMiss = t; it.given = e.g; it.src = e.b; it.fixedAt = 0; }
+          if (!it.firstMiss || t < it.firstMiss) it.firstMiss = t;
+        }
+      } else if (e.b === 'retry' && e.c && by[id] && by[id].misses && t >= by[id].lastMiss) {
+        by[id].fixedAt = t;
+      }
+    });
+    return Object.keys(by).map(function (k) { return by[k]; }).filter(function (it) { return it.misses; })
+      .sort(function (a, b) { return b.lastMiss - a.lastMiss; });
+  }
+  function loadMisses() {
+    var key = currentStudent && currentStudent.key;
+    if (!key) return;
+    if (mx.key === key && mx.items) { renderMisses(); return; }
+    mx.key = key; mx.items = null;
+    $('mx-count').textContent = '';
+    $('mx-list').innerHTML = '<div class="empty">Loading&hellip;</div>';
+    evidenceFor(key).then(function (ev) {
+      if (!currentStudent || currentStudent.key !== key) return;
+      if (!ev || !ev.ok) { $('mx-list').innerHTML = '<div class="empty">Could not load their answers (' + escHtml((ev && ev.error) || 'network') + ').</div>'; mx.key = ''; return; }
+      mx.items = mxBuild(ev.events || []);
+      renderMisses();
+    }, function () { if (mx.key === key) { mx.key = ''; $('mx-list').innerHTML = '<div class="empty">Could not load their answers (network).</div>'; } });
+  }
+  function mxDay(t) { return t ? new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
+  function mxFiltered() {
+    var f = { status: $('mx-status').value, subj: $('mx-subj').value, src: $('mx-src').value, days: $('mx-days').value, diff: $('mx-diff').value };
+    var since = f.days === 'all' ? 0 : Date.now() - Number(f.days) * 86400000;
+    return (mx.items || []).filter(function (it) {
+      return (f.status === 'all' || (f.status === 'fixed') === !!it.fixedAt) && (f.subj === 'all' || it.subj === f.subj) &&
+        (f.src === 'all' || it.src === f.src) && (!since || it.lastMiss >= since) && (f.diff === 'all' || String(it.diff).toLowerCase() === f.diff);
+    });
+  }
+  function renderMisses() {
+    if (!mx.items) return;
+    var all = mx.items, list = mxFiltered();
+    var open = all.filter(function (it) { return !it.fixedAt; }).length;
+    $('mx-count').textContent = all.length
+      ? (list.length === all.length ? '' : list.length + ' shown of ') + all.length + ' question' + (all.length === 1 ? '' : 's') + ' missed, ' + open + ' still wrong.'
+      : '';
+    if (!all.length) { $('mx-list').innerHTML = '<div class="empty">No Question Bank misses on record.</div>'; return; }
+    if (!list.length) { $('mx-list').innerHTML = '<div class="empty">Nothing matches these filters.</div>'; return; }
+    $('mx-list').innerHTML = list.map(function (it) {
+      var d = String(it.diff || '').toLowerCase();
+      return '<div class="mx-row" data-id="' + escHtml(it.id) + '">' +
+        '<button type="button" class="mx-sum">' +
+          '<span class="mx-when">' + escHtml(mxDay(it.lastMiss)) + '</span>' +
+          '<span class="mx-what">' + escHtml(it.skill || '(no skill)') + '<small>' + (it.subj === 'math' ? 'Math' : 'Reading and Writing') + ' · ' + escHtml(MX_SRC[it.src] || it.src) +
+            (it.misses > 1 ? ' · missed ' + it.misses + ' times' : '') + '</small></span>' +
+          '<span class="mx-tags">' + (d ? '<span class="mx-tag ' + escHtml(d) + '">' + escHtml(d.charAt(0).toUpperCase() + d.slice(1)) + '</span>' : '') +
+            (it.fixedAt ? '<span class="mx-tag fixed">Fixed ' + escHtml(mxDay(it.fixedAt)) + '</span>' : '<span class="mx-tag open">Still wrong</span>') + '</span>' +
+        '</button></div>';
+    }).join('');
+  }
+  /* Opens in the report's own question viewer (question-viewer.js, Luca 2026-10-28: "the same clickable
+     question interface ... as the reports and portal"), with Previous and Next walking the list as filtered. */
+  function mxOpen(id) {
+    var list = mxFiltered(), idx = 0;
+    list.forEach(function (x, i) { if (x.id === id) idx = i; });
+    var it = list[idx];
+    if (!it || !window.openBankQuestionViewer) return;
+    var need = {};
+    list.forEach(function (x) { if (!mxIndex[x.q]) need[x.src === 'chal' ? 'chal' : x.subj] = true; });
+    var row = mxRow(id), tag = row && row.querySelector('.mx-when'), was = tag && tag.textContent;
+    if (tag && Object.keys(need).length) tag.textContent = 'Opening\u2026';
+    Promise.all(Object.keys(need).map(function (n) { return mxLoadBank(n).catch(function () {}); })).then(function () {
+      // Rush and a few others can sit in the other bank; one more pass for anything still missing.
+      var more = {};
+      list.forEach(function (x) { if (!mxIndex[x.q]) { more.chal = true; more[x.subj] = true; } });
+      return Promise.all(Object.keys(more).map(function (n) { return mxLoadBank(n).catch(function () {}); }));
+    }).then(function () {
+      if (tag) tag.textContent = was;
+      var rows = list.map(function (x) {
+        var q = mxIndex[x.q] || { type: 'fr', text: 'This question is no longer in the bank (id ' + escHtml(x.q) + ').' };
+        var g = x.given, num = (g === '' || g == null || isNaN(Number(g))) ? null : Number(g);
+        return { q: q, sectionKey: x.subj === 'math' ? 'math' : 'reading-writing', ok: !!x.fixedAt, okLabel: 'Fixed since',
+                 givenIdx: (q.type !== 'fr' && q.choices) ? num : null, givenText: g == null ? '' : String(g),
+                 meta: (MX_SRC[x.src] || x.src) + ' \u00b7 ' + (x.skill || '') + ' \u00b7 missed ' + (x.misses > 1 ? x.misses + ' times, last ' : '') + mxDay(x.lastMiss) +
+                       (x.fixedAt ? ' \u00b7 right on ' + mxDay(x.fixedAt) : ' \u00b7 still wrong') };
+      });
+      window.openBankQuestionViewer(rows, idx, (currentStudent && currentStudent.name ? currentStudent.name.split(' ')[0] + '\u2019s mistakes' : 'Mistakes'));
+    });
+  }
+  function mxRow(id) {
+    var rows = $('mx-list').querySelectorAll('.mx-row');
+    for (var i = 0; i < rows.length; i++) if (rows[i].getAttribute('data-id') === id) return rows[i];
+    return null;
+  }
+  ['mx-status', 'mx-subj', 'mx-src', 'mx-days', 'mx-diff'].forEach(function (id) {
+    var el = $(id); if (el) el.addEventListener('change', renderMisses);
+  });
+  (function () {
+    var host = $('mx-list');
+    if (!host) return;
+    host.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.mx-sum');
+      if (!btn) return;
+      mxOpen(btn.closest('.mx-row').getAttribute('data-id'));
+    });
+  })();
+
   function loadStudentEvidence(data) {
     var host = $('stu-evidence');
     var MS = window.MorettiSignals;
@@ -5095,7 +5262,7 @@
     $('stu-evidence-card').style.display = '';
     var key = currentStudent && currentStudent.key;
     host.innerHTML = '<div class="empty">Loading&hellip;</div>';
-    postToBackend({ action: 'adminStudentEvidence', adminKey: adminKey(), key: key }).then(function (ev) {
+    evidenceFor(key).then(function (ev) {
       if (!currentStudent || currentStudent.key !== key) return;
       if (!ev || !ev.ok) {
         host.innerHTML = '<div class="empty">' + (ev && ev.error === 'unauthorized'
