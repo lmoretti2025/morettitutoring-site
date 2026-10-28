@@ -241,7 +241,10 @@
         <div><label for="b-email">Email</label><input id="b-email" type="email" autocomplete="email" required maxlength="120"></div>
       </div>
       <div class="two">
-        <div><label for="b-student">Student&rsquo;s name</label><input id="b-student" required maxlength="80"></div>
+        <div><label for="b-student">Student&rsquo;s first name</label><input id="b-student" required maxlength="40" autocomplete="off"></div>
+        <div><label for="b-student-last">Student&rsquo;s last name</label><input id="b-student-last" required maxlength="40" autocomplete="off"></div>
+      </div>
+      <div class="two">
         <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
       </div>
       <div id="repeat-wrap">
@@ -262,6 +265,7 @@
 
 <script src="analytics.js" defer></script>
 <script src="portal/backend-url.js"></script>
+<script src="email-check.js?v=20261028a"></script>
 <script>
 (function () {
   var URL_ = window.APPS_SCRIPT_URL;
@@ -316,10 +320,21 @@
 
   // The details from last time on this device, so a family booking again types nothing.
   var WHERE = 'online';   // from the Online / In person toggle
+  /* The student's first and last name, asked separately (Luca, 2026-10-28: a
+     family typed only "Matt", and the calendar could not tell it was Matthew
+     Gutierrez). Booked as "First Last". */
+  function setStudent(full) {
+    var w = String(full || '').trim().split(/\s+/);
+    if (!w[0]) return;
+    $('b-student').value = w[0];
+    $('b-student-last').value = w.slice(1).join(' ');
+  }
+  var emailOk = window.emailCheckWire ? window.emailCheckWire($('b-email')) : function () { return true; };
   var SAVED = 'mt_session_details';
   try {
     var pre = JSON.parse(localStorage.getItem(SAVED) || 'null');
-    if (pre) [['b-name', pre.name], ['b-email', pre.email], ['b-phone', pre.phone], ['b-student', pre.student]].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
+    if (pre) [['b-name', pre.name], ['b-email', pre.email], ['b-phone', pre.phone], ].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
+    if (pre) setStudent(pre.student);
     if (pre && (pre.where === 'online' || pre.where === 'inperson')) setWhere(pre.where);
   } catch (e) { /* nothing saved */ }
   function newRequestId() {
@@ -539,10 +554,13 @@
   $('book').addEventListener('submit', function (e) {
     e.preventDefault();
     if (!chosen) return;
-    var name = $('b-name').value.trim(), email = $('b-email').value.trim(), student = $('b-student').value.trim();
+    var name = $('b-name').value.trim(), email = $('b-email').value.trim();
+    var first = $('b-student').value.trim(), last = $('b-student-last').value.trim(), student = (first + ' ' + last).trim();
     if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
-    if (student.length < 2) { say('Please add the student’s name.', true); $('b-student').focus(); return; }
+    if (!emailOk()) { say('Please check your email address.', true); return; }
+    if (first.length < 2) { say('Please add the student’s first name.', true); $('b-student').focus(); return; }
+    // Moving a session booked before the last name was asked for: the name it has is enough.
+    if (!last && !moving) { say('Please add the student’s last name.', true); $('b-student-last').focus(); return; }
     var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: WHERE };
     $('go').disabled = true; $('go').textContent = moving ? 'Moving…' : 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
@@ -636,7 +654,8 @@
         box.innerHTML = '<p><b>This link doesn&rsquo;t match a booking.</b> Text me at <a href="sms:+12012752791">' + PHONE + '</a> and I&rsquo;ll sort it out.</p>';
         return;
       }
-      [['b-name', d.name], ['b-email', d.email], ['b-phone', d.phone], ['b-student', d.student]].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
+      [['b-name', d.name], ['b-email', d.email], ['b-phone', d.phone], ].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
+      setStudent(d.student);
       var rows = d.sessions.map(function (x) {
         var gone = x.state === 'cancelled' || x.state === 'moved';
         var tag = x.state === 'cancelled' ? 'Cancelled' : x.state === 'moved' ? 'Moved' : x.state === 'past' ? 'Done' : '';

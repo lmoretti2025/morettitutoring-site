@@ -240,6 +240,7 @@
 
 <script src="analytics.js" defer></script>
 <script src="portal/backend-url.js"></script>
+<script src="email-check.js?v=20261028a"></script>
 <script>
 (function () {
   var URL_ = window.APPS_SCRIPT_URL;
@@ -442,13 +443,15 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('scrim').classList.contains('open')) closeSheet(); });
 
   function say(text, isErr) { $('status').textContent = text; $('status').className = isErr ? 'err' : ''; }
+  // Typos like "hotmail.con" are caught before booking (email-check.js, 2026-10-28).
+  var emailOk = window.emailCheckWire ? window.emailCheckWire($('b-email')) : function () { return true; };
 
   $('book').addEventListener('submit', function (e) {
     e.preventDefault();
     if (!chosen) return;
     var name = $('b-name').value.trim(), email = $('b-email').value.trim();
     if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
+    if (!emailOk()) { say('Please check your email address.', true); return; }
     var phone = $('b-phone').value.trim();
     if (HOW === 'phone' && (phone.match(/\d/g) || []).length < 7) { say('Please add the best number to call you on.', true); $('b-phone').focus(); return; }
     // Booking checks every calendar again: 15-20 seconds (measured 2026-09-24).
