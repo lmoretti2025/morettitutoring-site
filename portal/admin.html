@@ -4173,9 +4173,8 @@
     }
     // When the weekly update goes (emails.gs weeklyTiming_). Older deployments send nothing: say nothing.
     if (typeof s.weeklyAfter === 'string') {
-      row('Weekly update', s.weeklyAfter === 'second'
-        ? 'After the <b>second session</b> each week <button type="button" class="mini" data-weekly-after="">Back to automatic</button>'
-        : 'After the week\u2019s last session <button type="button" class="mini" data-weekly-after="second">After the 2nd instead</button>');
+      // Two or more sessions in a week: always after the last (2026-10-27); the old "after the 2nd" setting is retired.
+      row('Weekly update', 'The morning after the week\u2019s last session');
     }
     (s.emailOptOut || []).forEach(function (addr) {
       row('Unsubscribed', escHtml(addr) + ' ' +
