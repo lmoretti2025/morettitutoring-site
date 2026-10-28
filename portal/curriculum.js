@@ -304,7 +304,42 @@
     '@media(max-width:900px){#cu-root .cu-panel{border-right:0;border-bottom:1px solid var(--cu-line);padding-bottom:.6rem}}',
     '@media(max-width:520px){#cu-root .cu-why{padding-left:.4rem}#cu-root .cu-md-t{gap:4px}#cu-root .cu-tile i{display:none}#cu-root .cu-card{padding-left:.85rem}}',
     '@media(prefers-reduced-motion:reduce){#cu-root .cu-map.go .cu-tile,#cu-root .cu-why{animation:none}}',
-    '@media(max-width:520px){#cu-root .cu-go{display:none}#cu-root .cu-unit-p .cu-mbar{display:none}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}'
+    '@media(max-width:520px){#cu-root .cu-go{display:none}#cu-root .cu-unit-p .cu-mbar{display:none}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}',
+    /* THE NOTES, AS A BOOK (Luca, 2026-10-28): every lesson's notes in one
+       column, contents on the left, the lesson you are reading lit in it. */
+    '#cu-root .cu-topr{display:flex;gap:.6rem;flex-wrap:wrap}',
+    '#cu-root .cu-book{display:grid;grid-template-columns:260px 1fr;gap:2rem;align-items:start}',
+    '#cu-root .cu-bk-toc{position:sticky;top:1rem;max-height:calc(100vh - 2rem);display:flex;flex-direction:column;border-right:1px solid var(--cu-line);padding-right:.9rem}',
+    '#cu-root .cu-bk-q{width:100%;border:1px solid var(--cu-line);border-radius:999px;padding:.55rem .95rem;font:400 .85rem var(--hel,Poppins,sans-serif);background:#fff;color:inherit;margin-bottom:.6rem}',
+    '#cu-root .cu-bk-q:focus{outline:2px solid color-mix(in srgb,var(--red,#B0271C) 35%,transparent);outline-offset:1px}',
+    '#cu-root .cu-bk-nav{overflow-y:auto;min-height:0;padding-bottom:1rem}',
+    '#cu-root .cu-bk-d{font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin:1rem 0 .25rem;padding-left:.5rem}#cu-root .cu-bk-d:first-child{margin-top:.2rem}',
+    '#cu-root .cu-bk-l{display:grid;grid-template-columns:2.3rem 1fr;gap:.3rem;width:100%;border:0;border-left:2px solid transparent;background:none;text-align:left;padding:.32rem .5rem;font:400 .8rem/1.35 var(--hel,Poppins,sans-serif);color:var(--text,#111);cursor:pointer;border-radius:0 6px 6px 0}',
+    '#cu-root .cu-bk-l span{font-weight:600;color:var(--mid)}',
+    '#cu-root .cu-bk-l:hover{background:var(--cu-soft)}',
+    '#cu-root .cu-bk-l.on{border-left-color:var(--c);background:color-mix(in srgb,var(--c) 8%,transparent);font-weight:500}#cu-root .cu-bk-l.on span{color:var(--c)}',
+    '#cu-root .cu-bk-l.locked{color:#a8a39c;cursor:default}#cu-root .cu-bk-l.locked span{color:#c4bfb8}',
+    '#cu-root .cu-bk-tocb{display:none}',
+    '#cu-root .cu-bk-main{min-width:0;max-width:720px}',
+    '#cu-root .cu-bk-intro{padding-bottom:1rem;border-bottom:1px solid var(--cu-line);margin-bottom:.4rem}#cu-root .cu-bk-intro h1{margin-top:.2rem}',
+    '#cu-root .cu-bk-uh{font-size:clamp(1.5rem,2.6vw,1.9rem);margin:2.6rem 0 0;padding-bottom:.5rem;border-bottom:2px solid var(--c)}',
+    '#cu-root .cu-bk-ch{padding:1.6rem 0 .6rem;border-bottom:1px solid var(--cu-line);scroll-margin-top:1rem}',
+    '#cu-root .cu-bk-chh{display:flex;align-items:flex-start;gap:.8rem;flex-wrap:wrap;margin-bottom:.3rem}',
+    '#cu-root .cu-bk-chh .n{flex:none;min-width:2.6rem;height:2rem;border-radius:6px;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font:600 .8rem var(--hel,Poppins,sans-serif);margin-top:.2rem}',
+    '#cu-root .cu-bk-chh h2{flex:1 1 16rem;font-size:clamp(1.25rem,2.2vw,1.55rem);line-height:1.2;margin:.15rem 0 0}',
+    '#cu-root .cu-bk-chh .cu-btn{padding:.5rem 1rem;font-size:.78rem}',
+    '#cu-root .cu-bk-part{font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin:1.5rem 0 -.4rem}',
+    '#cu-root .cu-bk-ch .cu-notes-b{padding:0}',
+    '#cu-root .cu-bk-lock{font-size:.88rem;color:var(--mid);margin:.4rem 0 .8rem}',
+    '#cu-root .cu-bk-none{padding:2rem 0;color:var(--mid)}',
+    '#cu-root [hidden]{display:none!important}',
+    '::highlight(cu-bk){background:#fde68a;color:inherit}',
+    '@media(max-width:900px){#cu-root .cu-book{grid-template-columns:1fr;gap:.6rem}' +
+      '#cu-root .cu-bk-toc{position:sticky;top:3.4rem;z-index:5;max-height:none;border-right:0;padding:.5rem 0;background:#fff;border-bottom:1px solid var(--cu-line);flex-direction:row;flex-wrap:wrap;gap:.5rem}' +
+      '#cu-root .cu-bk-tocb{display:block;flex:none;border:1px solid var(--cu-line);background:#fff;border-radius:999px;padding:.5rem .95rem;font:500 .82rem var(--hel,Poppins,sans-serif);color:inherit;cursor:pointer}' +
+      '#cu-root .cu-bk-q{flex:1 1 8rem;width:auto;margin:0}#cu-root .cu-bk-nav{flex:1 1 100%}' +
+      '#cu-root .cu-bk-nav{display:none;max-height:55vh}#cu-root .cu-bk-toc.open .cu-bk-nav{display:block}' +
+      '#cu-root .cu-bk-ch{scroll-margin-top:9rem}}'
   ].join('');
   function injectCss() {
     if (document.getElementById('cu-css')) return;
@@ -710,7 +745,7 @@
 
   function rerender() {
     if (!root) return;
-    if (view.name === 'lesson') renderLesson(); else renderHome();
+    if (view.name === 'lesson') renderLesson(); else if (view.name === 'notes') renderNotes(); else renderHome();
   }
   /* WHERE THEY ARE, FOR THE ADMIN PAGE (Luca, 2026-10-02). The presence
      heartbeat (auth-client.js) asks for this on the curriculum screen and
@@ -725,7 +760,7 @@
       if (hit) return short(hit.l.num + ' ' + hit.l.title, 30) + ' - Part ' + (view.part + 1) + ' ' + (view.step === 'check' ? 'check' : 'video');
     }
     var c = courses().filter(function (x) { return x.id === view.course; })[0];
-    return short((c ? c.title : 'Course') + ' lessons', 30);
+    return short((c ? c.title : 'Course') + (view.name === 'notes' ? ' notes' : ' lessons'), 30);
   }
   window.curriculumWhere = function () { try { return root ? whereNow() : ''; } catch (e) { return ''; } };
   var whereSent = '';
@@ -755,18 +790,132 @@
      The header and the course tabs are drawn once and never move; switching
      course crossfades only what is below them, keeping its height while it
      swaps, so nothing on the page jumps (Luca, 2026-09-27). */
+  function topHtml(c) {
+    var notes = view.name === 'notes';
+    return '<div class="cu-top"><div class="cu-toph">Curriculum</div><div class="cu-topr">' +
+      '<div class="cu-tabs" role="group" aria-label="Show"><button type="button" data-mode="home" aria-pressed="' + !notes + '">Lessons</button><button type="button" data-mode="notes" aria-pressed="' + notes + '">Notes</button></div>' +
+      '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
+        return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
+      }).join('') + '</div></div></div>';
+  }
   function renderHome() {
     calcPop(false);
     whereChanged();
+    bookSpy(null);
     var c = course(view.course);
     view.course = c.id;
-    root.innerHTML = '<div class="cu-wrap">' +
-      '<div class="cu-top"><div class="cu-toph">Curriculum</div>' +
-      '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
-        return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
-      }).join('') + '</div></div>' +
+    root.innerHTML = '<div class="cu-wrap">' + topHtml(c) +
       '<div class="cu-body" id="cu-body">' + homeBody(c) + '</div></div>';
     warmLikely(c);
+  }
+
+  /* ---------- the notes, as a book (Luca, 2026-10-28) ----------
+     Every lesson's notes, part by part, in course order: a textbook beside
+     the lessons. The same locks as the lessons (Math past 1.1 waits on
+     1.1's video; Reading & Writing waits until it is out). Parts are not
+     locked here: it is for reading and looking things up. */
+  function renderNotes() {
+    calcPop(false);
+    var c = course(view.course);
+    view.course = c.id;
+    view.name = 'notes';
+    whereChanged();
+    root.innerHTML = '<div class="cu-wrap">' + topHtml(c) +
+      '<div class="cu-body" id="cu-body">' + notesBody(c) + '</div></div>';
+    bookSpy(c);
+  }
+  function notesBody(c) {
+    if (courseSoon(c)) {
+      return '<div class="cu-gate cu-in" style="--d:1"><span class="cu-gate-ic">' + LOCK_SVG + '</span><div><b>Coming soon</b>' +
+        '<span>The Reading &amp; Writing notes open with its lessons. The Math notes are ready now.</span></div>' +
+        '<button type="button" class="cu-btn" data-course="math">Go to Math &rarr;</button></div>';
+    }
+    var locked = c.id === 'math' && mathLocked(), gl = findLesson(GATE_LESSON);
+    var gate = locked ? '<div class="cu-gate cu-in" style="--d:1"><span class="cu-gate-ic">' + LOCK_SVG + '</span><div><b>Watch ' + esc(gl ? gl.l.num : '1.1') + ' to open the rest of the notes</b>' +
+      '<span>Its notes are below. The rest of Math, notes included, opens once you have watched it.</span></div>' +
+      '<button type="button" class="cu-btn" data-lesson="' + GATE_LESSON + '">Watch ' + esc(gl ? gl.l.num : '1.1') + ' &rarr;</button></div>' : '';
+    var toc = '', book = '', n = 0;
+    c.domains.forEach(function (d) {
+      var col = dcolor(d);
+      toc += '<div class="cu-bk-d" style="--c:' + col + '" data-bk-unit="' + esc(d.name) + '">' + esc(d.name) + '</div>';
+      book += '<section class="cu-bk-unit" style="--c:' + col + '" data-bk-unit="' + esc(d.name) + '"><h2 class="cu-bk-uh">' + esc(d.name) + '</h2>';
+      d.lessons.forEach(function (l) {
+        var lock = lessonLocked(c, l);
+        n++;
+        toc += '<button type="button" class="cu-bk-l' + (lock ? ' locked' : '') + '" style="--c:' + col + '"' + (lock ? ' data-locked title="Opens after 1.1"' : ' data-bk-go="' + esc(l.id) + '"') + '><span>' + esc(l.num) + '</span>' + esc(l.title) + '</button>';
+        if (lock) return;
+        book += '<article class="cu-bk-ch" data-bk="' + esc(l.id) + '"><div class="cu-bk-chh"><span class="n">' + esc(l.num) + '</span><h2>' + esc(l.title) + '</h2>' +
+          '<button type="button" class="cu-btn ghost" data-lesson="' + esc(l.id) + '">Watch the lesson &rarr;</button></div>' +
+          l.parts.map(function (p, i) {
+            return (l.parts.length > 1 ? '<div class="cu-bk-part">' + esc(partTitle(l, i)) + '</div>' : '') +
+              '<div class="cu-notes-b">' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div>';
+          }).join('') + '</article>';
+      });
+      book += '</section>';
+    });
+    return gate + '<div class="cu-book cu-in" style="--d:1">' +
+      '<aside class="cu-bk-toc"><button type="button" class="cu-bk-tocb" data-bk-toc aria-expanded="false">Contents</button>' +
+        '<input type="search" class="cu-bk-q" id="cu-bk-q" placeholder="Search the notes" aria-label="Search the notes" autocomplete="off">' +
+        '<nav class="cu-bk-nav" aria-label="Contents">' + toc + '</nav></aside>' +
+      '<div class="cu-bk-main"><div class="cu-bk-intro"><div class="cu-kicker">Notes</div><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
+        '<div class="cu-sub">The notes from all ' + n + ' lessons, in course order. Each one links to its video.</div></div>' +
+        book + '<p class="cu-bk-none" hidden></p></div></div>';
+  }
+  /* The lesson being read is lit in the contents, which scrolls itself to keep it in view. */
+  var bookObs = null;
+  function bookSpy(c) {
+    if (bookObs) { bookObs.disconnect(); bookObs = null; }
+    try { if (window.CSS && window.CSS.highlights) window.CSS.highlights.delete('cu-bk'); } catch (e) {}
+    if (!c || !('IntersectionObserver' in window)) return;
+    var nav = $('.cu-bk-nav', root);
+    if (!nav) return;
+    bookObs = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var id = en.target.getAttribute('data-bk');
+        $$('.cu-bk-l', nav).forEach(function (b) {
+          var on = b.getAttribute('data-bk-go') === id;
+          b.classList.toggle('on', on);
+          if (on && nav.scrollHeight > nav.clientHeight) {
+            var top = b.offsetTop - nav.offsetTop;
+            if (top < nav.scrollTop || top > nav.scrollTop + nav.clientHeight - b.offsetHeight) nav.scrollTop = top - nav.clientHeight / 3;
+          }
+        });
+      });
+    }, { rootMargin: '-15% 0px -75% 0px' });
+    $$('.cu-bk-ch', root).forEach(function (a) { bookObs.observe(a); });
+  }
+  /* Search: only the lessons that mention it stay, the words marked where the browser can. */
+  function bookSearch(q) {
+    q = String(q || '').trim().toLowerCase();
+    var shown = 0, ranges = [];
+    $$('.cu-bk-ch', root).forEach(function (a) {
+      if (a.__txt == null) a.__txt = a.textContent.toLowerCase();
+      var hit = !q || a.__txt.indexOf(q) >= 0;
+      a.hidden = !hit;
+      var b = $('.cu-bk-l[data-bk-go="' + a.getAttribute('data-bk') + '"]', root);
+      if (b) b.hidden = !hit;
+      if (hit) shown++;
+      if (hit && q && window.CSS && window.CSS.highlights) {
+        var w = document.createTreeWalker(a, NodeFilter.SHOW_TEXT), node;
+        while ((node = w.nextNode())) {
+          var s = node.nodeValue.toLowerCase(), at = s.indexOf(q);
+          while (at >= 0) { var r = new Range(); r.setStart(node, at); r.setEnd(node, at + q.length); ranges.push(r); at = s.indexOf(q, at + q.length); }
+        }
+      }
+    });
+    $$('.cu-bk-l.locked', root).forEach(function (b) { b.hidden = !!q; });
+    $$('[data-bk-unit]', root).forEach(function (u) {
+      if (u.tagName === 'SECTION') u.hidden = !$$('.cu-bk-ch', u).some(function (a) { return !a.hidden; });
+    });
+    $$('.cu-bk-d', root).forEach(function (h) {
+      var el = h.nextElementSibling, any = false;
+      while (el && !el.classList.contains('cu-bk-d')) { if (!el.hidden) any = true; el = el.nextElementSibling; }
+      h.hidden = !any;
+    });
+    var none = $('.cu-bk-none', root);
+    if (none) { none.hidden = shown > 0; none.textContent = 'Nothing in the notes mentions “' + q + '”.'; }
+    try { if (window.CSS && window.CSS.highlights) { if (ranges.length) { var hl = new Highlight(); ranges.forEach(function (r) { hl.add(r); }); window.CSS.highlights.set('cu-bk', hl); } else window.CSS.highlights.delete('cu-bk'); } } catch (e) {}
   }
   // The video most likely to be opened next from this page: its link is asked for now.
   function warmLikely(c) {
@@ -887,7 +1036,8 @@
     body.style.minHeight = body.offsetHeight + 'px';          // hold the space while it swaps
     body.classList.add('cu-fading');
     setTimeout(function () {
-      body.innerHTML = homeBody(course(id));
+      if (view.name === 'notes') { whereChanged(); body.innerHTML = notesBody(course(id)); bookSpy(course(id)); }
+      else body.innerHTML = homeBody(course(id));
       body.classList.remove('cu-fading');
       requestAnimationFrame(function () { body.style.minHeight = ''; });
     }, 160);
@@ -900,6 +1050,7 @@
     // A locked lesson leads to the one that opens it; a course not out yet, back to its page.
     if (courseSoon(hit.c)) { view.name = 'home'; view.course = hit.c.id; return renderHome(); }
     if (lessonLocked(hit.c, hit.l)) { if (id === GATE_LESSON) return; return openLesson(GATE_LESSON); }
+    bookSpy(null);
     view.name = 'lesson'; view.course = hit.c.id; view.lessonId = id;
     // Never past what is unlocked.
     var p = typeof part === 'number' ? part : firstOpenPart(hit.l);
@@ -1319,6 +1470,25 @@
       if (gc) { try { gc.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) {} gc.classList.remove('nudge'); void gc.offsetWidth; gc.classList.add('nudge'); }
       return;
     }
+    if ((b = t.closest('[data-mode]'))) {
+      var mode = b.getAttribute('data-mode');
+      if (mode === view.name) return;
+      view.name = mode; check = null;
+      if (mode === 'notes') renderNotes(); else renderHome();
+      try { window.scrollTo(0, 0); } catch (err) {}
+      return;
+    }
+    if ((b = t.closest('[data-bk-toc]'))) {
+      var tc = b.closest('.cu-bk-toc'), op = !tc.classList.contains('open');
+      tc.classList.toggle('open', op); b.setAttribute('aria-expanded', String(op));
+      return;
+    }
+    if ((b = t.closest('[data-bk-go]'))) {
+      var ch = $('.cu-bk-ch[data-bk="' + b.getAttribute('data-bk-go') + '"]', root), toc = b.closest('.cu-bk-toc');
+      if (toc && toc.classList.contains('open')) { toc.classList.remove('open'); $('[data-bk-toc]', toc).setAttribute('aria-expanded', 'false'); }
+      if (ch) { try { ch.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (err) { ch.scrollIntoView(); } }
+      return;
+    }
     if ((b = t.closest('[data-course]'))) return switchCourse(b.getAttribute('data-course'));
     if ((b = t.closest('[data-resume]'))) { var L = prog.last; return openLesson(L.lessonId, L.part, L.step); }
     if ((b = t.closest('[data-lesson]'))) return openLesson(b.getAttribute('data-lesson'));
@@ -1480,6 +1650,7 @@
     injectCss();
     if (!root.__wired) {
       root.addEventListener('click', onClick);
+      root.addEventListener('input', function (e) { if (e.target.id === 'cu-bk-q') bookSearch(e.target.value); });
       root.addEventListener('mouseover', function (e) {
         var t = e.target.closest && e.target.closest('.cu-tile'), box = t && $('.cu-map-info', root);
         if (box && view.name === 'home') box.innerHTML = mapInfo(course(view.course), t.getAttribute('data-tip'));
