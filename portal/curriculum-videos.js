@@ -61,5 +61,14 @@ window.CURRICULUM_VIDEOS = {
   // questions of its own, so it belongs to Part 1.
   //   Part 2  "Without a table"      appears 8:03  -> 8:02
   //   Part 3  "Adding the brackets"  appears 13:03 -> 13:02
-  'm3.11': ['r2:m3.11-1.mp4@0:00-8:02', 'r2:m3.11-1.mp4@8:02-13:02', 'r2:m3.11-1.mp4@13:02']
+  'm3.11': ['r2:m3.11-1.mp4@0:00-8:02', 'r2:m3.11-1.mp4@8:02-13:02', 'r2:m3.11-1.mp4@13:02'],
+  // 3.3, recorded 2026-10-28. Six parts, boundaries read off the video the
+  // usual way: the second the part's title slide appears, one second early.
+  //   Part 2  "What “Solutions” Mean for a Quadratic"  appears 6:25  -> 6:24
+  //   Part 3  "The Slider"                              appears 12:43 -> 12:42
+  //   Part 4  "Solutions from Factored Form"            appears 19:47 -> 19:46
+  //   Part 5  "The Quadratic Formula"                   appears 27:57 -> 27:56
+  //   Part 6  "Sum and Product of Solutions"            appears 36:40 -> 36:39
+  'm3.3': ['r2:m3.3-1.mp4@0:00-6:24', 'r2:m3.3-1.mp4@6:24-12:42', 'r2:m3.3-1.mp4@12:42-19:46',
+           'r2:m3.3-1.mp4@19:46-27:56', 'r2:m3.3-1.mp4@27:56-36:39', 'r2:m3.3-1.mp4@36:39']
 };
