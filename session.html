@@ -143,6 +143,7 @@
   .addtime { display: inline-block; background: none; border: none; padding: 0; margin: 0 0 18px; font: inherit; font-size: .84rem; font-weight: 500; color: var(--red); cursor: pointer; }
   .addtime:hover { text-decoration: underline; }
   label { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .se-why { font-size: 0.82rem; color: var(--muted); margin: -4px 0 14px; line-height: 1.45; }
   label .opt { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--faint); }
   input, select, textarea { width: 100%; font: inherit; font-size: 15px; font-weight: 400; color: var(--ink); background: var(--paper);
                             border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; margin: 0 0 14px; transition: border-color .15s, box-shadow .15s; }
@@ -244,6 +245,11 @@
         <div><label for="b-student">Student&rsquo;s first name</label><input id="b-student" required maxlength="40" autocomplete="off"></div>
         <div><label for="b-student-last">Student&rsquo;s last name</label><input id="b-student-last" required maxlength="40" autocomplete="off"></div>
       </div>
+      <!-- A family new to Luca (no match on the Students sheet): the student's own address, for their portal invitation. -->
+      <div id="se-wrap" hidden>
+        <label for="b-student-email">Student&rsquo;s email</label><input id="b-student-email" type="email" autocomplete="off" maxlength="120">
+        <p class="se-why">Looks like you&rsquo;re new here, welcome! I&rsquo;ll send the student an invitation to their practice portal at this address.</p>
+      </div>
       <div class="two">
         <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
       </div>
@@ -330,6 +336,7 @@
     $('b-student-last').value = w.slice(1).join(' ');
   }
   var emailOk = window.emailCheckWire ? window.emailCheckWire($('b-email')) : function () { return true; };
+  var studentEmailOk = window.emailCheckWire ? window.emailCheckWire($('b-student-email')) : function () { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('b-student-email').value.trim()); };
   var SAVED = 'mt_session_details';
   try {
     var pre = JSON.parse(localStorage.getItem(SAVED) || 'null');
@@ -561,12 +568,15 @@
     if (first.length < 2) { say('Please add the student’s first name.', true); $('b-student').focus(); return; }
     // Moving a session booked before the last name was asked for: the name it has is enough.
     if (!last && !moving) { say('Please add the student’s last name.', true); $('b-student-last').focus(); return; }
+    var asked = !$('se-wrap').hidden, studentEmail = asked ? $('b-student-email').value.trim() : '';
+    if (asked && !studentEmailOk()) { say('Please check the student’s email address.', true); $('b-student-email').focus(); return; }
     var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: WHERE };
     $('go').disabled = true; $('go').textContent = moving ? 'Moving…' : 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
     var req = { action: 'bookSession', start: chosen, minutes: pickLen || LEN, requestId: requestId, name: name, email: email,
            phone: details.phone, student: student, where: details.where, notes: $('b-notes').value.trim(), website: $('b-website').value,
            repeat: moving ? 1 : Number($('b-repeat').value) };
+    if (studentEmail) req.studentEmail = studentEmail;
     if (moving) { req.replace = MANAGE; req.replaceStart = moving.start; }
     else if (picks.length > 1) req.starts = picks.slice();
     post(req, BOOK_TIMEOUT_MS)
@@ -577,6 +587,13 @@
           return done(d, email, details);
         }
         var err = d && d.error;
+        // New to Luca: one more field, then Book again. Nothing was booked yet.
+        if (err === 'need_student_email') {
+          $('se-wrap').hidden = false;
+          say('One more thing: the student’s email, for their portal invitation.', true);
+          return $('b-student-email').focus();
+        }
+        if (err === 'bad_student_email') { $('se-wrap').hidden = false; say('Please check the student’s email address.', true); return $('b-student-email').focus(); }
         if (err === 'slot_taken') {
           // With several times, drop only the one that went and keep the rest.
           if (picks.length > 1 && d.at) {
@@ -634,6 +651,7 @@
       times + skippedHtml +
       '<p>A confirmation' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>, with a calendar file and a link to move or cancel' + (d.ongoing ? ' (or stop the weekly sessions)' : '') + ' up to 24 hours before. ' +
       'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
+      (d.portal && d.portal.sentTo ? '<p>' + esc(details.student.split(' ')[0]) + '&rsquo;s invitation to the practice portal went to <b>' + esc(d.portal.sentTo) + '</b>.</p>' : '') +
       '<p style="margin-top:18px"><button type="button" class="btn ghost" id="another">' + (skipped.length ? 'Pick another time' : 'Book another session') + '</button></p>' +
       '<p style="margin-top:14px"><b style="color:var(--ink);font-weight:600">Luca Moretti</b></p></div>';
     $('another').onclick = function () { load(); };

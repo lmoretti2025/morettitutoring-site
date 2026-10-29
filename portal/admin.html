@@ -173,6 +173,54 @@
   .cu-vc.ok { background: rgba(63,143,95,.13); color: #2F7A4F; }
   .cu-vc.part { background: rgba(201,168,76,.18); color: #7A5F1C; }
   .cu-vc.no { background: rgba(176,39,28,.1); color: var(--red); }
+  /* The Course tab and course work assigned (2026-10-29) */
+  .co-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 0 0 1rem; }
+  .co-stat { border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.85rem; min-width: 0; }
+  .co-stat .lbl { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+  .co-stat .num { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 0.15rem; }
+  .co-stat .num small { font-size: 0.78rem; font-weight: 500; color: var(--mid); }
+  .co-stat .sub { font-size: 0.74rem; color: var(--mid); margin-top: 0.15rem; }
+  .co-stat .sub b.ok { color: #2F7A4F; } .co-stat .sub b.part { color: #7A5F1C; } .co-stat .sub b.no { color: var(--red); }
+  .co-bar { height: 6px; border-radius: 999px; background: rgba(17,17,17,.07); overflow: hidden; margin-top: 0.45rem; }
+  .co-bar i { display: block; height: 100%; background: #3F8F5F; border-radius: 999px; }
+  .co-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; font-size: 0.72rem; color: var(--mid); margin: 0 0 0.6rem; }
+  .co-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .co-legend .co-p { width: 13px; height: 13px; font-size: 0; }
+  .co-course { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin: 1.2rem 0 0.2rem; }
+  .co-dom { border-top: 1px solid var(--border); }
+  .co-dom > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0; font-weight: 600; font-size: 0.88rem; }
+  .co-dom > summary::-webkit-details-marker { display: none; }
+  .co-dom > summary::before { content: '\203A'; color: var(--faint); transition: transform .15s; display: inline-block; width: 0.6rem; }
+  .co-dom[open] > summary::before { transform: rotate(90deg); }
+  .co-dom > summary .co-of { margin-left: auto; font-weight: 500; font-size: 0.76rem; color: var(--mid); font-variant-numeric: tabular-nums; }
+  .co-dom > summary .co-bar { width: 90px; margin-top: 0; flex: none; }
+  .co-dom-body { padding: 0 0 0.6rem 1.35rem; }
+  .co-l { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) auto 6.2rem; gap: 0.6rem; align-items: center; padding: 0.32rem 0; font-size: 0.82rem; }
+  .co-l + .co-l { border-top: 1px dashed var(--border); }
+  .co-l.cold .co-n, .co-l.cold .co-t { color: var(--mid); }
+  .co-n { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .co-t { min-width: 0; }
+  .co-t small { display: block; font-size: 0.7rem; color: var(--mid); }
+  .co-t small.ok { color: #2F7A4F; }
+  .co-parts { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; }
+  .co-p { width: 20px; height: 20px; border-radius: 5px; font-size: 0.62rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: rgba(17,17,17,.06); color: var(--faint); cursor: default; flex: none; }
+  .co-p.ok { background: #3F8F5F; color: #fff; }
+  .co-p.part { background: #E2C66F; color: #4A3A10; }
+  .co-p.no { background: var(--red); color: #fff; }
+  .co-p.go { background: rgba(63,143,95,.1); box-shadow: inset 0 0 0 1.5px #3F8F5F; color: #2F7A4F; }
+  .co-p.here { outline: 2px solid var(--text); outline-offset: 1px; }
+  .co-chk { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.78rem; }
+  .co-chk small { display: block; font-size: 0.66rem; color: var(--mid); }
+  .co-chk.low { color: var(--red); font-weight: 600; }
+  .as-hw li .prep-hw-when.bad { color: var(--red); font-weight: 600; }
+  .as-hw li .prep-hw-when.go { color: #9A7A2A; font-weight: 600; }
+  @media (max-width: 640px) {
+    .co-l { grid-template-columns: 2.2rem minmax(0, 1fr) auto; }
+    .co-chk { grid-column: 2 / -1; text-align: left; }
+    .co-chk small { display: inline; margin-left: 0.3rem; }
+    .co-dom-body { padding-left: 0; }
+    .co-dom > summary .co-bar { width: 50px; }
+  }
   .ls-before .k { color: var(--red); }
   .ls-work small { display: block; color: var(--mid); font-size: 0.7rem; margin-top: 0.15rem; }
   .dt-day.today .dt-bar { box-shadow: inset 0 0 0 1.5px var(--text); }
@@ -1182,6 +1230,7 @@
 
     <div class="tabbar">
       <button type="button" class="tab is-on" data-tab="week">This week</button>
+      <button type="button" class="tab" data-tab="course" id="tab-btn-course">Course</button>
       <button type="button" class="tab" data-tab="scores" id="tab-btn-scores">Scores</button>
       <button type="button" class="tab" data-tab="misses">Mistakes</button>
       <button type="button" class="tab" data-tab="homework">Schedule</button>
@@ -1226,6 +1275,15 @@
           <div id="stu-work-list"></div>
         </div>
         </div>
+      </div>
+    </section>
+
+    <!-- THE WHOLE COURSE (2026-10-29): every lesson and part, from session prep's curriculum. -->
+    <section id="tab-course" style="display:none;">
+      <div class="card" id="stu-course-card">
+        <h2>Course progress</h2>
+        <p class="card-sub">Every lesson and part: when it was finished, how much of its video was played, and the check on the first try.</p>
+        <div id="stu-course"></div>
       </div>
     </section>
 
@@ -2598,6 +2656,9 @@
     $('stu-skills').innerHTML = skLines(4);
     $('stu-analysis').innerHTML = '<div class="sk sk-block" style="width:100%;margin-bottom:14px"></div>' + skLines(3);
     $('stu-trend').innerHTML = '';
+    $('stu-course').innerHTML = skLines(4);
+    // Shown for SAT students from the start; anyone else once session prep says they began the course.
+    $('tab-btn-course').style.display = isSat(student) ? '' : 'none';
     $('hw-next').innerHTML = '<span class="ns-none">Checking the calendar&hellip;</span>';
     // Cleared, not just hidden: the calendar fetch hasn't run for THIS
     // student yet, so the previous student's rows would show here (and
@@ -2629,7 +2690,7 @@
     document.querySelectorAll('#student .tabbar .tab').forEach(function (b) {
       b.classList.toggle('is-on', b.getAttribute('data-tab') === tab);
     });
-    ['week', 'scores', 'misses', 'homework', 'account'].forEach(function (t) {
+    ['week', 'course', 'scores', 'misses', 'homework', 'account'].forEach(function (t) {
       $('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
     });
     replayAnim($('tab-' + tab), 'tab-in');
@@ -3015,6 +3076,8 @@
       var when = w.at ? new Date(w.at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
       return '<div class="wk-item"><a href="' + escHtml(w.url) + '" target="_blank" rel="noopener">' + escHtml(when || w.name) + '</a>' + (w.note ? '<small>' + escHtml(w.note) + '</small>' : '') + '</div>';
     }).join('') : '';
+    // The newest recap's "Before ..." line feeds Course work assigned in session prep.
+    if (lastPrep && recapAdmin.key && lastPrep.key === recapAdmin.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
   }
   function loadRecapAdmin(key) {
     recapAdmin.key = key; recapResetForm(); recapStatus(''); paintRecapAdmin(kept('s_recap_' + key));
@@ -3560,6 +3623,9 @@
       ? 'Since the last session, ' + new Date(snap.since).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '.'
       : dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days; no session on the calendar yet)';
     var sat = isSat(currentStudent);
+    try { renderCourseTab(p); } catch (e) { if (window.console) console.error('[admin] course tab render failed:', e); }
+    var asHtml = '';
+    try { asHtml = renderAssignedCourse(p); } catch (e) { if (window.console) console.error('[admin] course work assigned failed:', e); }
 
     // Practice: the log when it has the week, else the bank's own count
     // (which only sees each question's latest attempt).
@@ -3670,7 +3736,7 @@
       // Everything the portal measures is SAT practice; for this student
       // only the homework means anything.
       $('stu-prep-sub').textContent = 'Portal time and homework since the last session.';
-      $('stu-prep').innerHTML = renderPortalTime(snap, mins, p.snapError) + nextHtml + (hwHtml || (nextHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
+      $('stu-prep').innerHTML = renderPortalTime(snap, mins, p.snapError) + nextHtml + asHtml + (hwHtml || (nextHtml || asHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
       return;
     }
     /* The week at a glance, then homework. The rest (time by area, topics,
@@ -3686,7 +3752,7 @@
     var habits = renderBehaviorPatterns(p.behavior, p.behaviorError), pooled = renderPooledPrep(p.pooled, p.pooledError);
     var more = practiceCard + (habits ? '<div class="mcard">' + habits + '</div>' : '') + (pooled ? '<div class="mcard">' + pooled + '</div>' : '');
     $('stu-prep').innerHTML = renderPortalTime(snap, mins, p.snapError) + '<div class="prep-stats">' + stats.join('') + '</div>' +
-      nextHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
+      nextHtml + asHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
     /* A part with answers opens them in the report's question viewer (Luca, 2026-10-28: "the same interface
        ... for the comp check questions ... not these half assed drop downs"), at the first one they missed. */
     Array.prototype.forEach.call(document.querySelectorAll('tr.cu-row'), function (tr) {
@@ -3927,6 +3993,189 @@
     return '<div class="prep-sec">Curriculum since the last session</div>' +
       (head.length ? '<p class="cu-prep-head">' + head.join(' &nbsp;·&nbsp; ') + '</p>' : '') + vids + body +
       (browseMin >= 1 ? '<p class="prep-note">Plus ' + mins(browseMin) + ' looking through the lessons.</p>' : '');
+  }
+
+  /* ONE PART, EVERYTHING KNOWN ABOUT IT (2026-10-29), for the Course tab and the course work assigned:
+     finished and when (curriculum.at; an older backend sends only the list), how much of its video was
+     played, whether it is where they last were, and its check on the first try (practice.cuFirst). */
+  function cuPartState(p, lessonId, i) {
+    var cu = p.curriculum || null, k = lessonId + '#' + i;
+    var at = (cu && cu.at && cu.at[k]) || '';
+    var done = !!at || !!(cu && cu.done && cu.done.indexOf(k) !== -1);
+    var share = cuWatchShare(cu, lessonId, i);
+    var here = !!(cu && cu.last && cu.last.lessonId === lessonId && (cu.last.part || 0) === i);
+    var f = p.practice && p.practice.cuFirst && p.practice.cuFirst[lessonId + '|' + i];
+    return { done: done, at: at, share: share, here: here, step: here ? cu.last.step : '', first: f && f.n ? f : null,
+      cls: done ? (share == null || share >= 0.9 ? 'ok' : share >= 0.2 ? 'part' : 'no') : (here || share > 0 ? 'go' : '') };
+  }
+  function cuPartName(l, i) {
+    var pt = l.parts && l.parts[i], many = l.parts && l.parts.length > 1;
+    var nm = pt && pt.title ? String(pt.title).replace(/\*\*/g, '') : '';
+    return (l.id.charAt(0) === 'e' ? 'R&W ' : '') + l.num + ' ' + l.title + (many ? ' · Part ' + (i + 1) + (nm ? ': ' + nm : '') : '');
+  }
+  // Under 60% when the evidence says so (the top of the 80% interval), like Practice by topic.
+  function cuLow(right, n) {
+    var MSi = window.MorettiSignals;
+    return MSi && MSi.betaInterval ? MSi.betaInterval(right, n, 0.8).hi < 0.6 : (n >= 3 && right / n < 0.6);
+  }
+
+  /* THE WHOLE COURSE (Luca, 2026-10-29: "the student view and tracking on th admin page can be better"):
+     the Course tab. Session prep only covered the week, so what a student had finished overall, which
+     videos they really watched and how their checks went had to be remembered. Every lesson and part,
+     one square each; a domain with nothing in it starts folded. Math always, Reading & Writing for an
+     SAT student or anyone who began it. */
+  function renderCourseTab(p) {
+    var box = $('stu-course');
+    if (!box) return;
+    var cu = p.curriculum || null, sat = isSat(currentStudent);
+    $('tab-btn-course').style.display = (sat || (cu && cu.started)) ? '' : 'none';
+    if (activeTab === 'course' && !(sat || (cu && cu.started))) selectTab('week');
+    if (cu && cu.error) { box.innerHTML = '<div class="empty">Course progress could not be read: ' + escHtml(cu.error) + '</div>'; return; }
+    if (!cu || !cu.started) { box.innerHTML = '<div class="empty">Not started in the course yet.</div>'; return; }
+    var data = cuCourseData();
+    cuVideos();
+    if (!data) { box.innerHTML = cuNamesState === 'failed' ? '<div class="empty">The course files could not be loaded.</div>' : skLines(4); return; }
+    var day = function (iso) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+    var oldBackend = !cu.at;   // before prep.gs v33
+    var stats = [], courses = [];
+    var vt = { ok: 0, part: 0, no: 0 }, chk = { n: 0, right: 0 }, lastAt = '', recent = 0, since14 = Date.now() - 14 * 86400000;
+    data.courses.forEach(function (c) {
+      var doms = c.domains || c.units || [], tot = 0, got = 0, rows = [];
+      var any = doms.some(function (d) { return (d.lessons || []).some(function (l) { return (l.parts || []).some(function (pp, i) { var s = cuPartState(p, l.id, i); return s.done || s.cls === 'go'; }); }); });
+      if (c.id !== 'math' && !sat && !any) return;
+      doms.forEach(function (d) {
+        var dTot = 0, dGot = 0, dLive = false;
+        var lessons = (d.lessons || []).map(function (l) {
+          var cells = [], nDone = 0, last = '', fN = 0, fR = 0, live = false;
+          (l.parts || []).forEach(function (pp, i) {
+            var s = cuPartState(p, l.id, i);
+            dTot++; tot++;
+            if (s.done) {
+              nDone++; dGot++; got++;
+              if (s.at > last) last = s.at;
+              if (s.at > lastAt) lastAt = s.at;
+              if (s.at && new Date(s.at).getTime() >= since14) recent++;
+              if (s.share != null) vt[s.cls]++;
+            }
+            if (s.done || s.cls === 'go') live = true;
+            if (s.first) { fN += s.first.n; fR += s.first.right; chk.n += s.first.n; chk.right += s.first.right; }
+            var tip = [cuPartName(l, i)];
+            tip.push(s.done ? 'Finished' + (s.at ? ' ' + day(s.at) : '') : (s.here ? 'Where they are now (' + (s.step === 'check' ? 'the check' : 'the video') + ')' : 'Not finished'));
+            if (s.share != null) tip.push(Math.round(s.share * 100) + '% of the video played');
+            if (s.first) tip.push('Check: ' + s.first.right + ' of ' + s.first.n + ' right on the first try');
+            cells.push('<span class="co-p' + (s.cls ? ' ' + s.cls : '') + (s.here ? ' here' : '') + '" title="' + escHtml(tip.join('\n')) + '">' + (i + 1) + '</span>');
+          });
+          if (live) dLive = true;
+          var n = (l.parts || []).length;
+          var sub = nDone === n && n ? '<small class="ok">Finished ' + (last ? day(last) : '') + '</small>'
+            : nDone ? '<small>' + nDone + ' of ' + n + ' parts' + (last ? ', last ' + day(last) : '') + '</small>' : '';
+          var chkHtml = fN ? '<div class="co-chk' + (cuLow(fR, fN) ? ' low' : '') + '">' + fR + ' of ' + fN + '<small>first try</small></div>' : '<div class="co-chk"></div>';
+          return '<div class="co-l' + (live ? '' : ' cold') + '"><div class="co-n">' + escHtml(l.num) + '</div><div class="co-t">' + escHtml(l.title) + sub + '</div>' +
+            '<div class="co-parts">' + cells.join('') + '</div>' + chkHtml + '</div>';
+        });
+        var pc = dTot ? Math.round(100 * dGot / dTot) : 0;
+        rows.push('<details class="co-dom"' + (dLive ? ' open' : '') + '><summary>' + escHtml(d.title || d.name || '') +
+          '<span class="co-of">' + dGot + ' of ' + dTot + '</span><span class="co-bar"><i style="width:' + pc + '%"></i></span></summary>' +
+          '<div class="co-dom-body">' + lessons.join('') + '</div></details>');
+      });
+      // The next lesson in the course's suggested order with a part not finished.
+      var next = '';
+      if (c.guide && c.guide.steps) {
+        c.guide.steps.some(function (st) {
+          return (st.lessons || []).some(function (id) {
+            var l = cuLessonById(data, id);
+            if (l && (l.parts || []).some(function (pp, i) { return !cuPartState(p, id, i).done; })) { next = l.num + ' ' + l.title; return true; }
+            return false;
+          });
+        });
+      }
+      var pcT = tot ? Math.round(100 * got / tot) : 0;
+      stats.push('<div class="co-stat"><div class="lbl">' + escHtml(c.title) + '</div><div class="num">' + got + ' <small>of ' + tot + ' parts</small></div>' +
+        '<div class="co-bar"><i style="width:' + pcT + '%"></i></div>' + (next ? '<div class="sub">Next in the suggested order: ' + escHtml(next) + '</div>' : '') + '</div>');
+      courses.push('<div class="co-course">' + escHtml(c.title) + '</div>' + rows.join(''));
+    });
+    var vN = vt.ok + vt.part + vt.no;
+    if (vN) stats.push('<div class="co-stat"><div class="lbl">Videos</div><div class="num">' + vt.ok + ' <small>of ' + vN + ' watched</small></div>' +
+      '<div class="sub"><b class="part">' + vt.part + ' partly</b> &middot; <b class="no">' + vt.no + ' skipped</b>, for the parts they finished</div></div>');
+    if (chk.n) stats.push('<div class="co-stat"><div class="lbl">Checks, first try</div><div class="num">' + Math.round(100 * chk.right / chk.n) + '% <small>' + chk.right + ' of ' + chk.n + '</small></div>' +
+      '<div class="sub">A retake does not change it</div></div>');
+    stats.push('<div class="co-stat"><div class="lbl">Last two weeks</div><div class="num">' + recent + ' <small>part' + (recent === 1 ? '' : 's') + ' finished</small></div>' +
+      '<div class="sub">' + (lastAt ? 'Last one ' + day(lastAt) : (cu.done && cu.done.length ? '' : 'None finished yet')) + '</div></div>');
+    var legend = '<div class="co-legend"><span><i class="co-p ok"></i>Finished, video watched</span><span><i class="co-p part"></i>Finished, video partly played</span>' +
+      '<span><i class="co-p no"></i>Finished, video skipped</span><span><i class="co-p go"></i>Started</span><span><i class="co-p"></i>Not started</span>' +
+      '<span><i class="co-p here"></i>Where they are now</span></div>';
+    box.innerHTML = '<div class="co-sum">' + stats.join('') + '</div>' + legend + courses.join('') +
+      (oldBackend ? '<p class="prep-note">Finish days and first-try check scores appear once the backend update is deployed.</p>' : '');
+  }
+
+  /* ASSIGNED AGAINST DONE (Luca, 2026-10-29). The course parts named in this session's homework and in
+     the latest recap's "Before ..." line, each with what happened to it: finished (when, the video, the
+     check on the first try), started, or not opened. Read from how they are written: "3.3 Parts 1 to 3",
+     "3.4 P2", "2.1" (a lesson with no part named is all of it). A number with # after it is a book's
+     problem set, not the course; R&W, Reading, Writing or English earlier on the line means that course. */
+  function cuRefsIn(text, data) {
+    var out = [];
+    if (!text || !data) return out;
+    var re = /(\d{1,2})\.(\d{1,2})(?![\d.]|\s*(?:#|%|x\b|hours?\b|hrs?\b|mins?\b|minutes\b))/gi, m;
+    while ((m = re.exec(text))) {
+      if (/[\d.$]/.test(text.charAt(m.index - 1))) continue;
+      var head = text.slice(text.lastIndexOf('\n', m.index) + 1, m.index);
+      var lastAt = function (r) { var x, at = -1; while ((x = r.exec(head))) at = x.index; return at; };
+      var course = lastAt(/r\s*&\s*w|reading|writing|english|grammar/gi) > lastAt(/math/gi) ? 'e' : 'm';
+      var l = cuLessonById(data, course + Number(m[1]) + '.' + Number(m[2]));
+      if (!l || !l.parts || !l.parts.length) continue;
+      var tail = /^\s*[,:(]?\s*(?:parts?|pts?\.?|p)\s*((?:\d(?!\d|\.\d)|\s|,|&|and\b|to\b|through\b|thru\b|-|–)+)/i.exec(text.slice(re.lastIndex));
+      var parts = [];
+      if (tail) {
+        tail[1].replace(/\s*(?:to|through|thru|-|–)\s*/gi, '-').replace(/\s*(?:and|&)\s*/gi, ',').split(/[,\s]+/).forEach(function (bit) {
+          var r = /^(\d)-(\d)$/.exec(bit);
+          if (r) { for (var a = Number(r[1]); a <= Number(r[2]); a++) parts.push(a - 1); }
+          else if (/^\d$/.test(bit)) parts.push(Number(bit) - 1);
+        });
+      }
+      if (!parts.length) parts = l.parts.map(function (x, i) { return i; });
+      parts.forEach(function (i) { if (i >= 0 && i < l.parts.length) out.push({ l: l, i: i }); });
+    }
+    return out;
+  }
+  function renderAssignedCourse(p) {
+    var data = cuCourseData();
+    if (!data || !p.curriculum || !currentStudent) return '';
+    var refs = [], from = [], seen = {};
+    var add = function (list) { list.forEach(function (r) { var k = r.l.id + '#' + r.i; if (!seen[k]) { seen[k] = 1; refs.push(r); } }); };
+    var hwN = refs.length;
+    ((p.homework && p.homework.items) || []).forEach(function (a) { add(cuRefsIn(a.task + '\n' + (a.notes || ''), data)); });
+    if (refs.length > hwN) from.push('the homework list');
+    // The newest recap, from its "Before Thursday:" (or Homework, For next time...) on. Only one written for
+    // the last session or after it counts.
+    var rl = recapAdmin.key === currentStudent.key ? recapAdmin.list : ((kept('s_recap_' + currentStudent.key) || {}).recaps || []);
+    var newest = (rl || []).slice().sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); })[0];
+    var sinceDay = p.homework && p.homework.since ? new Date(new Date(p.homework.since).getTime() - 86400000).toISOString().slice(0, 10) : '';
+    if (newest && (!sinceDay || String(newest.date) >= sinceDay)) {
+      var txt = String(newest.recap || ''), mm = /\b(before|homework|hw|for next|next time|to do|assigned|due by|this week)\b/i.exec(txt);
+      if (mm) {
+        var n0 = refs.length;
+        add(cuRefsIn(txt.slice(mm.index), data));
+        if (refs.length > n0) from.push('the ' + recapLabel(newest.date) + ' recap');
+      }
+    }
+    if (!refs.length) return '';
+    var dayW = function (iso) { return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+    var nDone = 0;
+    var items = refs.map(function (r) {
+      var s = cuPartState(p, r.l.id, r.i), bits = [];
+      if (s.share != null) bits.push(s.done ? (s.cls === 'ok' ? 'video watched' : s.cls === 'part' ? Math.round(s.share * 100) + '% of the video played' : 'video skipped') : (s.share > 0 ? Math.round(s.share * 100) + '% of the video played' : ''));
+      if (s.first) bits.push('check ' + s.first.right + ' of ' + s.first.n + ' on the first try');
+      if (!s.done && s.here) bits.push('on the ' + (s.step === 'check' ? 'check' : 'video') + ' now');
+      bits = bits.filter(String);
+      if (s.done) nDone++;
+      var when = s.done ? '<span class="prep-hw-when">' + (s.at ? 'done ' + dayW(s.at) : 'done') + '</span>'
+        : (s.cls === 'go' ? '<span class="prep-hw-when go">started</span>' : '<span class="prep-hw-when bad">not opened</span>');
+      return '<li' + (s.done ? ' class="done"' : '') + '><span class="prep-hw-box">' + (s.done ? '&#10003;' : '') + '</span>' +
+        '<span class="prep-hw-task">' + escHtml(cuPartName(r.l, r.i)) + (bits.length ? '<span class="prep-hw-notes">' + escHtml(bits.join(' · ')) + '</span>' : '') + '</span>' + when + '</li>';
+    });
+    return '<div class="prep-hw as-hw"><div class="prep-hw-hed">Course work assigned<span>' + nDone + ' of ' + refs.length + ' finished</span></div>' +
+      '<ul>' + items.join('') + '</ul><p class="prep-note">The lesson parts named in ' + from.join(' and ') + '.</p></div>';
   }
 
   /* TIME ON THE PORTAL (Luca, 2026-10-15: "make the weekly time spent more clear"): its own block at the
