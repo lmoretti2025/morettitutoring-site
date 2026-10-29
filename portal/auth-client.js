@@ -802,9 +802,30 @@ window.MorettiAuth = (function () {
             'student&rsquo;s own Google account, not a parent&rsquo;s.</p>' +
           '<div id="mta-gbtn" style="display:flex;justify-content:center;margin:1.5rem 0 0;"></div>' +
           '<p class="key-error" id="mta-signin-error"></p>' +
-          '<p class="key-help">No Google account on your email address? You can make one on the address you already use: ' +
-            'go to <a href="https://accounts.google.com/signup" target="_blank" rel="noopener">accounts.google.com/signup</a> ' +
-            'and choose &ldquo;Use your existing email.&rdquo;</p>' +
+          '<p class="key-help">No Google account, or your school blocks it? ' +
+            '<a href="#" id="mta-email-go">Sign in with your email instead</a></p>' +
+        '</div>' +
+
+        /* SIGN IN WITH EMAIL (2026-10-29): a 6-digit code to the student's address (auth.gs emailCodeStart). */
+        '<div id="mta-email" style="display:none;">' +
+          '<h1 class="panel-hed">Sign in with email</h1>' +
+          '<div id="mta-email-ask">' +
+            '<p class="panel-sub">Use the <b>student&rsquo;s</b> email address, the one Luca has on file. ' +
+              'You&rsquo;ll get a 6-digit code there.</p>' +
+            '<input type="email" class="key-input" id="mta-email-input" placeholder="Email address" ' +
+              'autocomplete="email" autocapitalize="off" style="text-transform:none;letter-spacing:0;">' +
+            '<p class="key-error" id="mta-email-error"></p>' +
+            '<button class="key-btn" id="mta-email-send">Email me a code</button>' +
+          '</div>' +
+          '<div id="mta-email-codebox" style="display:none;">' +
+            '<p class="panel-sub" id="mta-email-sent"></p>' +
+            '<input type="text" class="key-input" id="mta-email-code" placeholder="6-digit code" ' +
+              'inputmode="numeric" autocomplete="one-time-code" maxlength="6">' +
+            '<p class="key-error" id="mta-code-error"></p>' +
+            '<button class="key-btn" id="mta-email-verify">Sign in</button>' +
+            '<p class="key-help"><a href="#" id="mta-email-again">Send a new code, or use a different email</a></p>' +
+          '</div>' +
+          '<p class="key-help"><a href="#" id="mta-email-back">Back to Google sign-in</a></p>' +
         '</div>' +
 
         '<div id="mta-key" style="display:none;">' +
@@ -927,6 +948,13 @@ window.MorettiAuth = (function () {
     host.querySelector('#mta-pending-switch').addEventListener('click', function (e) {
       e.preventDefault(); restart();
     });
+    host.querySelector('#mta-email-go').addEventListener('click', function (e) { e.preventDefault(); emailAsk(); });
+    host.querySelector('#mta-email-back').addEventListener('click', function (e) { e.preventDefault(); renderSignIn(); });
+    host.querySelector('#mta-email-again').addEventListener('click', function (e) { e.preventDefault(); emailAsk(); });
+    host.querySelector('#mta-email-send').addEventListener('click', emailSend);
+    host.querySelector('#mta-email-input').addEventListener('keydown', function (e) { if (e.key === 'Enter') emailSend(); });
+    host.querySelector('#mta-email-verify').addEventListener('click', emailVerify);
+    host.querySelector('#mta-email-code').addEventListener('keydown', function (e) { if (e.key === 'Enter') emailVerify(); });
     return host;
   }
 
@@ -941,7 +969,7 @@ window.MorettiAuth = (function () {
     var card = host.querySelector('.mta-card-inner');
     var from = (!REDUCE && host.style.display !== 'none' && card) ? card.offsetHeight : 0;
 
-    ['continue', 'who', 'signin', 'key', 'name', 'pending', 'stay'].forEach(function (p) {
+    ['continue', 'who', 'signin', 'email', 'key', 'name', 'pending', 'stay'].forEach(function (p) {
       host.querySelector('#mta-' + p).style.display = (p === which) ? 'block' : 'none';
     });
     host.style.display = 'flex';
@@ -1251,6 +1279,74 @@ window.MorettiAuth = (function () {
     err('#mta-name-error', '');
     err('#mta-signin-error', '');
     pane('signin');
+  }
+
+  /* ═══ SIGN IN WITH EMAIL ═══ (Luca, 2026-10-29: kids with no Google account, or a school account
+     the school blocks.) Ask for the address, then the code. The backend answers the first step the same
+     way whether or not the address is on file, so the screen says "if". A good code answers like
+     googleAuth, so handle() takes it from there; an invite in hand is claimed with it. */
+  var emailAddr = '';
+  function emailAsk() {
+    pane('email');
+    host.querySelector('#mta-email-ask').style.display = 'block';
+    host.querySelector('#mta-email-codebox').style.display = 'none';
+    err('#mta-email-error', '');
+    var box = host.querySelector('#mta-email-input');
+    if (!box.value && emailAddr) box.value = emailAddr;
+    box.focus();
+  }
+  function emailErrorMessage(code) {
+    switch (code) {
+      case 'bad_email': return 'That doesn’t look like a complete email address.';
+      case 'bad_code': return 'That code isn’t right. Check it and try again.';
+      case 'code_expired': return 'That code has expired or was used up. Send a new one.';
+      case 'too_many_codes': return 'That’s a lot of codes in a short time. Wait 15 minutes, then try again.';
+      case 'email_mismatch': return 'This invite is set up for a different email address. Use that one, or ' + CONTACT + '.';
+      // An older backend that predates emailCodeStart (until the deploy that adds it).
+      case 'unknown_action': return 'Email sign-in isn\u2019t switched on yet. Use Google for now, or ' + CONTACT + '.';
+      case 'no_account': return 'That address isn’t linked to a student portal yet. ' + CONTACT.charAt(0).toUpperCase() + CONTACT.slice(1) + '.';
+      default: return keyErrorMessage(code);
+    }
+  }
+  function emailSend() {
+    var e = host.querySelector('#mta-email-input').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { err('#mta-email-error', emailErrorMessage('bad_email')); return; }
+    var btn = host.querySelector('#mta-email-send');
+    btn.disabled = true;
+    status('#mta-email-error', 'Sending…');
+    var req = { action: 'emailCodeStart', email: e };
+    if (invite) req.invite = invite;
+    post(req).then(function (d) {
+      btn.disabled = false;
+      if (!d || !d.ok) { err('#mta-email-error', emailErrorMessage(d && d.error)); return; }
+      emailAddr = e;
+      err('#mta-email-error', '');
+      host.querySelector('#mta-email-sent').innerHTML =
+        'If <b>' + escapeText(e) + '</b> is the address Luca has on file, a code is on its way. ' +
+        'It can take a minute, so check spam too. Nothing after a few minutes? It may not be the address he has: ' + CONTACT + '.';
+      host.querySelector('#mta-email-ask').style.display = 'none';
+      host.querySelector('#mta-email-codebox').style.display = 'block';
+      err('#mta-code-error', '');
+      var c = host.querySelector('#mta-email-code');
+      c.value = '';
+      c.focus();
+    });
+  }
+  function emailVerify() {
+    var code = host.querySelector('#mta-email-code').value.replace(/\D/g, '');
+    if (code.length !== 6) { err('#mta-code-error', 'The code is 6 digits.'); return; }
+    var btn = host.querySelector('#mta-email-verify');
+    btn.disabled = true;
+    status('#mta-code-error', 'Checking…');
+    var req = { action: 'emailCodeVerify', email: emailAddr, code: code };
+    if (invite) req.invite = invite;
+    post(req).then(function (d) {
+      btn.disabled = false;
+      if (!d || !d.ok) { err('#mta-code-error', emailErrorMessage(d && d.error)); return; }
+      invite = null;
+      err('#mta-code-error', '');
+      handle(d);
+    });
   }
 
   /* ═══ GOOGLE IDENTITY SERVICES ═══ */
