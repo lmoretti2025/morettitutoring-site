@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Roster — Moretti Test Prep &amp; Tutoring</title>
+<title>Roster | Moretti Test Prep &amp; Tutoring</title>
 <link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1688,10 +1688,10 @@
   // whatever origin admin.html is on. index.html does the same rewrite.
   var REPORT_ABS_PREFIX = 'https://morettitutoring.com/portal/report.html';
   var TASK_PRESETS = [
-    'Question Bank — 15 questions',
+    'Question Bank: 15 questions',
     'Review my incorrect questions',
-    'Vocab — 1 set',
-    'Math review — 1 lesson',
+    'Vocab: 1 set',
+    'Math review: 1 lesson',
     'Full practice test (timed)'
   ];
 
@@ -1705,7 +1705,7 @@
   // The value is the field a real answer always carries. A stalling service
   // can answer a POST with its GET health reply ({ok:true}, no data), so a
   // reply missing that field is treated as lost.
-  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'note', fridayPreview: 'items' };
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'note', fridayPreview: 'items' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
     return !!field && data && data.ok && !(field in data);
@@ -3085,7 +3085,9 @@
       if (recapAdmin.key !== key) return;
       if (d && d.ok) { keep('s_recap_' + key, d); paintRecapAdmin(d); }
       else if (d && d.error === 'unknown_action') recapStatus('Needs the backend update before recaps can be saved.', 'warn');
-    }).catch(function () {});
+      // Say so, or a failed load reads as "no recaps yet" and one gets written twice.
+      else recapStatus('Could not load the recaps (' + ((d && (d.error || d.message)) || 'no answer') + '). Reopen the student to try again.', 'warn');
+    }).catch(function () { if (recapAdmin.key === key) recapStatus('Could not reach the backend to load the recaps. Reopen the student to try again.', 'warn'); });
   }
   function saveRecapAdmin(body, okMsg) {
     var key = recapAdmin.key; if (!key) return;
@@ -3591,7 +3593,9 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Refresh'; }
       if (!d || !d.ok) {
         var e = d && d.error;
-        body.innerHTML = '<p class="prep-note">' + (e === 'unauthorized' || e === 'unknown_action' || !e
+        body.innerHTML = '<p class="prep-note">' + (e === 'unauthorized'
+          ? 'Your admin sign-in has expired. Sign in again, then press Refresh.'
+          : e === 'unknown_action' || !e
           ? 'The backend does not have this view yet: paste prep.gs, Code.gs, auth.gs and signals.gs (version 31), then deploy a new version.'
           : e === 'needs_signals_31' ? 'signals.gs in Apps Script is older than version 31: paste portal/signals.js again as signals.gs.'
           : 'Not available: ' + escHtml(e)) + '</p>';
@@ -5689,7 +5693,7 @@
     tomorrow.setDate(tomorrow.getDate() + 1);
     selectTab('homework');
     openCreateModal([toDateStr(tomorrow)], currentStudent.key, currentStudent.name,
-      'Question Bank — 10 questions on ' + btn.getAttribute('data-skill'));
+      'Question Bank: 10 questions on ' + btn.getAttribute('data-skill'));
   });
 
   /* ═══ REPORT VIEWER ═══ the payload lives in one Attempts-sheet cell
@@ -5769,8 +5773,12 @@
     }).catch(function () { return link; });
   }
 
+  /* Each open or close bumps this, so a slow answer for an earlier report
+     never paints over the one open now (or into a closed viewer). */
+  var reportSeq = 0;
   function openReport(attempt) {
     if (!attempt || !attempt.reportRow || !currentStudent) return;
+    var seq = ++reportSeq;
     var wrap = $('report-frame-wrap');
     reportViewerLink = '';
     $('report-title').firstChild.textContent = attemptLabel(attempt);
@@ -5787,6 +5795,7 @@
       : postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: currentStudent.key, row: attempt.reportRow })
           .then(function (d) { if (d && d.ok && d.reportLink) keep(repName, { ok: true, reportLink: d.reportLink }); return d; }))
       .then(function (data) {
+        if (seq !== reportSeq) return null;
         if (!data || !data.ok || !data.reportLink) {
           wrap.innerHTML = '<div id="report-loading">This attempt has no saved report payload.</div>';
           return null;
@@ -5800,7 +5809,7 @@
         return withPreviousTest(attempt, link);
       })
       .then(function (link) {
-        if (!link) return;
+        if (!link || seq !== reportSeq) return;
         // A fresh <iframe> per open, rather than reassigning src: the
         // report is addressed entirely by URL hash, and changing only the
         // hash on a live frame doesn't reload it — it would silently keep
@@ -5825,11 +5834,13 @@
         wrap.appendChild(frame);
       })
       .catch(function () {
+        if (seq !== reportSeq) return;
         wrap.innerHTML = '<div id="report-loading">Network error loading the report.</div>';
       });
   }
 
   function closeReport() {
+    reportSeq++;
     $('report-viewer').classList.remove('open');
     $('report-frame-wrap').innerHTML = '<div id="report-loading">Loading report&hellip;</div>'; // stop the frame
     reportViewerLink = '';
@@ -6072,7 +6083,7 @@
         ? { left: 'prev,next', center: 'title', right: 'dayGridMonth,listWeek' }
         : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
       buttonText: { listWeek: 'List', dayGridMonth: 'Month', timeGridWeek: 'Week', today: 'Today' },
-      fixedWeekRows: false,          // only the weeks the month needs, not a spare week of the next one
+      fixedWeekCount: false,          // only the weeks the month needs, not a spare week of the next one
       // Sessions and office hours always sit on top of a day, then homework (Luca, 2026-09-25).
       eventOrder: 'rank,start,title',
       eventOrderStrict: true,
@@ -6830,11 +6841,13 @@
      far it went. Families added by hand count under the Source typed on
      their row. Figures only. */
   function openSources() { showView('sources'); renderLinkBuilder(); loadSources($('src-period').value); }
+  var srcSeq = 0;   // the period changed again before an answer came: only the newest paints
   function loadSources(period) {
+    var seq = ++srcSeq;
     $('src-table').innerHTML = skLines(3);
     $('src-leads').innerHTML = '';
     postToBackend({ action: 'adminLeadFunnel', adminKey: adminKey(), period: period }).then(function (data) {
-      if (currentView !== 'sources') return;
+      if (currentView !== 'sources' || seq !== srcSeq) return;
       if (!data || !data.ok) {
         var err = data && data.error;
         $('src-table').innerHTML = '<div class="empty">' + (err === 'unknown_action'
@@ -7373,6 +7386,6 @@
 <!-- Portal access panel (invites, approval queue, login resets). Builds
      its own markup and styles from this file's CSS variables; removing this
      tag removes the feature. -->
-<script src="auth-admin.js?v=20261020a"></script>
+<script src="auth-admin.js?v=20261029a"></script>
 </body>
 </html>

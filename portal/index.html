@@ -4284,7 +4284,7 @@ window.Portal = {
      MorettiAuth.refresh() and the onRefresh hook, and a cached copy would
      silently lack both (the guards degrade quietly). Only this tag moves;
      the question banks below keep theirs. -->
-<script src="auth-client.js?v=20261029a"></script>
+<script src="auth-client.js?v=20261029b"></script>
 
 <!-- Pre-login top bar (key entry, onboarding, marketing-style screens).
      Hidden once a student is in the app shell (see
@@ -6246,7 +6246,7 @@ window.Portal = {
 <script src="grid-in.js?v=20261013a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script src="report-tour.js?v=20261019a"></script>
-<script src="curriculum.js?v=20261028a"></script>
+<script src="curriculum.js?v=20261029a"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -7190,7 +7190,7 @@ window.Portal = {
     var bar = document.createElement('div');
     bar.id = 'dx-tab-warning';
     var msg = document.createElement('span');
-    msg.textContent = 'This practice test was updated since you started it, so your saved place could not be restored. Nothing you have finished before is affected \u2014 you will just need to start this one again.';
+    msg.textContent = 'This practice test was updated since you started it, so your saved place could not be restored. Nothing you have finished before is affected. You will just need to start this one again.';
     var close = document.createElement('button');
     close.type = 'button';
     close.textContent = 'Got it';
@@ -8142,9 +8142,15 @@ window.Portal = {
   function startAssignmentsPolling() {
     if (assignPollTimer) clearInterval(assignPollTimer);
     assignPollTimer = setInterval(function () {
+      // A tab left open in the background costs a backend call every few minutes for nothing.
+      if (document.hidden) return;
       if (activeScreenId === 'screen-menu') loadAssignments();
     }, 3 * 60 * 1000);
   }
+  // Coming back to the tab catches up at once instead of waiting for the next tick.
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && assignPollTimer && activeScreenId === 'screen-menu') loadAssignments();
+  });
   // Checking a box marks the row done in place (no removal) and tells the
   // backend; unchecking reverses it. On failure the row is restored.
   /* ═══ CALENDAR SCREEN ═══
@@ -28290,7 +28296,7 @@ window.renderNativeReport = function (data) {
       var cause = CAUSES.filter(function (c) { return c.key === key; })[0];
       detailEl.innerHTML =
         '<div class="dx-detail-hed">' + esc(list.length + ' ' +
-          (list.length === 1 ? 'question' : 'questions') + ' — ' + cause.barLabel) + '</div>' +
+          (list.length === 1 ? 'question' : 'questions') + ': ' + cause.barLabel) + '</div>' +
         '<ol class="dx-detail-list">' + list.map(function (e, qi) {
           var d = rowLabel(e);
           return '<li class="qx-open" data-qx-idx="' + qi + '" tabindex="0" role="button">' +

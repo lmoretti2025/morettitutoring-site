@@ -227,6 +227,7 @@
       <select id="b-about">
         <option value="sat">SAT prep</option>
         <option value="math">Math tutoring</option>
+        <option value="essays">College essays and applications</option>
         <option value="other">Something else</option>
       </select>
       <label for="b-notes">Anything I should know first? <span class="opt">(optional)</span></label>
@@ -252,6 +253,9 @@
   }
   // Phone or Google Meet. From the diagnostic (#via=diag) it starts on Meet, to share the report.
   var HOW = /[#&]via=diag\b/.test(window.location.hash || '') ? 'meet' : 'phone';
+  // The page a family came from picks the topic: #about=math or #about=essays (a token's prefill still wins).
+  var ABOUT = /[#&]about=(sat|math|essays)\b/.exec(window.location.hash || '');
+  if (ABOUT) $('b-about').value = ABOUT[1];
   function setHow(h) {
     HOW = h;
     Array.prototype.forEach.call(document.querySelectorAll('[data-how]'), function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-how') === h)); });
@@ -477,6 +481,9 @@
         if (err === 'bad_email') return say('Please check your email address.', true);
         if (err === 'bad_phone' || err === 'need_phone') { $('b-phone').focus(); return say(HOW === 'phone' ? 'Please check the phone number: it\u2019s the one I\u2019ll call.' : 'Please check the phone number, or leave it blank.', true); }
         if (err === 'bad_name') return say('Please add your name.', true);
+        if (err === 'busy') return say('Online booking is full for now. Text me at ' + PHONE + ' and I\u2019ll set up a time with you.', true);
+        /* No reply in time: the booking may still land, so check email before picking another time. */
+        if (err === 'network') return say('No answer from the booking system. It may have gone through: check your email for a confirmation before trying another time, or text ' + PHONE + '.', true);
         say('Something went wrong on my end. Please try again, or text ' + PHONE + '.', true);
       });
   });

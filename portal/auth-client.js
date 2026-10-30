@@ -577,6 +577,12 @@ window.MorettiAuth = (function () {
         if (field && data && data.ok === true && !isAuthAnswer(data)) {
           return canRetry ? again() : { ok: false, error: 'network' };
         }
+        /* The edge turning a call away (over its rate limit, or shedding load)
+           is not the server saying no: treat it like no answer, so a busy
+           moment never signs anyone out. */
+        if (data && data.ok === false && (data.error === 'busy' || data.retryable)) {
+          return canRetry ? again() : { ok: false, error: 'network' };
+        }
         return data;
       }, function () {
         clearTimeout(timer);
@@ -1304,11 +1310,15 @@ window.MorettiAuth = (function () {
       case 'email_mismatch': return 'This invite is set up for a different email address. Use that one, or ' + CONTACT + '.';
       // An older backend that predates emailCodeStart (until the deploy that adds it).
       case 'unknown_action': return 'Email sign-in isn\u2019t switched on yet. Use Google for now, or ' + CONTACT + '.';
+      case 'mail_failed': return 'The code email couldn\u2019t be sent just now. Try again in a minute, or ' + CONTACT + '.';
+      case 'busy': return keyErrorMessage('network');
       case 'no_account': return 'That address isn’t linked to a student portal yet. ' + CONTACT.charAt(0).toUpperCase() + CONTACT.slice(1) + '.';
       default: return keyErrorMessage(code);
     }
   }
   function emailSend() {
+    // Enter pressed twice must not send a second code: the first one would stop working.
+    if (host.querySelector('#mta-email-send').disabled) return;
     var e = host.querySelector('#mta-email-input').value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { err('#mta-email-error', emailErrorMessage('bad_email')); return; }
     var btn = host.querySelector('#mta-email-send');
@@ -1333,6 +1343,7 @@ window.MorettiAuth = (function () {
     });
   }
   function emailVerify() {
+    if (host.querySelector('#mta-email-verify').disabled) return;
     var code = host.querySelector('#mta-email-code').value.replace(/\D/g, '');
     if (code.length !== 6) { err('#mta-code-error', 'The code is 6 digits.'); return; }
     var btn = host.querySelector('#mta-email-verify');

@@ -173,11 +173,12 @@
   }
 
   function inviteMessage(link, name) {
-    return (name ? 'Hi ' + name + ' — ' : 'Hi — ') +
+    return (name ? 'Hi ' + name + ', ' : 'Hi, ') +
       "here's the link to set up the student portal:\n\n" + link +
       "\n\nIt needs to be opened by the student on their own device, and signed in with their own " +
-      'Google account — that becomes their login and is where I share their notes and practice materials. ' +
-      'The link works once and expires in 14 days.\n\n— Luca';
+      'Google account. That becomes their login and is where I share their notes and practice materials. ' +
+      "No Google account, or the school blocks it? They can choose \"Sign in with your email instead\" and use any email they check. " +
+      'The link works once and expires in 14 days.\n\nLuca';
   }
 
   /* The counterpart to inviteMessage for a pre-approved student: no link,
@@ -186,13 +187,14 @@
      a parent's mistyped guess. Same shape as inviteMessage so either can be
      pasted into a text thread. */
   function signInMessage(name) {
-    return (name ? 'Hi ' + name + ' — ' : 'Hi — ') +
+    return (name ? 'Hi ' + name + ', ' : 'Hi, ') +
       'your student portal is ready:\n\n' + PORTAL_URL +
       "\n\nThere's no password and nothing to set up. Press Student Login and sign in with your own " +
-      'Google account — the one on your school or personal email. That becomes your login, and it is ' +
-      'where I share your notes, practice tests and score reports.\n\n' +
-      'Open it in Safari or Chrome rather than tapping through from inside another app — Google blocks ' +
-      "sign-in in those.\n\n— Luca";
+      'Google account, the one on your school or personal email. That becomes your login, and it is ' +
+      'where I share your notes, practice tests and score reports. No Google account, or your school blocks it? ' +
+      'Choose "Sign in with your email instead" and I\'ll email you a code.\n\n' +
+      'Open it in Safari or Chrome rather than tapping through from inside another app, since Google blocks ' +
+      "sign-in in those.\n\nLuca";
   }
 
   /* ═══ STYLES ═══ scoped under the panel's own ids so nothing here can
@@ -1082,6 +1084,7 @@
              deliverInviteFlow and setup.html). This email carries no
              credential, so it has its own backend action. The address shown
              comes back from the server, so it is what was actually used. */
+          if (!window.confirm('Email the sign-in details for ' + (s.name || key) + ' now?')) return;
           act(c, 'Sending…', { action: 'sendStudentSignIn', adminKey: adminKey(), key: key },
             function (d) { return 'Sign-in details emailed to ' + d.sentTo + '. Nothing expires.'; });
         } else if (a === 'signin-copy') {
@@ -1093,6 +1096,8 @@
               : 'Could not copy automatically — open the student email action instead.';
           });
         } else if (a === 'invite') {
+          // One click emails the family, and any invite link already in their inbox stops working.
+          if (!window.confirm('Email a new invite for ' + (s.name || key) + ' now? Any earlier invite link stops working.')) return;
           act(c, 'Sending…', { action: 'sendInvite', adminKey: adminKey(), key: key, deliver: 'email' },
             function (d) { return 'Invite emailed to ' + d.sentTo + '.'; });
         } else if (a === 'invite-to') {
@@ -1117,6 +1122,7 @@
           act(c, 'Approving…', { action: 'decideClaim', adminKey: adminKey(), key: key, decision: 'approve' },
             function () { return 'Approved — they are being let in now.'; });
         } else if (a === 'decline') {
+          if (!window.confirm('Decline this claim? Nothing is granted.')) return;
           act(c, 'Declining…', { action: 'decideClaim', adminKey: adminKey(), key: key, decision: 'decline' },
             function () { return 'Declined. Nothing was granted.'; });
         } else if (a === 'delete') {

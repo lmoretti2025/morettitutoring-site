@@ -62,6 +62,9 @@ safe(function(){
   /* Missing or malformed fields are named inline, under the button, and the
      first one gets the cursor. This used to be a browser alert() box. */
   var invalidMsg = document.getElementById('rf-invalid');
+  /* Typos like "hotmail.con" are caught here too, as on book.html, so the
+     confirmation does not bounce (email-check.js, where the page loads it). */
+  var emailOk = window.emailCheckWire ? window.emailCheckWire(document.getElementById('rf-email')) : null;
   function checkFields(name, phone, email) {
     var checks = [
       ['rf-name',  !name, 'your name'],
@@ -148,6 +151,7 @@ safe(function(){
        student are answered in the first minute of the call, and asking here
        turns a free diagnostic into a quoting form. */
     if (!checkFields(name, phone, email)) return;
+    if (emailOk && !emailOk()) return;
 
     var honeypot = document.getElementById('rf-hp').value;
     var elapsedMs = Date.now() - readyAt;
@@ -195,7 +199,10 @@ safe(function(){
         form.reset();
         btn.disabled=false; btn.innerHTML=btnLabel;
       })
-      .catch(function(){
+      .catch(function(err){
+        /* A lost reply is not a lost lead: the row and the email may already
+           have gone, so a second send would make a duplicate. */
+        if (!err || err.message !== 'submit_failed') bad.textContent = 'No answer came back, but it may have gone through. Check your inbox for a confirmation in a few minutes, or text (201) 275-2791.';
         bad.style.display='block'; ok.style.display='none';
         btn.disabled=false; btn.innerHTML=btnLabel;
       });
