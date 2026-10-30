@@ -1,5 +1,5 @@
-/* The homepage #start form (index.html), shared by the SAT, math and
-   admissions pages: the handler, the next-sitting line and the underline
+/* The homepage #start form (index.html), shared by the SAT and math
+   pages: the handler, the next-sitting line and the underline
    under "free", copied from the homepage. If the homepage form changes,
    change this too. Needs portal/backend-url.js and site.js. */
 (function(){
@@ -117,11 +117,11 @@ safe(function(){
   var interest = form.getAttribute('data-interest') || '';
 
   /* A family who wants to talk first (or is on a page that starts with a
-     call: math and essays have no diagnostic door) can book the call right
+     call: math has no diagnostic door) can book the call right
      away on book.html. What they just typed goes along in sessionStorage,
      never in the URL, so they are not asked twice. */
   var hasDoors = !!form.querySelector('input[name="start"]');
-  var ABOUT = { 'Math tutoring': 'math', 'Essays and applications': 'essays', 'SAT tutoring': 'sat' };
+  var ABOUT = { 'Math tutoring': 'math', 'SAT tutoring': 'sat' };
   function offerCall(okEl, start, name, email, phone) {
     if (hasDoors && start !== 'call') return;
     try { sessionStorage.setItem('mt_book_prefill', JSON.stringify({ name: name, email: email, phone: phone, about: ABOUT[interest] || 'sat' })); } catch (err) {}
