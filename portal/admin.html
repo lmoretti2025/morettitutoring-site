@@ -163,16 +163,17 @@
   .vid-tally { display: block; font-size: 0.7rem; color: #2F7A4F; margin-top: 0.15rem; white-space: nowrap; }
   .vid-tally.bad { color: var(--red); font-weight: 600; }
   .cu-w { font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
-  .cu-w.ok { color: #2F7A4F; } .cu-w.part { color: #9A7A2A; } .cu-w.no { color: var(--red); }
+  .cu-w.ok { color: #2F7A4F; } .cu-w.part { color: #9A7A2A; } .cu-w.no { color: var(--red); } .cu-w.none { color: var(--mid); font-weight: 400; }
   .cu-vids { margin: 0.4rem 0 0.9rem; }
   .cu-vids-h { font-size: 0.78rem; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
   .cu-vids-h span { font-weight: 400; color: var(--mid); }
-  .cu-vids-h b.ok { color: #2F7A4F; } .cu-vids-h b.part { color: #9A7A2A; } .cu-vids-h b.no { color: var(--red); }
+  .cu-vids-h b.ok { color: #2F7A4F; } .cu-vids-h b.part { color: #9A7A2A; } .cu-vids-h b.no { color: var(--red); } .cu-vids-h b.none { color: var(--mid); }
   .cu-vc-row { display: flex; flex-wrap: wrap; gap: 0.3rem; }
   .cu-vc { font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 999px; font-variant-numeric: tabular-nums; cursor: default; }
   .cu-vc.ok { background: rgba(63,143,95,.13); color: #2F7A4F; }
   .cu-vc.part { background: rgba(201,168,76,.18); color: #7A5F1C; }
   .cu-vc.no { background: rgba(176,39,28,.1); color: var(--red); }
+  .cu-vc.none { background: rgba(17,17,17,.06); color: var(--mid); }
   /* The Course tab and course work assigned (2026-10-29) */
   .co-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 0 0 1rem; }
   .co-stat { border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.85rem; min-width: 0; }
@@ -207,6 +208,7 @@
   .co-p.ok { background: #3F8F5F; color: #fff; }
   .co-p.part { background: #E2C66F; color: #4A3A10; }
   .co-p.no { background: var(--red); color: #fff; }
+  .co-p.none { background: #A9A9A3; color: #fff; }
   .co-p.go { background: rgba(63,143,95,.1); box-shadow: inset 0 0 0 1.5px #3F8F5F; color: #2F7A4F; }
   .co-p.here { outline: 2px solid var(--text); outline-offset: 1px; }
   .co-chk { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.78rem; }
@@ -3833,8 +3835,18 @@
   /* WATCHED OR SKIPPED (Luca, 2026-10-16: "show watched vs skipped videos in the
      admin too"). Which video plays for each part comes from the portal's own
      curriculum-videos.js, fetched once; how much of it was played comes from the
-     student's synced progress (videos: { file: { w: seconds played, d: length } }).
-     A part's stretch of a shared video is judged on the seconds played up to its end. */
+     student's synced progress (videos: { file: { w: seconds played, d: length,
+     r: stretches played } }).
+     FIXED 2026-10-30, after a parent was nearly told 37 videos were skipped: 14 of
+     those parts had no video when finished, and one had been watched.
+     - Finished before the video went up (CURRICULUM_VIDEO_DATES): "No video yet",
+       unless it was played afterwards.
+     - A shared video is judged on the stretches played. A record from before those
+       were kept has only a total, which does not say where the seconds fell: the
+       most and least it can mean for this part are worked out, a part that passed
+       the lock is taken as watched, and what is left reads "some", never a number.
+     Before this, a part's share was (total - part's start) / part's length, which
+     made seconds played at the end of a video credit Part 1 and skip the last part. */
   var cuVidState = '';
   function cuVideos() {
     if (window.CURRICULUM_VIDEOS) return window.CURRICULUM_VIDEOS;
@@ -3860,35 +3872,57 @@
     if (!(m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)(?:@([\d:.]*)(?:-([\d:.]*))?)?$/.exec(v))) return null;
     return { key: m[1], from: cuSecs(m[2]), to: cuSecs(m[3]) };
   }
-  // 0..1 of the part's video played, or null when the part has no tracked video.
-  function cuWatchShare(cu, lessonId, i) {
+  var CU_LOCK_LIVE = '2026-10-17T01:36:07Z';   // checks wait for the video from here on (curriculum.js CHECK_WATCH_SHARE)
+  /* A part's video as far as the record can say, or null when it has no tracked video:
+     { share: 0..1, cls: 'ok' | 'part' | 'no' | 'none', some: true when only "some of it" is known }. */
+  function cuWatch(cu, lessonId, i) {
     var pv = cuPartVideo(lessonId, i);
     if (!pv) return null;
-    var rec = (cu && cu.videos && cu.videos[pv.key]) || {};
-    if (rec.done && !pv.from && !pv.to) return 1;
-    var z = pv.to || rec.d || 0;
-    if (!rec.w || !(z > pv.from)) return 0;
-    return Math.max(0, Math.min(1, (rec.w - pv.from) / (z - pv.from)));
+    var rec = (cu && cu.videos && cu.videos[pv.key]) || {}, at = (cu && cu.at && cu.at[lessonId + '#' + i]) || '';
+    var whole = !pv.from && !pv.to, z = pv.to || rec.d || 0, len = z - pv.from, w = rec.w || 0, share = 0, some = false, passed = false;
+    var live = (window.CURRICULUM_VIDEO_DATES || {})[pv.key] || '';
+    var early = !!(at && live && new Date(at) < new Date(live));
+    if (whole) share = rec.done ? 1 : rec.d ? Math.min(1, w / rec.d) : 0;
+    else if (rec.r && len > 0) {
+      rec.r.forEach(function (s) { share += Math.max(0, Math.min(s[1], z) - Math.max(s[0], pv.from)); });
+      share = Math.min(1, share / len);
+    } else if (w && len > 0) {
+      var most = Math.min(1, w / len), least = Math.max(0, 1 - (rec.d - w) / len);
+      var locked = !!(at && live && !early && new Date(at) >= new Date(CU_LOCK_LIVE));
+      if (least >= 0.9) share = 1;
+      else if (locked && most >= 0.9) { share = 1; passed = true; }
+      else if (early) share = 0;
+      else if (most >= 0.2) { share = most; some = true; }
+    }
+    return { share: share, some: some, passed: passed, cls: early && share < 0.2 ? 'none' : share >= 0.9 ? 'ok' : share >= 0.2 ? 'part' : 'no' };
   }
-  function cuWatchCell(share) {
-    if (share == null) return '\u2014';
-    if (share >= 0.9) return '<span class="cu-w ok">&#10003; watched</span>';
-    if (share >= 0.2) return '<span class="cu-w part">' + Math.round(share * 100) + '%</span>';
+  function cuWatchCell(wv) {
+    if (!wv) return '\u2014';
+    if (wv.cls === 'none') return '<span class="cu-w none">no video yet</span>';
+    if (wv.cls === 'ok') return '<span class="cu-w ok">&#10003; watched</span>';
+    if (wv.cls === 'part') return '<span class="cu-w part">' + (wv.some ? 'some' : Math.round(wv.share * 100) + '%') + '</span>';
     return '<span class="cu-w no">skipped</span>';
+  }
+  function cuWatchWords(wv) {
+    if (wv.cls === 'none') return 'finished before its video was posted';
+    if (wv.passed) return 'watched: its check only opens after the video';
+    if (wv.some) return 'some of the video played; this older record does not show which part';
+    return Math.round(wv.share * 100) + '% of the video played';
   }
   // Watched / partly / skipped over every finished part with a tracked video; null until the course files are in.
   function cuVideoTally(cu) {
     if (!cu || !cu.done || !cu.done.length) return null;
     var data = cuCourseData(), vids = cuVideos();
     if (!data || !vids) return null;
-    var got = {}, t = { ok: 0, part: 0, no: 0, n: 0 };
+    var got = {}, t = { ok: 0, part: 0, no: 0, none: 0, n: 0 };
     cu.done.forEach(function (k) { got[k] = 1; });
     data.courses.forEach(function (c) {
       (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) {
         if (!got[l.id + '#' + i]) return;
-        var sh = cuWatchShare(cu, l.id, i);
-        if (sh == null) return;
-        t.n++; t[sh >= 0.9 ? 'ok' : sh >= 0.2 ? 'part' : 'no']++;
+        var wv = cuWatch(cu, l.id, i);
+        if (!wv) return;
+        t[wv.cls]++;
+        if (wv.cls !== 'none') t.n++;
       }); }); });
     });
     return t.n ? t : null;
@@ -3899,7 +3933,7 @@
     var one = kept('s_prep_' + key), cu = one && one.prep && one.prep.curriculum;
     var t = cuVideoTally(cu);
     if (!t) return '';
-    return '<span class="vid-tally' + (t.no ? ' bad' : '') + '" title="Videos for the course parts they finished: ' + t.ok + ' watched, ' + t.part + ' partly, ' + t.no + ' skipped">' +
+    return '<span class="vid-tally' + (t.no ? ' bad' : '') + '" title="Videos for the course parts they finished: ' + t.ok + ' watched, ' + t.part + ' partly, ' + t.no + ' skipped' + (t.none ? ', ' + t.none + ' finished before the video was posted' : '') + '">' +
       '&#9654; ' + t.ok + ' of ' + t.n + ' videos watched' + (t.no ? ' &middot; ' + t.no + ' skipped' : '') + '</span>';
   }
   function renderCurriculumPrep(p, snap, mins) {
@@ -3962,24 +3996,24 @@
     if (gv && gv.d) head.push('1.1 video ' + (gv.done ? 'watched' : Math.round(100 * Math.min(gv.w, gv.d) / gv.d) + '% watched'));
     var vids = '';
     if (cu && cu.done && cu.done.length && data && cuVideos()) {
-      var got2 = {}, chips = [], nW = 0, nP = 0, nS = 0;
+      var got2 = {}, chips = [], nW = 0, nP = 0, nS = 0, nN = 0;
       cu.done.forEach(function (k) { got2[k] = 1; });
       data.courses.forEach(function (c) {
         (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) {
           if (!got2[l.id + '#' + i]) return;
-          var sh = cuWatchShare(cu, l.id, i);
-          if (sh == null) return;
-          var cls = sh >= 0.9 ? 'ok' : sh >= 0.2 ? 'part' : 'no';
-          if (cls === 'ok') nW++; else if (cls === 'part') nP++; else nS++;
+          var wv = cuWatch(cu, l.id, i);
+          if (!wv) return;
+          var cls = wv.cls;
+          if (cls === 'ok') nW++; else if (cls === 'part') nP++; else if (cls === 'none') nN++; else nS++;
           var many = l.parts.length > 1, ptName = pp && pp.title ? String(pp.title).replace(/\*\*/g, '') : '';
-          chips.push('<span class="cu-vc ' + cls + '" title="' + escHtml(l.num + ' ' + l.title + (many ? ', Part ' + (i + 1) + (ptName ? ': ' + ptName : '') : '') + ': ' + Math.round(sh * 100) + '% of the video played') + '">' +
+          chips.push('<span class="cu-vc ' + cls + '" title="' + escHtml(l.num + ' ' + l.title + (many ? ', Part ' + (i + 1) + (ptName ? ': ' + ptName : '') : '') + ': ' + cuWatchWords(wv)) + '">' +
             escHtml(l.num + (many ? ' P' + (i + 1) : '')) + '</span>');
         }); }); });
       });
       if (chips.length) vids = '<div class="cu-vids"><div class="cu-vids-h">Videos for the parts they finished<span>' +
-        '<b class="ok">' + nW + ' watched</b> &middot; <b class="part">' + nP + ' partly</b> &middot; <b class="no">' + nS + ' skipped</b></span></div>' +
+        '<b class="ok">' + nW + ' watched</b> &middot; <b class="part">' + nP + ' partly</b> &middot; <b class="no">' + nS + ' skipped</b>' + (nN ? ' &middot; <b class="none">' + nN + ' no video yet</b>' : '') + '</span></div>' +
         '<div class="cu-vc-row">' + chips.join('') + '</div>' +
-        (nS ? '<p class="prep-note">Skipped means under a fifth of the video was played before the check was done. Checks lock until the video is watched from Oct 16 on.</p>' : '') + '</div>';
+        (nS || nN ? '<p class="prep-note">Skipped means the video was there when they finished the part and under a fifth of it has been played. No video yet means they finished the part before its video was posted. Since Oct 16 a check stays locked until its video is watched, but only once there is a video.</p>' : '') + '</div>';
     }
     var body = list.length
       ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Watched</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
@@ -3991,7 +4025,7 @@
           return '<tr' + (has ? ' class="cu-row" data-cu-part="' + escHtml(pk) + '" title="Open the check questions"' : '') + '><td>' +
             escHtml(nameOf(r)) + (has ? ' <span class="cu-open' + (wrong ? ' bad' : '') + '">' + (wrong ? wrong + ' missed \u203a' : 'Review \u203a') + '</span>' : '') + '</td>' +
             '<td class="n">' + (r.video ? mins(r.video) : '—') + '</td>' +
-            '<td class="n">' + cuWatchCell(cuWatchShare(cu, r.lessonId, r.part)) + '</td>' +
+            '<td class="n">' + cuWatchCell(cuWatch(cu, r.lessonId, r.part)) + '</td>' +
             '<td class="n">' + (r.check ? mins(r.check) : '—') + '</td>' +
             '<td class="n">' + (r.n ? r.right + ' of ' + r.n + ' right' : '—') + '</td>' +
             '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>';
@@ -4009,11 +4043,11 @@
     var cu = p.curriculum || null, k = lessonId + '#' + i;
     var at = (cu && cu.at && cu.at[k]) || '';
     var done = !!at || !!(cu && cu.done && cu.done.indexOf(k) !== -1);
-    var share = cuWatchShare(cu, lessonId, i);
+    var wv = cuWatch(cu, lessonId, i), share = wv ? wv.share : null;
     var here = !!(cu && cu.last && cu.last.lessonId === lessonId && (cu.last.part || 0) === i);
     var f = p.practice && p.practice.cuFirst && p.practice.cuFirst[lessonId + '|' + i];
-    return { done: done, at: at, share: share, here: here, step: here ? cu.last.step : '', first: f && f.n ? f : null,
-      cls: done ? (share == null || share >= 0.9 ? 'ok' : share >= 0.2 ? 'part' : 'no') : (here || share > 0 ? 'go' : '') };
+    return { done: done, at: at, share: share, watch: wv, here: here, step: here ? cu.last.step : '', first: f && f.n ? f : null,
+      cls: done ? (wv ? wv.cls : 'ok') : (here || share > 0 ? 'go' : '') };
   }
   function cuPartName(l, i) {
     var pt = l.parts && l.parts[i], many = l.parts && l.parts.length > 1;
@@ -4045,7 +4079,7 @@
     var day = function (iso) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
     var oldBackend = !cu.at;   // before prep.gs v33
     var stats = [], courses = [];
-    var vt = { ok: 0, part: 0, no: 0 }, chk = { n: 0, right: 0 }, lastAt = '', recent = 0, since14 = Date.now() - 14 * 86400000;
+    var vt = { ok: 0, part: 0, no: 0, none: 0 }, chk = { n: 0, right: 0 }, lastAt = '', recent = 0, since14 = Date.now() - 14 * 86400000;
     data.courses.forEach(function (c) {
       var doms = c.domains || c.units || [], tot = 0, got = 0, rows = [];
       var any = doms.some(function (d) { return (d.lessons || []).some(function (l) { return (l.parts || []).some(function (pp, i) { var s = cuPartState(p, l.id, i); return s.done || s.cls === 'go'; }); }); });
@@ -4068,7 +4102,7 @@
             if (s.first) { fN += s.first.n; fR += s.first.right; chk.n += s.first.n; chk.right += s.first.right; }
             var tip = [cuPartName(l, i)];
             tip.push(s.done ? 'Finished' + (s.at ? ' ' + day(s.at) : '') : (s.here ? 'Where they are now (' + (s.step === 'check' ? 'the check' : 'the video') + ')' : 'Not finished'));
-            if (s.share != null) tip.push(Math.round(s.share * 100) + '% of the video played');
+            if (s.watch) tip.push(cuWatchWords(s.watch));
             if (s.first) tip.push('Check: ' + s.first.right + ' of ' + s.first.n + ' right on the first try');
             cells.push('<span class="co-p' + (s.cls ? ' ' + s.cls : '') + (s.here ? ' here' : '') + '" title="' + escHtml(tip.join('\n')) + '">' + (i + 1) + '</span>');
           });
@@ -4101,15 +4135,15 @@
         '<div class="co-bar"><i style="width:' + pcT + '%"></i></div>' + (next ? '<div class="sub">Next in the suggested order: ' + escHtml(next) + '</div>' : '') + '</div>');
       courses.push('<div class="co-course">' + escHtml(c.title) + '</div>' + rows.join(''));
     });
-    var vN = vt.ok + vt.part + vt.no;
+    var vN = vt.ok + vt.part + vt.no;   // parts finished before their video was posted are not in it
     if (vN) stats.push('<div class="co-stat"><div class="lbl">Videos</div><div class="num">' + vt.ok + ' <small>of ' + vN + ' watched</small></div>' +
-      '<div class="sub"><b class="part">' + vt.part + ' partly</b> &middot; <b class="no">' + vt.no + ' skipped</b>, for the parts they finished</div></div>');
+      '<div class="sub"><b class="part">' + vt.part + ' partly</b> &middot; <b class="no">' + vt.no + ' skipped</b>' + (vt.none ? ' &middot; ' + vt.none + ' no video yet' : '') + ', for the parts they finished</div></div>');
     if (chk.n) stats.push('<div class="co-stat"><div class="lbl">Checks, first try</div><div class="num">' + Math.round(100 * chk.right / chk.n) + '% <small>' + chk.right + ' of ' + chk.n + '</small></div>' +
       '<div class="sub">A retake does not change it</div></div>');
     stats.push('<div class="co-stat"><div class="lbl">Last two weeks</div><div class="num">' + recent + ' <small>part' + (recent === 1 ? '' : 's') + ' finished</small></div>' +
       '<div class="sub">' + (lastAt ? 'Last one ' + day(lastAt) : (cu.done && cu.done.length ? '' : 'None finished yet')) + '</div></div>');
     var legend = '<div class="co-legend"><span><i class="co-p ok"></i>Finished, video watched</span><span><i class="co-p part"></i>Finished, video partly played</span>' +
-      '<span><i class="co-p no"></i>Finished, video skipped</span><span><i class="co-p go"></i>Started</span><span><i class="co-p"></i>Not started</span>' +
+      '<span><i class="co-p no"></i>Finished, video skipped</span><span><i class="co-p none"></i>Finished before the video was posted</span><span><i class="co-p go"></i>Started</span><span><i class="co-p"></i>Not started</span>' +
       '<span><i class="co-p here"></i>Where they are now</span></div>';
     box.innerHTML = '<div class="co-sum">' + stats.join('') + '</div>' + legend + courses.join('') +
       (oldBackend ? '<p class="prep-note">Finish days and first-try check scores appear once the backend update is deployed.</p>' : '');
@@ -4171,7 +4205,7 @@
     var nDone = 0;
     var items = refs.map(function (r) {
       var s = cuPartState(p, r.l.id, r.i), bits = [];
-      if (s.share != null) bits.push(s.done ? (s.cls === 'ok' ? 'video watched' : s.cls === 'part' ? Math.round(s.share * 100) + '% of the video played' : 'video skipped') : (s.share > 0 ? Math.round(s.share * 100) + '% of the video played' : ''));
+      if (s.watch) bits.push(s.done ? (s.cls === 'ok' ? 'video watched' : s.cls === 'no' ? 'video skipped' : cuWatchWords(s.watch)) : (s.share > 0 ? cuWatchWords(s.watch) : ''));
       if (s.first) bits.push('check ' + s.first.right + ' of ' + s.first.n + ' on the first try');
       if (!s.done && s.here) bits.push('on the ' + (s.step === 'check' ? 'check' : 'video') + ' now');
       bits = bits.filter(String);

@@ -20,7 +20,7 @@
   'use strict';
 
   var DATA_SRC = 'curriculum-data.js?v=20261030d';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20261029a';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20261030a';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -538,7 +538,29 @@
      while playing. A drag along the bar is a jump, so it marks nothing, and
      so does replaying a minute already seen. The marks stay on the device
      (one character a second); the count and the length go to the backend
-     with the rest of the progress, which decides when 90% is reached. */
+     with the rest of the progress, which decides when 90% is reached.
+     So do the stretches played (r: [[from, to], ...], in seconds), so that
+     another device and the admin page can tell which part of a shared video
+     the seconds belong to (2026-10-30: 301 seconds at the end of 3.3 read as
+     Part 1 "partly" and Part 6 "skipped"). */
+  function spanJoin(a, b) {
+    var out = [];
+    (a || []).concat(b || []).filter(function (s) { return s && s[1] > s[0]; }).sort(function (x, y) { return x[0] - y[0]; }).forEach(function (s) {
+      var l = out[out.length - 1];
+      if (l && s[0] <= l[1] + 5) l[1] = Math.max(l[1], s[1]); else out.push([s[0], s[1]]);
+    });
+    if (out.length > 12) out = out.sort(function (x, y) { return (y[1] - y[0]) - (x[1] - x[0]); }).slice(0, 12).sort(function (x, y) { return x[0] - y[0]; });
+    return out;
+  }
+  function spansOf(marks) {
+    var out = [], at = -1;
+    for (var t = 0; t <= marks.length; t++) {
+      var on = marks[t] === 1 || marks[t] === '1';
+      if (on && at < 0) at = t;
+      if (!on && at >= 0) { out.push([at, t]); at = -1; }
+    }
+    return spanJoin(out);
+  }
   function watchTrack(v, key, box) {
     var store = 'moretti_cu_watch_' + progKey + '_' + key;
     var marks = [], n = 0, last = null, savedAt = 0, syncedAt = 0;
@@ -565,6 +587,7 @@
       if (!d) return;
       var had = videoRec(key) || {};
       var rec = { w: Math.max(Math.min(n, d), had.w || 0), d: d };
+      rec.r = spanJoin(had.r, spansOf(marks));
       if (had.done) rec.done = had.done;
       else if (rec.w >= share * d) { rec.done = new Date().toISOString(); now = true; }
       prog.videos = prog.videos || {};
@@ -665,8 +688,13 @@
     var n = 0;
     for (var t = Math.floor(a); t < z; t++) if (marks[t] === '1') n++;
     var share = n / (z - a);
-    // Watched on another device: only the total comes back, taken as played from the start.
-    if (rec.w) share = Math.max(share, Math.min(1, (rec.w - a) / (z - a)));
+    if (rec.r) {   // the stretches played, on any device
+      var hit = 0;
+      rec.r.forEach(function (s) { hit += Math.max(0, Math.min(s[1], z) - Math.max(s[0], a)); });
+      share = Math.max(share, hit / (z - a));
+    }
+    // Watched on another device before stretches were kept: only the total comes back, taken as played from the start.
+    else if (rec.w) share = Math.max(share, Math.min(1, (rec.w - a) / (z - a)));
     return Math.max(0, Math.min(1, share));
   }
   function checkOpen(l, i) {
@@ -714,9 +742,11 @@
       }
       Object.keys(d.progress.videos || {}).forEach(function (k) {
         var theirs = d.progress.videos[k], mine = videoRec(k) || {};
-        if (!theirs || ((theirs.w || 0) <= (mine.w || 0) && (!theirs.done || mine.done))) return;
+        if (!theirs) return;
+        var spans = spanJoin(mine.r, theirs.r);
+        if ((theirs.w || 0) <= (mine.w || 0) && (!theirs.done || mine.done) && JSON.stringify(spans) === JSON.stringify(mine.r || [])) return;
         prog.videos = prog.videos || {};
-        prog.videos[k] = { w: Math.max(theirs.w || 0, mine.w || 0), d: theirs.d || mine.d, done: mine.done || theirs.done };
+        prog.videos[k] = { w: Math.max(theirs.w || 0, mine.w || 0), d: theirs.d || mine.d, done: mine.done || theirs.done, r: spans };
         if (!prog.videos[k].done) delete prog.videos[k].done;
         changed = true;
       });
@@ -724,6 +754,16 @@
         if (!prog.parts[k] && d.progress.parts[k] && d.progress.parts[k].done) { prog.parts[k] = d.progress.parts[k]; changed = true; partsChanged = true; }
       });
       if (!prog.last && d.progress.last) { prog.last = d.progress.last; changed = true; }
+      // Videos played before stretches were kept: this device's marks still know them.
+      Object.keys(prog.videos || {}).forEach(function (k) {
+        if (prog.videos[k].r) return;
+        var marks = '';
+        try { marks = localStorage.getItem('moretti_cu_watch_' + progKey + '_' + k) || ''; } catch (e) {}
+        if (marks.indexOf('1') === -1) return;
+        prog.videos[k].r = spansOf(marks.split(''));
+        changed = true;
+        queueSync();
+      });
       if (!changed) return;
       try { localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog)); } catch (e) {}
       // An open lesson is redrawn only when it must be: a redraw restarts its video.

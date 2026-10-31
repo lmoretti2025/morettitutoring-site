@@ -72,3 +72,25 @@ window.CURRICULUM_VIDEOS = {
   'm3.3': ['r2:m3.3-1.mp4@0:00-6:24', 'r2:m3.3-1.mp4@6:24-12:42', 'r2:m3.3-1.mp4@12:42-19:46',
            'r2:m3.3-1.mp4@19:46-27:56', 'r2:m3.3-1.mp4@27:56-36:39', 'r2:m3.3-1.mp4@36:39']
 };
+
+/* WHEN EACH VIDEO WENT UP (Luca, 2026-10-30). The admin page judges a finished
+   part against the video that existed when it was finished: a part done before
+   its video was posted reads "No video yet", not "skipped". Add a line here
+   with every new video, or its parts will read skipped until one is added. */
+window.CURRICULUM_VIDEO_DATES = {
+  'm1.1-1.mp4': '2026-09-30T14:53:55Z',
+  'm2.1-1.mp4': '2026-10-02T04:43:29Z',
+  'm2.2-1.mp4': '2026-10-02T04:43:29Z',
+  'm2.3-1.mp4': '2026-10-02T04:43:29Z',
+  'm2.4-1.mp4': '2026-10-04T22:07:09Z',
+  'm2.5-1.mp4': '2026-10-04T22:07:09Z',
+  'm2.6-1.mp4': '2026-10-04T22:07:09Z',
+  'm2.7-1.mp4': '2026-10-04T22:07:09Z',
+  'm2.8-1.mp4': '2026-10-04T22:07:09Z',
+  'm2.9-1.mp4': '2026-10-16T04:16:36Z',
+  'm2.10-1.mp4': '2026-10-21T01:24:35Z',
+  'm3.1-1.mp4': '2026-10-22T13:44:04Z',
+  'm3.2-1.mp4': '2026-10-22T22:01:53Z',
+  'm3.11-1.mp4': '2026-10-23T04:54:52Z',
+  'm3.3-1.mp4': '2026-10-29T18:26:18Z'
+};
