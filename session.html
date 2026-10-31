@@ -288,6 +288,7 @@
   // Booking reads every calendar again and writes the event: it gets longer. The
   // request carries an id, so a retry after a lost reply finds the first booking.
   var BOOK_TIMEOUT_MS = 45000;
+  var READY_AT = Date.now();
   function post(payload, timeoutMs) {
     var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, timeoutMs || POST_TIMEOUT_MS);
@@ -573,7 +574,7 @@
     var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: WHERE };
     $('go').disabled = true; $('go').textContent = moving ? 'Moving…' : 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
-    var req = { action: 'bookSession', start: chosen, minutes: pickLen || LEN, requestId: requestId, name: name, email: email,
+    var req = { action: 'bookSession', elapsedMs: Date.now() - READY_AT, start: chosen, minutes: pickLen || LEN, requestId: requestId, name: name, email: email,
            phone: details.phone, student: student, where: details.where, notes: $('b-notes').value.trim(), website: $('b-website').value,
            repeat: moving ? 1 : Number($('b-repeat').value) };
     if (studentEmail) req.studentEmail = studentEmail;
@@ -604,6 +605,7 @@
           closeSheet(); return load('That time was just taken. Here is what is open now.');
         }
         if (err === 'inperson_hours') { closeSheet(); setWhere('inperson'); return load('That time runs past the library\u2019s hours. Here are the in-person times that fit.'); }
+        if (err === 'try_again') return say('Please press the button once more.', true);
         if (err === 'too_late') return say('That session is less than 24 hours away, so it can\u2019t be moved here. Text me at ' + PHONE + '.', true);
         if (err === 'bad_token' || err === 'not_found') return say('That session could not be found. Text me at ' + PHONE + ' and I\u2019ll sort it out.', true);
         if (err === 'too_many') return say('You already have ' + (d.count || 4) + ' upcoming sessions booked. To add more, text me at ' + PHONE + '.', true);

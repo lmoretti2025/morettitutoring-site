@@ -187,6 +187,7 @@ safe(function(){
                              src: (window.MTSource && window.MTSource.forLead()) || null })
     }).then(function(res){ return res.json(); })
       .then(function(data){
+        if (data && data.error === 'invalid_email') throw new Error('bad_email');
         if (!data || !data.ok) throw new Error('submit_failed');
         note.style.display='none'; ok.style.display='block'; bad.style.display='none';
         offerCall(ok, start, name, email, phone);
@@ -202,7 +203,8 @@ safe(function(){
       .catch(function(err){
         /* A lost reply is not a lost lead: the row and the email may already
            have gone, so a second send would make a duplicate. */
-        if (!err || err.message !== 'submit_failed') bad.textContent = 'No answer came back, but it may have gone through. Check your inbox for a confirmation in a few minutes, or text (201) 275-2791.';
+        if (err && err.message === 'bad_email') bad.textContent = 'Please check your email address. It looks like it has a typo.';
+        else if (!err || err.message !== 'submit_failed') bad.textContent = 'No answer came back, but it may have gone through. Check your inbox for a confirmation in a few minutes, or text (201) 275-2791.';
         bad.style.display='block'; ok.style.display='none';
         btn.disabled=false; btn.innerHTML=btnLabel;
       });

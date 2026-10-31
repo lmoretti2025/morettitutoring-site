@@ -267,6 +267,7 @@
   setHow(HOW);
   var m = /[#&]t=([^&]+)/.exec(window.location.hash || '');
   var TOKEN = '';
+  var READY_AT = Date.now();
   try { TOKEN = m ? decodeURIComponent(m[1]) : ''; } catch (e) { TOKEN = ''; }
 
   /* A plain string body keeps this a CORS simple request, like every other
@@ -460,7 +461,7 @@
     // Booking checks every calendar again: 15-20 seconds (measured 2026-09-24).
     $('go').disabled = true; $('go').textContent = 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
-    post({ action: 'bookCall', start: chosen, token: TOKEN, name: name, email: email,
+    post({ action: 'bookCall', elapsedMs: Date.now() - READY_AT, start: chosen, token: TOKEN, name: name, email: email,
            phone: phone, how: HOW, student: $('b-student').value.trim(),
            about: $('b-about').value, notes: $('b-notes').value.trim(), website: $('b-website').value }, BOOK_TIMEOUT_MS)
       .then(function (d) {
@@ -477,6 +478,7 @@
           return say('You already have a call booked for ' + fmt(d.start, DAY) + ' at ' + fmt(d.start, TIME) +
                      '. To change it, reply to the confirmation email or text ' + PHONE + '.', true);
         }
+        if (err === 'try_again') return say('Please press Book the call once more.', true);
         if (err === 'bad_email') return say('Please check your email address.', true);
         if (err === 'bad_phone' || err === 'need_phone') { $('b-phone').focus(); return say(HOW === 'phone' ? 'Please check the phone number: it\u2019s the one I\u2019ll call.' : 'Please check the phone number, or leave it blank.', true); }
         if (err === 'bad_name') return say('Please add your name.', true);
