@@ -801,6 +801,8 @@
   .mx-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.2rem 0 0.9rem; }
   .mx-bar select { font: inherit; font-size: 0.82rem; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--text); }
   .mx-count { font-size: 0.8rem; color: var(--mid); margin-bottom: 0.4rem; }
+  .mx-older { font-size: 0.8rem; color: var(--mid); margin-bottom: 0.6rem; }
+  .mx-older button { all: unset; cursor: pointer; color: var(--red); text-decoration: underline; margin-right: 0.8rem; }
   .mx-row { border-top: 1px solid var(--border); }
   .mx-row:first-child { border-top: 0; }
   .mx-sum { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 5.2rem 1fr auto; gap: 0.2rem 0.8rem; align-items: baseline; padding: 0.6rem 0.2rem; font-family: var(--hel); }
@@ -1328,20 +1330,21 @@
       </details>
     </section>
 
-    <!-- MISTAKES (2026-10-28): every question they missed in the Question Bank, Challenge and Rush, from PracticeLog
-         (the same read as the evidence panel). Loaded the first time the tab opens. Tap a row for the question. -->
+    <!-- MISTAKES (2026-10-28; everything since 2026-10-30): every question they missed anywhere, from PracticeLog
+         (the same read as the evidence panel) and each test's own record. Loaded the first time the tab opens. Tap a row for the question. -->
     <section id="tab-misses" style="display:none;">
       <div class="card">
-        <h2>Question Bank mistakes</h2>
-        <p class="card-sub">Every question missed in the Question Bank, Challenge questions and Rush, newest first. Tap one to open it as they saw it, with their answer.</p>
+        <h2>Mistakes</h2>
+        <p class="card-sub">Every question missed on practice tests, the diagnostic, course checks, the Question Bank, Challenge questions and Rush, newest first. Tap one to open it as they saw it, with their answer.</p>
         <div class="mx-bar" id="mx-bar">
           <select id="mx-status" aria-label="Status"><option value="all">Still wrong and fixed</option><option value="open">Still wrong</option><option value="fixed">Fixed since</option></select>
           <select id="mx-subj" aria-label="Subject"><option value="all">Both subjects</option><option value="math">Math</option><option value="rw">Reading and Writing</option></select>
-          <select id="mx-src" aria-label="Source"><option value="all">Every source</option><option value="qb">Question Bank</option><option value="chal">Challenge</option><option value="rush">Rush</option></select>
+          <select id="mx-src" aria-label="Source"><option value="all">Every source</option><option value="test">Practice tests</option><option value="diag">Diagnostic</option><option value="cu">Course checks</option><option value="qb">Question Bank</option><option value="chal">Challenge</option><option value="rush">Rush</option></select>
           <select id="mx-days" aria-label="When"><option value="all">Any time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select>
           <select id="mx-diff" aria-label="Difficulty"><option value="all">Any difficulty</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
         </div>
         <div class="mx-count" id="mx-count"></div>
+        <div class="mx-older" id="mx-older"></div>
         <div id="mx-list"><div class="empty">Loading&hellip;</div></div>
       </div>
     </section>
@@ -4358,6 +4361,7 @@
         return;
       }
       currentDetail = data;
+      if (mx.key === key) mxCompose();
       // The detail is fresher than the roster row the page opened from.
       var p = data.student && data.student.program;
       if (PROGRAMS[p] && !programPending[key] && p !== programOf(currentStudent)) {
@@ -5365,24 +5369,40 @@
     return p;
   }
 
-  /* ═══ MISTAKES ═══ (2026-10-28) every question this student missed in the
-     Question Bank, Challenge questions or Rush, one row per question: when
-     it was last missed, how many times, the answer they gave, and whether a
-     later try (there or a Saved & Mistakes retry) got it right. The
-     question itself comes from the bank files, loaded only when a row is
-     opened. */
-  var mx = { key: '', items: null };
-  var MX_SRC = { qb: 'Question Bank', chal: 'Challenge', rush: 'Rush' };
+  /* ═══ MISTAKES ═══ (2026-10-28; Luca, 2026-10-30: "show ALL mistakes") every
+     question this student missed, one row per question: on a practice test or
+     the diagnostic (each attempt's qStats, already on getStudentDetail), a
+     course check (evidence cuEvents), the Question Bank, Challenge questions
+     or Rush (evidence events). When it was last missed, how many times, the
+     answer they gave, and whether a later try anywhere (or a Saved & Mistakes
+     retry) got it right. The question itself comes from the bank files,
+     loaded only when a row is opened. A test too old to carry question ids
+     cannot be listed question by question, so it is named with a link to its
+     report instead (mx.older). */
+  var mx = { key: '', items: null, ev: null, older: [] };
+  var MX_SRC = { qb: 'Question Bank', chal: 'Challenge', rush: 'Rush', test: 'Practice test', diag: 'Diagnostic', cu: 'Course check' };
   var MX_BANKS = {
     rw: { src: 'question-bank.js?v=20261025b', glob: 'QUESTION_BANK' },
     math: { src: 'question-bank-math.js?v=20261025d', glob: 'QUESTION_BANK_MATH' },
-    chal: { src: 'challenge-questions.js?v=20260926a', glob: ['CHALLENGE_RW', 'CHALLENGE_MATH'] }
+    chal: { src: 'challenge-questions.js?v=20260926a', glob: ['CHALLENGE_RW', 'CHALLENGE_MATH'] },
+    tests: { src: 'practice-tests.js?v=20261028a', glob: 'SAT_PRACTICE_TESTS' },
+    diag: { src: 'banks.js?v=20261020a', glob: 'SECTION_BANKS' },
+    // Questions since replaced: a test taken before then still names them.
+    testsOld: { src: 'practice-tests-v1.js?v=20261013a', glob: 'SAT_PRACTICE_TESTS_V1' },
+    diagOld: { src: 'banks-v1.js?v=20261013a', glob: 'SECTION_BANKS_V1' }
   };
+  // Banks are flat lists; tests and the diagnostic nest theirs by section and module. The first file to name a qid wins.
+  function mxIndexAll(o) {
+    if (Array.isArray(o)) { o.forEach(mxIndexAll); return; }
+    if (!o || typeof o !== 'object') return;
+    if (o.qid) { if (!mxIndex[String(o.qid)]) mxIndex[String(o.qid)] = o; return; }
+    Object.keys(o).forEach(function (k) { mxIndexAll(o[k]); });
+  }
   var mxLoads = {}, mxIndex = {};
   function mxLoadBank(name) {
     if (mxLoads[name]) return mxLoads[name];
     var b = MX_BANKS[name];
-    var index = function () { [].concat(b.glob).forEach(function (g) { (window[g] || []).forEach(function (q) { if (q && q.qid) mxIndex[String(q.qid)] = q; }); }); };
+    var index = function () { [].concat(b.glob).forEach(function (g) { mxIndexAll(window[g]); }); };
     if ([].concat(b.glob).every(function (g) { return window[g]; })) { index(); return (mxLoads[name] = Promise.resolve()); }
     mxLoads[name] = new Promise(function (resolve, reject) {
       var el = document.createElement('script');
@@ -5393,21 +5413,46 @@
     });
     return mxLoads[name];
   }
+  /* One answer per question on each test, in the shape of a PracticeLog event. A
+     mostly blank sitting is a test they stopped, not questions they missed, so
+     its blanks are left out; the ones they answered still count. */
+  function mxTestEvents(attempts) {
+    var MS = window.MorettiSignals, out = [], older = [];
+    (attempts || []).forEach(function (a) {
+      var items = (a.qStats && MS && MS.itemsFromQStats) ? MS.itemsFromQStats(a.qStats) : null;
+      var hasIds = items && items.some(function (x) { return x.qid; });
+      if (!hasIds) {
+        var n = items ? items.filter(function (x) { return !x.ok; }).length : null;
+        if (a.hasReport && (n === null || n > 0)) older.push({ attempt: a, n: n });
+        return;
+      }
+      var blanks = items.filter(function (x) { return x.blank; }).length, stopped = blanks > items.length / 2;
+      var src = /^diagnostic/.test(String(a.source || '')) ? 'diag' : 'test';
+      items.forEach(function (x) {
+        if (!x.qid || (x.blank && stopped)) return;
+        out.push({ b: src, s: x.sec === 'math' ? 'math' : 'rw', q: String(x.qid), sk: x.skill || x.dom || '', d: x.diff || '',
+                   c: x.ok ? 1 : 0, g: x.given, blank: !!x.blank, at: a.at, title: a.testTitle || '' });
+      });
+    });
+    return { events: out, older: older };
+  }
   function mxBuild(events) {
     var by = {};
-    events.forEach(function (e) {
+    // Oldest first across every source: a right answer only fixes a miss before it.
+    events.slice().sort(function (a, b) { return (Date.parse(a.at || '') || 0) - (Date.parse(b.at || '') || 0); }).forEach(function (e) {
       if (!e || !e.q) return;
       var subj = e.s === 'math' ? 'math' : 'rw';
       var id = subj + '|' + e.q;
       var t = Date.parse(e.at || '') || 0;
-      if (e.b === 'qb' || e.b === 'chal' || e.b === 'rush') {
-        var it = by[id] || (by[id] = { id: id, q: e.q, subj: subj, src: e.b, skill: e.sk || '', diff: e.d || '', misses: 0, lastMiss: 0, firstMiss: 0, given: null, fixedAt: 0 });
+      if (MX_SRC[e.b]) {
+        var it = by[id] || (by[id] = { id: id, q: e.q, subj: subj, src: e.b, skill: e.sk || '', diff: e.d || '', misses: 0, lastMiss: 0, firstMiss: 0, given: null, fixedAt: 0, title: '', blank: false, srcs: {} });
         if (!it.skill && e.sk) it.skill = e.sk;
         if (!it.diff && e.d) it.diff = e.d;
         if (e.c) { if (it.misses && t >= it.lastMiss) it.fixedAt = t; }
         else {
           it.misses++;
-          if (t >= it.lastMiss) { it.lastMiss = t; it.given = e.g; it.src = e.b; it.fixedAt = 0; }
+          it.srcs[e.b] = 1;   // the Source filter finds a question under every place it was missed
+          if (t >= it.lastMiss) { it.lastMiss = t; it.given = e.g; it.src = e.b; it.fixedAt = 0; it.title = e.title || ''; it.blank = !!e.blank; }
           if (!it.firstMiss || t < it.firstMiss) it.firstMiss = t;
         }
       } else if (e.b === 'retry' && e.c && by[id] && by[id].misses && t >= by[id].lastMiss) {
@@ -5421,15 +5466,23 @@
     var key = currentStudent && currentStudent.key;
     if (!key) return;
     if (mx.key === key && mx.items) { renderMisses(); return; }
-    mx.key = key; mx.items = null;
+    mx.key = key; mx.items = null; mx.ev = null; mx.older = [];
     $('mx-count').textContent = '';
     $('mx-list').innerHTML = '<div class="empty">Loading&hellip;</div>';
     evidenceFor(key).then(function (ev) {
       if (!currentStudent || currentStudent.key !== key) return;
       if (!ev || !ev.ok) { $('mx-list').innerHTML = '<div class="empty">Could not load their answers (' + escHtml((ev && ev.error) || 'network') + ').</div>'; mx.key = ''; return; }
-      mx.items = mxBuild(ev.events || []);
-      renderMisses();
+      mx.ev = ev;
+      mxCompose();
     }, function () { if (mx.key === key) { mx.key = ''; $('mx-list').innerHTML = '<div class="empty">Could not load their answers (network).</div>'; } });
+  }
+  // Needs both answers: the evidence, and the student's detail for their tests. Whichever lands last draws it.
+  function mxCompose() {
+    if (!mx.ev || !currentDetail || !currentStudent || currentStudent.key !== mx.key) return;
+    var tests = mxTestEvents(currentDetail.attempts);
+    mx.older = tests.older;
+    mx.items = mxBuild((mx.ev.events || []).concat(mx.ev.cuEvents || [], tests.events));
+    renderMisses();
   }
   function mxDay(t) { return t ? new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
   function mxFiltered() {
@@ -5437,25 +5490,28 @@
     var since = f.days === 'all' ? 0 : Date.now() - Number(f.days) * 86400000;
     return (mx.items || []).filter(function (it) {
       return (f.status === 'all' || (f.status === 'fixed') === !!it.fixedAt) && (f.subj === 'all' || it.subj === f.subj) &&
-        (f.src === 'all' || it.src === f.src) && (!since || it.lastMiss >= since) && (f.diff === 'all' || String(it.diff).toLowerCase() === f.diff);
+        (f.src === 'all' || it.srcs[f.src]) && (!since || it.lastMiss >= since) && (f.diff === 'all' || String(it.diff).toLowerCase() === f.diff);
     });
   }
   function renderMisses() {
     if (!mx.items) return;
     var all = mx.items, list = mxFiltered();
     var open = all.filter(function (it) { return !it.fixedAt; }).length;
-    $('mx-count').textContent = all.length
+    $('mx-count').textContent = (all.length
       ? (list.length === all.length ? '' : list.length + ' shown of ') + all.length + ' question' + (all.length === 1 ? '' : 's') + ' missed, ' + open + ' still wrong.'
-      : '';
-    if (!all.length) { $('mx-list').innerHTML = '<div class="empty">No Question Bank misses on record.</div>'; return; }
+      : '') + (mx.ev && !mx.ev.cuEvents ? ' Course checks show here after the backend deploy.' : '');
+    $('mx-older').innerHTML = mx.older.length ? 'Older tests, too old to list by question: ' + mx.older.map(function (o, i) {
+      return '<button type="button" data-older="' + i + '">' + escHtml(o.attempt.testTitle || 'Test') + ', ' + escHtml(mxDay(Date.parse(o.attempt.at))) + (o.n != null ? ' (' + o.n + ' missed)' : '') + '</button>';
+    }).join('') : '';
+    if (!all.length) { $('mx-list').innerHTML = '<div class="empty">No missed questions on record.</div>'; return; }
     if (!list.length) { $('mx-list').innerHTML = '<div class="empty">Nothing matches these filters.</div>'; return; }
     $('mx-list').innerHTML = list.map(function (it) {
       var d = String(it.diff || '').toLowerCase();
       return '<div class="mx-row" data-id="' + escHtml(it.id) + '">' +
         '<button type="button" class="mx-sum">' +
           '<span class="mx-when">' + escHtml(mxDay(it.lastMiss)) + '</span>' +
-          '<span class="mx-what">' + escHtml(it.skill || '(no skill)') + '<small>' + (it.subj === 'math' ? 'Math' : 'Reading and Writing') + ' · ' + escHtml(MX_SRC[it.src] || it.src) +
-            (it.misses > 1 ? ' · missed ' + it.misses + ' times' : '') + '</small></span>' +
+          '<span class="mx-what">' + escHtml(it.skill || '(no skill)') + '<small>' + (it.subj === 'math' ? 'Math' : 'Reading and Writing') + ' · ' + escHtml(it.title || MX_SRC[it.src] || it.src) +
+            (it.blank ? ' · left blank' : '') + (it.misses > 1 ? ' · missed ' + it.misses + ' times' : '') + '</small></span>' +
           '<span class="mx-tags">' + (d ? '<span class="mx-tag ' + escHtml(d) + '">' + escHtml(d.charAt(0).toUpperCase() + d.slice(1)) + '</span>' : '') +
             (it.fixedAt ? '<span class="mx-tag fixed">Fixed ' + escHtml(mxDay(it.fixedAt)) + '</span>' : '<span class="mx-tag open">Still wrong</span>') + '</span>' +
         '</button></div>';
@@ -5469,13 +5525,13 @@
     var it = list[idx];
     if (!it || !window.openBankQuestionViewer) return;
     var need = {};
-    list.forEach(function (x) { if (!mxIndex[x.q]) need[x.src === 'chal' ? 'chal' : x.subj] = true; });
+    list.forEach(function (x) { if (!mxIndex[x.q]) need[x.src === 'chal' ? 'chal' : x.src === 'test' ? 'tests' : x.src === 'diag' ? 'diag' : x.subj] = true; });
     var row = mxRow(id), tag = row && row.querySelector('.mx-when'), was = tag && tag.textContent;
     if (tag && Object.keys(need).length) tag.textContent = 'Opening\u2026';
     Promise.all(Object.keys(need).map(function (n) { return mxLoadBank(n).catch(function () {}); })).then(function () {
-      // Rush and a few others can sit in the other bank; one more pass for anything still missing.
+      // Rush and a few others can sit in the other bank, and a replaced test question in the old files; one more pass for anything still missing.
       var more = {};
-      list.forEach(function (x) { if (!mxIndex[x.q]) { more.chal = true; more[x.subj] = true; } });
+      list.forEach(function (x) { if (!mxIndex[x.q]) { more.chal = true; more[x.subj] = true; more.tests = more.diag = more.testsOld = more.diagOld = true; } });
       return Promise.all(Object.keys(more).map(function (n) { return mxLoadBank(n).catch(function () {}); }));
     }).then(function () {
       if (tag) tag.textContent = was;
@@ -5484,7 +5540,7 @@
         var g = x.given, num = (g === '' || g == null || isNaN(Number(g))) ? null : Number(g);
         return { q: q, sectionKey: x.subj === 'math' ? 'math' : 'reading-writing', ok: !!x.fixedAt, okLabel: 'Fixed since',
                  givenIdx: (q.type !== 'fr' && q.choices) ? num : null, givenText: g == null ? '' : String(g),
-                 meta: (MX_SRC[x.src] || x.src) + ' \u00b7 ' + (x.skill || '') + ' \u00b7 missed ' + (x.misses > 1 ? x.misses + ' times, last ' : '') + mxDay(x.lastMiss) +
+                 meta: (x.title || MX_SRC[x.src] || x.src) + ' \u00b7 ' + (x.skill || '') + ' \u00b7 ' + (x.blank ? 'left blank, ' : '') + 'missed ' + (x.misses > 1 ? x.misses + ' times, last ' : '') + mxDay(x.lastMiss) +
                        (x.fixedAt ? ' \u00b7 right on ' + mxDay(x.fixedAt) : ' \u00b7 still wrong') };
       });
       window.openBankQuestionViewer(rows, idx, (currentStudent && currentStudent.name ? currentStudent.name.split(' ')[0] + '\u2019s mistakes' : 'Mistakes'));
@@ -5505,6 +5561,10 @@
       var btn = e.target.closest && e.target.closest('.mx-sum');
       if (!btn) return;
       mxOpen(btn.closest('.mx-row').getAttribute('data-id'));
+    });
+    $('mx-older').addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('[data-older]');
+      if (btn) openReport(mx.older[Number(btn.getAttribute('data-older'))].attempt);
     });
   })();
 
