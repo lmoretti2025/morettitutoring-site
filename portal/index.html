@@ -4015,6 +4015,7 @@
   .rush-sum-list { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden auto; max-height: 320px; overscroll-behavior: contain; }
   .rush-sum-row { display: grid; grid-template-columns: 1.6rem 1fr auto auto; gap: .7rem; align-items: center; padding: .55rem .9rem; border-top: 1px solid var(--border); font-size: .76rem; }
   .rush-sum-row:first-child { border-top: 0; }
+  .rush-sum-row { cursor: pointer; } .rush-sum-row:hover, .rush-sum-row:focus-visible { background: rgba(176,39,28,.05); outline: none; }
   .rush-sum-row .rs-n { font-weight: 700; color: var(--faint); }
   .rush-sum-row .rs-time { font-variant-numeric: tabular-nums; color: var(--mid); }
   .rush-sum-row .rs-time.over { color: #B0271C; font-weight: 600; }
@@ -8005,22 +8006,46 @@ window.Portal = {
     });
     renderHomeShortcutTeasers();
   }
+  /* THE THIS WEEK TILE matches the calendar (a student's report, 2026-10-31).
+     The checklist's feed leaves out sessions and any task dated later in the
+     week, so the tile could read "nothing on deck" over a full week. It now
+     reads the calendar's own feed: sessions still ahead this week, assignments
+     due by Saturday, anything overdue. The checklist below it is unchanged. */
+  var weekTile = { line: '', todo: 0, at: 0, key: '' };
+  function loadWeekTile() {
+    if (!currentStudent || !currentStudent.key || !window.calWeekSummary) return;
+    if (weekTile.key === currentStudent.key && Date.now() - weekTile.at < 600000) return;
+    weekTile.key = currentStudent.key; weekTile.at = Date.now();
+    var r = window.calWeekSummary();
+    postToBackend({ action: 'getAssignmentsCalendar', key: currentStudent.key, start: r.start, end: r.end }).then(function (data) {
+      if (!data || !data.ok) return;
+      var sum = r.read(data), n = sum.sessions, t = sum.tasks;
+      weekTile.todo = t.length;
+      weekTile.line = !n && !t.length ? 'Nothing left on your calendar this week.'
+        : [n ? n + (n === 1 ? ' session' : ' sessions') : '', t.length ? t.length + (t.length === 1 ? ' assignment' : ' assignments') : ''].filter(String).join(' and ') + ' left this week.';
+      renderHomeShortcutTeasers();
+    }).catch(function () { weekTile.at = 0; });
+  }
   // Live copy for the "This Week" and "Question Bank" tiles in
   // .home-shortcuts (the other four are static), from data already in
   // memory, with no network round trip.
   function renderHomeShortcutTeasers() {
     var items = (currentStudent && currentStudent.assignments) || [];
     var remaining = items.filter(function (it) { return !it.done; });
+    loadWeekTile();
     var badge = document.getElementById('home-shortcut-thisweek-badge');
     var body = document.getElementById('home-shortcut-thisweek-body');
     if (badge && body) {
       badge.style.display = remaining.length ? '' : 'none';
       if (remaining.length) badge.textContent = remaining.length + ' to do';
+      if (weekTile.line) { badge.style.display = weekTile.todo ? '' : 'none'; badge.textContent = weekTile.todo + ' to do'; }
       // See applySubjectHome(): on the subject home the checklist is right
       // below this tile, so the tile describes the calendar instead of
       // reciting the same tasks a second time.
       if (body.__subjectCopy) {
         body.textContent = body.__subjectCopy;
+      } else if (weekTile.line) {
+        body.textContent = weekTile.line;
       } else if (!remaining.length) {
         body.textContent = items.length ? 'All caught up for now.' : "Nothing on deck yet. Check back after your next session.";
       } else {
@@ -8075,7 +8100,6 @@ window.Portal = {
      button that lands the student on that test's card. Returns null when a
      task doesn't name a test. */
   function assignmentShortcut(task) {
-    if (satHidden()) return null;
     var text = String(task || '');
     var link = document.createElement('a');
     link.className = 'assign-go';
@@ -8084,7 +8108,7 @@ window.Portal = {
     // Test 3", "practice test #3", "PT3", "pt 3" — any case, any spacing.
     // Not matched (on purpose): a bare "Test 3", which is just as likely
     // to be a school test as one of these.
-    var ptMatch = /(?:practice\s*test|\bpt)\s*#?\s*(\d+)/i.exec(text);
+    var ptMatch = satHidden() ? null : /(?:practice\s*test|\bpt)\s*#?\s*(\d+)/i.exec(text);
     if (ptMatch) {
       var num = ptMatch[1];
       // Only offer it if a test with that number actually exists — a
@@ -8104,7 +8128,7 @@ window.Portal = {
     // diagnostic results" must not match) and is suppressed once the
     // diagnostic is on file.
     var diagDone = !!(currentStudent && currentStudent.satTaken);
-    if (!diagDone && /\b(take|start|begin|do)\b[^.!?]{0,24}\bdiagnostic\b/i.test(text)) {
+    if (!satHidden() && !diagDone && /\b(take|start|begin|do)\b[^.!?]{0,24}\bdiagnostic\b/i.test(text)) {
       link.textContent = 'Go to diagnostic →';
       link.addEventListener('click', function (e) {
         e.preventDefault();
@@ -8112,6 +8136,27 @@ window.Portal = {
         if (snap) openResumeOverlay(snap);
         else { goToDiagnostic(); }
       });
+      return link;
+    }
+    /* The admin page's task presets, and the same words typed by hand: each
+       one goes to its page (2026-10-31), if this student has that page. */
+    var PAGES = [
+      [/\bquestion\s*bank\b|\bqbank\b/i, 'question-bank', 'Open Question Bank'],
+      [/\b(incorrect|mistakes?)\b/i, 'incorrect-questions', 'Open my mistakes'],
+      [/\bvocab/i, 'vocab', 'Open Vocab'],
+      [/\brush\b/i, 'rush', 'Open Rush'],
+      [/\bchallenge\b/i, 'challenge-questions', 'Open Challenge Questions'],
+      [/\bpractice\s*test\b/i, 'practice-tests', 'Open Practice Tests'],
+      [/\bmath\s*review\b|\bcurriculum\b|\blessons?\b/i, 'curriculum', 'Open the Curriculum']
+    ];
+    for (var pi = 0; pi < PAGES.length; pi++) {
+      if (!PAGES[pi][0].test(text)) continue;
+      var sb = document.getElementById('sidebar-' + PAGES[pi][1]);
+      if (!sb || sb.style.display === 'none') return null;
+      link.textContent = PAGES[pi][2] + ' →';
+      link.addEventListener('click', function (nav) {
+        return function (e) { e.preventDefault(); navigateTo(nav); };
+      }(PAGES[pi][1]));
       return link;
     }
     return null;
@@ -8209,6 +8254,27 @@ window.Portal = {
     return { start: gridStart, end: calAddDays(gridStart, weeks * 7) };
   }
 
+  /* For the home tile (loadWeekTile): this calendar week, same Sunday start
+     as the week view, reaching back for anything still overdue. */
+  window.calWeekSummary = function () {
+    var ws = calWeekStart(new Date()), end = calAddDays(ws, 7), lastDay = calDayKey(calAddDays(ws, 6)), now = Date.now();
+    return {
+      start: calDayKey(calAddDays(ws, -CAL_PAD_DAYS)), end: calDayKey(end),
+      read: function (data) {
+        return {
+          sessions: (data.sessions || []).filter(function (x) {
+            var at = new Date(x.startIso).getTime();
+            return !x.officeHours && at > now && at < end.getTime();
+          }).length,
+          tasks: (data.assignments || []).filter(function (a) {
+            var day = calItemDay(a);
+            return !a.done && (!day || day <= lastDay);
+          })
+        };
+      }
+    };
+  };
+
   var CAL_PAD_DAYS = 40;
   function calEnsureData(force) {
     if (!currentStudent || !currentStudent.key) return;
@@ -8256,14 +8322,14 @@ window.Portal = {
     });
   }
 
-  // The checkbox is a state indicator, not a control: clicking the row
-  // opens the assignment (see calWire) and it's ticked off from that popup,
+  // The checkbox is a state indicator, not a control: clicking it opens the
+  // assignment (see calWire, calOpenTask) and it's ticked off from that popup,
   // so a task can't be checked by accident.
   function calTaskHtml(item, dayKey, todayKey) {
     var overdue = !item.done && dayKey && dayKey < todayKey;
     return '<div class="cal-task' + (item.done ? ' is-done' : '') + (overdue ? ' is-overdue' : '') +
       '" data-row="' + item.row + '" role="button" tabindex="0">' +
-      '<input type="checkbox" tabindex="-1"' + (item.done ? ' checked' : '') + ' disabled>' +
+      '<span class="cal-task-box"><input type="checkbox" tabindex="-1"' + (item.done ? ' checked' : '') + ' disabled></span>' +
       '<span>' + calEscape(item.task) + (item.notes ? ' <i class="cal-has-notes" title="Has details">&#8942;</i>' : '') + '</span>' +
       '</div>';
   }
@@ -8415,6 +8481,7 @@ window.Portal = {
     if (!item) return;
     var was = !!item.done;
     item.done = !was;
+    weekTile.at = 0;   // the home tile counts this one
     calRender();
     calSyncDetail(item);
     fetch(APPS_SCRIPT_URL, {
@@ -8455,6 +8522,16 @@ window.Portal = {
      the checkbox that marks it done. Sessions open the same panel with
      the time and no checkbox — a session isn't something you complete. */
   var calDetailRow = null;   // the assignment row currently open, if any
+
+  /* An open assignment that names a page goes straight there (a student's
+     ask, 2026-10-31). One with Luca's notes still opens the panel, or the
+     notes would never be seen; so does the row's checkbox, for marking it
+     done, and a finished one, for unticking it. */
+  function calOpenTask(item, fromBox) {
+    var shortcut = !fromBox && !item.done && !item.notes ? assignmentShortcut(item.task) : null;
+    if (shortcut) shortcut.click();
+    else calOpenDetail(item, calItemDay(item), calDayKey(new Date()));
+  }
 
   function calOpenDetail(item, dayKey, todayKey) {
     calDetailRow = item.row;
@@ -8588,7 +8665,7 @@ window.Portal = {
       if (task) {
         var row = Number(task.getAttribute('data-row'));
         var item = calState.items.filter(function (a) { return a.row === row; })[0];
-        if (item) calOpenDetail(item, calItemDay(item), calDayKey(new Date()));
+        if (item) calOpenTask(item, !!e.target.closest('.cal-task-box'));
         return;
       }
       // A month chip carries the same payload its week-view counterpart
@@ -8597,7 +8674,7 @@ window.Portal = {
       if (chipTask) {
         var chipRow = Number(chipTask.getAttribute('data-row'));
         var chipItem = calState.items.filter(function (a) { return a.row === chipRow; })[0];
-        if (chipItem) calOpenDetail(chipItem, calItemDay(chipItem), calDayKey(new Date()));
+        if (chipItem) calOpenTask(chipItem, false);
         return;
       }
       var chipSess = e.target.closest('.cal-chip.sess');
@@ -8640,6 +8717,7 @@ window.Portal = {
   function toggleAssignmentRow(item, row, cb) {
     var was = !!item.done;
     item.done = !was;
+    weekTile.at = 0;   // the home tile counts this one
     row.classList.toggle('assign-done', item.done);
     cb.checked = item.done;
     function revert() {
@@ -21512,10 +21590,24 @@ window.Portal = {
         '<div><b>' + (rushCfg.overMs >= 1000 ? '+' + rushFmt(rushCfg.overMs) : 'None') + '</b><span>total time over, across the round</span></div>' +
       '</div>' +
       '<div class="rush-sum-list">' + R.map(function (x, i) {
-        return '<div class="rush-sum-row"><span class="rs-n">' + (i + 1) + '</span><span class="rs-skill">' + rushEsc(x.skill) + '</span>' +
+        return '<div class="rush-sum-row" role="button" tabindex="0" data-i="' + i + '"><span class="rs-n">' + (i + 1) + '</span><span class="rs-skill">' + rushEsc(x.skill) + '</span>' +
           '<span class="rs-time' + (x.over ? ' over' : '') + '">' + rushFmt(x.ms) + ' / ' + rushFmt(x.budgetMs) + '</span>' +
           '<span class="rs-res ' + (x.correct ? 'ok' : 'bad') + '">' + (x.correct ? '&#10003;' : '&#10007;') + '</span></div>';
       }).join('') + '</div>';
+    /* Any row opens that question in the review window (a student's ask,
+       2026-10-31), with Previous and Next walking the round. */
+    var modalRows = R.map(function (x) {
+      var mc = x.r.type !== 'fr';
+      return { q: Object.assign({}, x.r, { answer: x.r.answerValue }), ok: !!x.correct, skipped: x.given === null || x.given === undefined,
+        givenIdx: mc && typeof x.given === 'number' ? x.given : null, givenText: mc ? null : (x.given != null ? String(x.given) : null),
+        timeMs: x.ms, marked: false, key: bankKeyFor(x.r._qbSubject || currentSubject, x.r.qid), testTitle: 'Question Bank' };
+    });
+    function openRow(e) {
+      var row = e.target.closest && e.target.closest('.rush-sum-row');
+      if (row && window.openQuestionModal) window.openQuestionModal(modalRows, Number(row.getAttribute('data-i')), 'Rush');
+    }
+    block.addEventListener('click', openRow);
+    block.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRow(e); } });
     summary.insertBefore(block, summary.querySelector('#qb-runner-done'));
   }
   /* The same filters the Question Bank's own panel offers, applied here so
@@ -21724,7 +21816,7 @@ window.Portal = {
         // would count it twice (banked total + live overage).
         rushPaint();
         rushCfg.overMs += Math.max(0, rushMs - rushBudgetMs);
-        rushCfg.results.push({ skill: r.skill, correct: st.correct, ms: rushMs, budgetMs: rushBudgetMs, over: rushMs > rushBudgetMs });
+        rushCfg.results.push({ skill: r.skill, correct: st.correct, ms: rushMs, budgetMs: rushBudgetMs, over: rushMs > rushBudgetMs, r: r, given: given });
         logPracticeEvent(r, st.correct, rushMs, 'rush', given);
         rushStop();
         renderRunnerQuestion();
