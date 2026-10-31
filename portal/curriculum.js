@@ -20,7 +20,7 @@
   'use strict';
 
   var DATA_SRC = 'curriculum-data.js?v=20261030e';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20261030a';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20261031a';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }

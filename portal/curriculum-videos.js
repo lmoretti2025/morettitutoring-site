@@ -70,7 +70,13 @@ window.CURRICULUM_VIDEOS = {
   //   Part 5  "The Quadratic Formula"                   appears 27:57 -> 27:56
   //   Part 6  "Sum and Product of Solutions"            appears 36:40 -> 36:39
   'm3.3': ['r2:m3.3-1.mp4@0:00-6:24', 'r2:m3.3-1.mp4@6:24-12:42', 'r2:m3.3-1.mp4@12:42-19:46',
-           'r2:m3.3-1.mp4@19:46-27:56', 'r2:m3.3-1.mp4@27:56-36:39', 'r2:m3.3-1.mp4@36:39']
+           'r2:m3.3-1.mp4@19:46-27:56', 'r2:m3.3-1.mp4@27:56-36:39', 'r2:m3.3-1.mp4@36:39'],
+  // 4.9, recorded 2026-10-30. Four parts, boundaries read off the video the
+  // usual way: the second the part's title slide appears, one second early.
+  //   Part 2  "Desmos Calculator Functions to Finish Faster"  appears 10:20 -> 10:19
+  //   Part 3  "Tangent Lines"                                 appears 16:40 -> 16:39
+  //   Part 4  "Shapes Inside Circles"                         appears 20:49 -> 20:48
+  'm4.9': ['r2:m4.9-1.mp4@0:00-10:19', 'r2:m4.9-1.mp4@10:19-16:39', 'r2:m4.9-1.mp4@16:39-20:48', 'r2:m4.9-1.mp4@20:48']
 };
 
 /* WHEN EACH VIDEO WENT UP (Luca, 2026-10-30). The admin page judges a finished
@@ -92,5 +98,6 @@ window.CURRICULUM_VIDEO_DATES = {
   'm3.1-1.mp4': '2026-10-22T13:44:04Z',
   'm3.2-1.mp4': '2026-10-22T22:01:53Z',
   'm3.11-1.mp4': '2026-10-23T04:54:52Z',
-  'm3.3-1.mp4': '2026-10-29T18:26:18Z'
+  'm3.3-1.mp4': '2026-10-29T18:26:18Z',
+  'm4.9-1.mp4': '2026-10-31T04:04:53Z'
 };
